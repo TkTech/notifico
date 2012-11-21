@@ -35,7 +35,7 @@
                     </ul>
                 </li>
                 {% else %}
-                <li class="{{ nav_link('account.login') }}"><a href="{{ url_for('account.login') }}">Login</a></li>
+                {{ nav_link('account.login', 'account.login', 'Login') }}
                 {% endif %}
             </ul>
         </div>
