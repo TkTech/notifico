@@ -1,5 +1,11 @@
 # -*- coding: utf8 -*-
-from flask import Flask, g, session
+from functools import wraps
+from flask import (
+    Flask,
+    g,
+    redirect,
+    url_for
+)
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.gravatar import Gravatar
 
@@ -14,9 +20,22 @@ gravatar = Gravatar(
     force_lower=False
 )
 
-from frontend.models import User
-from frontend.public import public
 
+def user_required(f):
+    """
+    A decorator for views which required a logged in user.
+    """
+    @wraps(f)
+    def _wrapped(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('account.login'))
+        return f(*args, **kwargs)
+    return _wrapped
+
+from frontend.views.account import account
+from frontend.views.public import public
+
+app.register_blueprint(account, url_prefix='/user')
 app.register_blueprint(public)
 
 
@@ -27,16 +46,6 @@ def installation_variables():
     every outgoing template. Typically used for branding.
     """
     return app.config['TEMP_VARS']
-
-
-@app.before_request
-def set_user():
-    g.user = None
-    if '_u' in session and '_ue' in session:
-        g.user = User.query.filter_by(
-            id=session['_u'],
-            email=session['_ue']
-        ).first()
 
 
 @app.before_request

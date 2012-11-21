@@ -1,4 +1,3 @@
-from functools import wraps
 from flask import (
     Blueprint,
     render_template,
@@ -11,9 +10,10 @@ from flask import (
 )
 from flask.ext import wtf
 
+from frontend import user_required
 from frontend.models import User
 
-public = Blueprint('public', __name__, template_folder='templates')
+account = Blueprint('account', __name__, template_folder='templates')
 
 
 class UserRegisterForm(wtf.Form):
@@ -50,26 +50,24 @@ class UserLoginForm(wtf.Form):
             raise wtf.ValidationError('Incorrect email and/or password.')
 
 
-def user_required(f):
-    """
-    A decorator for views which required a logged in user.
-    """
-    @wraps(f)
-    def _wrapped(*args, **kwargs):
-        if g.user is None:
-            return redirect(url_for('.login'))
-        return f(*args, **kwargs)
-    return _wrapped
+@account.before_app_request
+def set_user():
+    g.user = None
+    if '_u' in session and '_ue' in session:
+        g.user = User.query.filter_by(
+            id=session['_u'],
+            email=session['_ue']
+        ).first()
 
 
-@public.route('/login', methods=['GET', 'POST'])
+@account.route('/login', methods=['GET', 'POST'])
 def login():
     """
     Standard login form.
     """
     if g.user:
         flash('You must logout before logging in.', 'error')
-        return redirect(url_for('.landing'))
+        return redirect(url_for('public.landing'))
 
     form = UserLoginForm()
     if form.validate_on_submit():
@@ -77,12 +75,13 @@ def login():
         session['_u'] = u.id
         session['_ue'] = u.email
         flash('Welcome back!', 'success')
-        return redirect(url_for('.landing'))
+        return redirect(url_for('public.landing'))
 
     return render_template('login.html', form=form)
 
 
-@public.route('/logout')
+@account.route('/logout')
+@user_required
 def logout():
     """
     Logout the current user.
@@ -95,16 +94,19 @@ def logout():
     return redirect(url_for('.login'))
 
 
-@public.route('/register', methods=['GET', 'POST'])
+@account.route('/register', methods=['GET', 'POST'])
 def register():
     """
     If new user registrations are enabled, provides a registration form
     and validation.
     """
+    if g.user:
+        return redirect(url_for('public.landing'))
+
     # Make sure this instance is allowing new users.
     if not current_app.config.get('PUBLIC_NEW_USERS', True):
         flash('New registrations are currently disabled.', 'error')
-        return redirect(url_for('.landing'))
+        return redirect(url_for('public.landing'))
 
     form = UserRegisterForm()
     if form.validate_on_submit():
@@ -117,9 +119,3 @@ def register():
         return redirect(url_for('.login'))
 
     return render_template('register.html', form=form)
-
-
-@public.route('/')
-@user_required
-def landing():
-    return render_template('landing.html')

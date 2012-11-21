@@ -1,20 +1,64 @@
-{% include "base/header.html" %}
-<div class="container-fluid">
-    {%- with messages = get_flashed_messages(with_categories=True) -%}
-        {%- if messages -%}
-            {%- for category, message in messages %}
-    <div class="alert alert-{{category}}">
-        <button type="button" class="close" data-dismiss="alert">×</button>
-        {{ message }}
+{% macro nav_link(filter, endpoint, label) %}
+    <li class="{%- if request.endpoint.startswith(filter) -%}active{%- endif -%}">
+        <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+    </li>
+{% endmacro %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ site_title }}</title>
+    <link href='http://fonts.googleapis.com/css?family=Arvo:400,700' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.css" rel="stylesheet" media="screen">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/css/custom.css" rel="stylesheet" media="screen">
+    {%- block css -%}{%- endblock -%}
+</head>
+<body>
+    {# Site-wide navbar -#}
+    <div class="navbar navbar-fixed-top navbar-inverse navbar-header">
+        <div class="navbar-inner">
+            <ul class="nav">
+                {{ nav_link('public.landing', 'public.landing', 'Home') }}
+            </ul>
+            <ul class="nav pull-right">
+                {% if g.user %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <img src="{{ g.user.email | gravatar(size="20") }}"/>
+                        {{ g.user.email }}
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="divider"></li>
+                        <li><a href="{{ url_for('account.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="{{ nav_link('account.login') }}"><a href="{{ url_for('account.login') }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-            {%- endfor -%}
-        {%- endif -%}
-    {%- endwith %}
-</div>
-
-{%- block pre_content -%}{%- endblock %}
-<div class="container-fluid container-content">
-{%- block content -%}{%- endblock -%}
-</div>
-{%- block post_content -%}{%- endblock %}
-{% include "base/footer.html" %}
+    <div class="container-fluid">
+        {%- with messages = get_flashed_messages(with_categories=True) -%}
+            {%- if messages -%}
+                {%- for category, message in messages %}
+        <div class="alert alert-{{category}}">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            {{ message }}
+        </div>
+                {%- endfor -%}
+            {%- endif -%}
+        {%- endwith %}
+    </div>
+    {%- block pre_content -%}{%- endblock %}
+    <div class="container-fluid container-content">
+    {%- block content -%}{%- endblock -%}
+    </div>
+    {%- block post_content -%}{%- endblock %}
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    {% block js -%}{%- endblock -%}
+</body>
+</html>
