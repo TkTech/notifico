@@ -50,6 +50,35 @@ class UserLoginForm(wtf.Form):
             raise wtf.ValidationError('Incorrect email and/or password.')
 
 
+class UserPasswordForm(wtf.Form):
+    old = wtf.PasswordField('Old Password', validators=[
+        wtf.Required()
+    ])
+    password = wtf.PasswordField('Password', validators=[
+        wtf.Required(),
+        wtf.Length(5),
+        wtf.EqualTo('confirm', 'Passwords do not match.'),
+    ])
+    confirm = wtf.PasswordField('Confirm Password')
+
+    def validate_old(form, field):
+        if not User.login(g.user.email, field.data):
+            raise wtf.ValidationError('Old Password is incorrect.')
+
+
+class UserDeleteForm(wtf.Form):
+    password = wtf.PasswordField('Password', validators=[
+        wtf.Required(),
+        wtf.Length(5),
+        wtf.EqualTo('confirm', 'Passwords do not match.'),
+    ])
+    confirm = wtf.PasswordField('Confirm Password')
+
+    def validate_password(form, field):
+        if not User.login(g.user.email, field.data):
+            raise wtf.ValidationError('Password is incorrect.')
+
+
 @account.before_app_request
 def set_user():
     g.user = None
@@ -119,3 +148,38 @@ def register():
         return redirect(url_for('.login'))
 
     return render_template('register.html', form=form)
+
+
+@account.route('/settings', methods=['GET', 'POST'])
+@account.route('/settings/<do>', methods=['GET', 'POST'])
+@user_required
+def settings(do=None):
+    """
+    Provides forms allowing a user to change various settings.
+    """
+    password_form = UserPasswordForm()
+    delete_form = UserDeleteForm()
+
+    if do == 'p' and password_form.validate_on_submit():
+        # Change the users password.
+        g.user.set_password(password_form.password.data)
+        flash('Your password has been changed.', 'success')
+        g.db.session.commit()
+    elif do == 'd' and delete_form.validate_on_submit():
+        # Delete this users account and all related data.
+        # Clear the session.
+        if '_u' in session:
+            del session['_u']
+        if '_ue' in session:
+            del session['_ue']
+        # Remove the user from the DB.
+        g.db.session.delete(g.user)
+        g.db.session.commit()
+
+        flash('Your account has been deleted.', 'success')
+        return redirect(url_for('.login'))
+
+    return render_template('settings.html',
+        password_form=password_form,
+        delete_form=delete_form
+    )

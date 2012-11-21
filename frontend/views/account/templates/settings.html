@@ -1,0 +1,32 @@
+{% extends "base/body.html" %}
+{% import "forms.html" as forms %}
+{% block content %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <form class="form form-horizontal" method="POST" action="{{ url_for('.settings', do='p') }}">
+            <legend>Change Password</legend>
+            {{ password_form.hidden_tag() }}
+            {{ forms.render_field(password_form.old) }}
+            {{ forms.render_field(password_form.password) }}
+            {{ forms.render_field(password_form.confirm) }}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12 well">
+        <form class="form form-horizontal" method="POST" action="{{ url_for('.settings', do='d') }}">
+            <legend>Delete Account</legend>
+            <p>Deleting your account is irreversible. <br/>All projects, hooks, and bots under your account will be <strong>purged</strong>.</p>
+            {{ delete_form.hidden_tag() }}
+            {{ forms.render_field(delete_form.password) }}
+            {{ forms.render_field(delete_form.confirm) }}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Delete Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

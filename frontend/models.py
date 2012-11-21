@@ -29,7 +29,7 @@ class User(db.Model):
     @classmethod
     def new(cls, email, password):
         u = cls()
-        u.email = email
+        u.email = email.lower().strip()
         u.salt = cls._create_salt()
         u.password = cls._hash_password(password, u.salt)
         return u
@@ -47,6 +47,10 @@ class User(db.Model):
         Returns a hashed password from `password` and `salt`.
         """
         return hashlib.sha256(salt + password.strip()).hexdigest()
+
+    def set_password(self, new_password):
+        self.salt = self._create_salt()
+        self.password = self._hash_password(new_password, self.salt)
 
     @classmethod
     def by_email(cls, email):
