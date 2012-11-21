@@ -1,9 +1,18 @@
 # -*- coding: utf8 -*-
 from flask import Flask, g, session
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.gravatar import Gravatar
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
+gravatar = Gravatar(
+    app,
+    size=100,
+    rating='g',
+    default='retro',
+    force_default=False,
+    force_lower=False
+)
 
 from frontend.models import User
 from frontend.public import public

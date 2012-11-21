@@ -1,3 +1,8 @@
+{% macro nav_link(filter, endpoint, label) %}
+    <li class="{%- if request.endpoint.startswith(filter) -%}active{%- endif -%}">
+        <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+    </li>
+{% endmacro %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,8 +15,28 @@
     {%- block css -%}{%- endblock css -%}
 </head>
 <body>
-{# Site-wide navbar -#}
-<div class="navbar navbar-fixed-top navbar-header">
-    <div class="navbar-inner">
+    {# Site-wide navbar -#}
+    <div class="navbar navbar-fixed-top navbar-inverse navbar-header">
+        <div class="navbar-inner">
+            <ul class="nav">
+                {{ nav_link('public.landing', 'public.landing', 'Home') }}
+            </ul>
+            <ul class="nav pull-right">
+                {% if g.user %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <img src="{{ g.user.email | gravatar(size="20") }}"/>
+                        {{ g.user.email }}
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="divider"></li>
+                        <li><a href="{{ url_for('public.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="{{ nav_link('public.login') }}"><a href="{{ url_for('public.login') }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-</div>
