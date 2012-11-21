@@ -1,0 +1,5 @@
+*.pyc
+ENV/
+.DS_Store
+local_config
+testing.db
