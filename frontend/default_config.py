@@ -29,6 +29,11 @@ REDIS_DB = 0
 # Should Notifico route static assets (/css/, /js/, etc...)?
 HANDLE_STATIC = True
 
+# Usually-static variables injected into each template.
+TEMP_VARS = {
+    'site_title': 'Notifico!'
+}
+
 try:
     from local_config import *
 except ImportError:

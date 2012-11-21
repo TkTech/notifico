@@ -10,6 +10,11 @@ from frontend.public import public
 app.register_blueprint(public)
 
 
+@app.context_processor
+def installation_variables():
+    return app.config['TEMP_VARS']
+
+
 def start(debug=False):
     """
     Sets up a basic deployment ready to run in production in light usage.
