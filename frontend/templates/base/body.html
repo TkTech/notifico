@@ -12,7 +12,9 @@
     {%- endwith %}
 </div>
 
-{%- block pre_content -%}{%- endblock -%}
+{%- block pre_content -%}{%- endblock %}
+<div class="container-fluid container-content">
 {%- block content -%}{%- endblock -%}
+</div>
 {%- block post_content -%}{%- endblock %}
 {% include "base/footer.html" %}

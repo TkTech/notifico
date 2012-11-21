@@ -1,10 +1,11 @@
 # -*- coding: utf8 -*-
-from flask import Flask
+from flask import Flask, g, session
 from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
 
+from frontend.models import User
 from frontend.public import public
 
 app.register_blueprint(public)
@@ -12,7 +13,26 @@ app.register_blueprint(public)
 
 @app.context_processor
 def installation_variables():
+    """
+    Include static template variables from the configuration file in
+    every outgoing template. Typically used for branding.
+    """
     return app.config['TEMP_VARS']
+
+
+@app.before_request
+def set_user():
+    g.user = None
+    if '_u' in session and '_ue' in session:
+        g.user = User.query.filter_by(
+            id=session['_u'],
+            email=session['_ue']
+        ).first()
+
+
+@app.before_request
+def set_db():
+    g.db = db
 
 
 def start(debug=False):

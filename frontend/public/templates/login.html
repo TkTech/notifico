@@ -1,0 +1,18 @@
+{% extends "base/body.html" %}
+{% import "forms.html" as forms %}
+{% block content %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+            <legend>Login</legend>
+            {{ form.hidden_tag() }}
+            {{ forms.render_field(form.email) }}
+            {{ forms.render_field(form.password) }}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a href="{{ url_for('.register') }}" class="btn">Register</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
