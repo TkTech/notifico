@@ -31,6 +31,16 @@ class ProjectDetailsForm(wtf.Form):
     ])
 
 
+class PasswordConfirmForm(wtf.Form):
+    password = wtf.PasswordField('Password', validators=[
+        wtf.Required()
+    ])
+
+    def validate_password(form, field):
+        if not User.login(g.user.username, field.data):
+            raise wtf.ValidationError('Your password is incorrect.')
+
+
 @projects.route('/')
 @user_required
 def overview():
@@ -54,3 +64,77 @@ def new():
         return redirect(url_for('.overview'))
 
     return render_template('new_project.html', form=form)
+
+
+@projects.route('/edit/<int:pid>', methods=['GET', 'POST'])
+@user_required
+def edit_project(pid):
+    p = Project.query.get(pid)
+    if not p:
+        # Project doesn't exist (404 Not Found)
+        return abort(404)
+
+    if not p.public and p.owner.id != g.user.id:
+        # Project isn't public and the viewer isn't the project owner.
+        # (403 Forbidden)
+        return abort(403)
+
+    form = ProjectDetailsForm(obj=p)
+    if form.validate_on_submit():
+        p.website = form.website.data
+        p.public = form.public.data
+        g.db.session.commit()
+        flash('Your changes have been saved.', 'success')
+        return redirect(url_for('.overview'))
+
+    return render_template('edit_project.html',
+        project=p,
+        form=form
+    )
+
+
+@projects.route('/delete/<int:pid>', methods=['GET', 'POST'])
+@user_required
+def delete_project(pid):
+    p = Project.query.get(pid)
+    if not p:
+        # Project doesn't exist (404 Not Found)
+        return abort(404)
+
+    if not p.public and p.owner.id != g.user.id:
+        # Project isn't public and the viewer isn't the project owner.
+        # (403 Forbidden)
+        return abort(403)
+
+    form = PasswordConfirmForm()
+    if form.validate_on_submit():
+        g.db.session.delete(p)
+        g.db.session.commit()
+        flash('Your project has been deleted.', 'success')
+        return redirect(url_for('.overview'))
+
+    return render_template('delete_project.html',
+        project=p,
+        form=form
+    )
+
+
+@projects.route('/<int:pid>')
+@user_required
+def details(pid):
+    p = Project.query.get(pid)
+    if not p:
+        # Project doesn't exist (404 Not Found)
+        return abort(404)
+
+    if not p.public and p.owner.id != g.user.id:
+        # Project isn't public and the viewer isn't the project owner.
+        # (403 Forbidden)
+        return abort(403)
+
+    is_owner = (g.user and g.user.id == p.owner_id)
+
+    return render_template('project_details.html',
+        project=p,
+        is_owner=is_owner
+    )

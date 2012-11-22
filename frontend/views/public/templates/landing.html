@@ -1,3 +1,40 @@
 {% extends "base/body.html" %}
+{% block css %}
+    {{ super() }}
+    <style>
+    .count {
+        font-size: 28px; 
+        font-weight: 300;
+    }
+    </style>
+{% endblock %}
 {% block content %}
+{% if not g.user %}
+{# 
+    No logged-in user, so lets show a little blurb.
+#}
+<div class="hero-unit">
+    <h1>{{ site_title }}</h1>
+    <p>{{ site_label }} is my personal, open-source (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a>) replacement for the now-defunct <a href="http://cia.vc">cia.vc</a> service.</p>
+    <p><a class="btn btn-primary btn-large" href="{{ url_for('account.register') }}">Sign Up</a></p>
+</div>
+{% endif %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <div class="row-fluid">
+            <div class="span4 pagination-centered">
+                <h2>Users</h2>
+                <span class="count">{{ User.query.count() }}</span>
+            </div>
+            <div class="span4 pagination-centered">
+                <h2>Projects</h2>
+                <span class="count">{{ Project.query.count() }}</span>
+            </div>
+            <div class="span4 pagination-centered">
+                <h2>Channels</h2>
+                <span class="count">0</span>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

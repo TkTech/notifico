@@ -5,7 +5,15 @@ import base64
 import hashlib
 import datetime
 
+from sqlalchemy.ext.hybrid import Comparator, hybrid_property
+from sqlalchemy import func
+
 from frontend import db
+
+
+class CaseInsensitiveComparator(Comparator):
+    def __eq__(self, other):
+        return func.lower(self.__clause_element__()) == func.lower(other)
 
 
 class User(db.Model):
@@ -14,7 +22,8 @@ class User(db.Model):
     # ---
     # Required Fields
     # ---
-    email = db.Column(db.String(255), unique=True, nullable=False)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     salt = db.Column(db.String(8), nullable=False)
     joined = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
@@ -27,11 +36,12 @@ class User(db.Model):
     location = db.Column(db.String(255))
 
     @classmethod
-    def new(cls, email, password):
+    def new(cls, username, email, password):
         u = cls()
         u.email = email.lower().strip()
         u.salt = cls._create_salt()
         u.password = cls._hash_password(password, u.salt)
+        u.username = username.strip()
         return u
 
     @staticmethod
@@ -57,15 +67,31 @@ class User(db.Model):
         return cls.query.filter_by(email=email.lower().strip()).first()
 
     @classmethod
-    def exists_email(cls, email):
+    def by_username(cls, username):
+        return cls.query.filter_by(username_i=username).first()
+
+    @classmethod
+    def email_exists(cls, email):
         return cls.query.filter_by(email=email.lower().strip()).count() >= 1
 
     @classmethod
-    def login(cls, email, password):
-        u = cls.by_email(email)
+    def username_exists(cls, username):
+        return cls.query.filter_by(username_i=username).count() >= 1
+
+    @classmethod
+    def login(cls, username, password):
+        u = cls.by_username(username)
         if u and u.password == cls._hash_password(password, u.salt):
             return u
         return None
+
+    @hybrid_property
+    def username_i(self):
+        return self.username.lower()
+
+    @username_i.comparator
+    def username_i(cls):
+        return CaseInsensitiveComparator(cls.username)
 
 
 class Project(db.Model):

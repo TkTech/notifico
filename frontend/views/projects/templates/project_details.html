@@ -1,0 +1,56 @@
+{% extends "base/body.html" %}
+{% import "forms.html" as forms %}
+{% block css %}
+    {{ super() }}
+    <style>
+    .count {
+        font-size: 28px; 
+        font-weight: 300;
+    }
+    </style>
+{% endblock %}
+{% block content %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <div class="row-fluid">
+            <div class="span4 pagination-centered">
+                <h2>Messages</h2>
+                <span class="count">0</span>
+            </div>
+            <div class="span4 pagination-centered">
+                <h2>Hooks</h2>
+                <span class="count">0</span>
+            </div>
+            <div class="span4 pagination-centered">
+                <h2>Channels</h2>
+                <span class="count">0</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% if is_owner %}
+{#
+    Only the owner should be able to see hooks. 
+#}
+<div class="row-fluid">
+    <div class="span12 well">
+        <a id="hooks"></a>
+        <h1>Hooks</h1>
+        <p><em>Hooks</em> are endpoints for 3rd party services (and scripts) capable of making a HTTP POST request. For example, you can create a hook for Github's <a href="https://help.github.com/articles/post-receive-hooks">WebHooks</a> service. Hooks recieve messages, which are then formatted and forwarded to <a href="#channels">IRC channels</a>.</p>
+        <a href="{{ url_for('.new') }}" class="btn btn-primary">Create New Hook</a>
+    </div>
+</div>
+{% endif %}
+{#
+    Anyone can see what channels the project is announced to, so
+    long as they're marked public.
+#}
+<div class="row-fluid">
+    <div class="span12 well">
+        <a id="channels"></a>
+        <h1>IRC Channels</h1>
+        <p>Any messages recieved by your project will be forwarded to any of the IRC channels you have added to them. An operator of the channel may blacklist your project, or ban the bot from entering their channel to prevent abuse.</p>
+        <a href="{{ url_for('.new') }}" class="btn btn-primary">Add New Channel</a>
+    </div>
+</div>
+{% endblock %}

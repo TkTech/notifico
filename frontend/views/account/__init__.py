@@ -17,6 +17,12 @@ account = Blueprint('account', __name__, template_folder='templates')
 
 
 class UserRegisterForm(wtf.Form):
+    username = wtf.TextField('Username', validators=[
+        wtf.Required(),
+        wtf.Length(min=2, max=50)
+    ], description=(
+        'Your username is public and used as part of your project name.'
+    ))
     email = wtf.TextField('Email', validators=[
         wtf.Required(),
         wtf.validators.Email()
@@ -28,26 +34,25 @@ class UserRegisterForm(wtf.Form):
     ])
     confirm = wtf.PasswordField('Confirm Password')
 
-    def validate_email(form, field):
-        email = field.data.strip().lower()
-        if User.exists_email(email):
+    def validate_username(form, field):
+        username = field.data.strip().lower()
+        if User.username_exists(username):
             raise wtf.ValidationError(
-                'A user already exists for that email.'
+                'Sorry, but that username is taken.'
             )
 
 
 class UserLoginForm(wtf.Form):
-    email = wtf.TextField('Email', validators=[
-        wtf.Required(),
-        wtf.validators.Email()
+    username = wtf.TextField('Username', validators=[
+        wtf.Required()
     ])
     password = wtf.PasswordField('Password', validators=[
         wtf.Required()
     ])
 
     def validate_password(form, field):
-        if not User.login(form.email.data, field.data):
-            raise wtf.ValidationError('Incorrect email and/or password.')
+        if not User.login(form.username.data, field.data):
+            raise wtf.ValidationError('Incorrect username and/or password.')
 
 
 class UserPasswordForm(wtf.Form):
@@ -62,7 +67,7 @@ class UserPasswordForm(wtf.Form):
     confirm = wtf.PasswordField('Confirm Password')
 
     def validate_old(form, field):
-        if not User.login(g.user.email, field.data):
+        if not User.login(g.user.username, field.data):
             raise wtf.ValidationError('Old Password is incorrect.')
 
 
@@ -75,17 +80,17 @@ class UserDeleteForm(wtf.Form):
     confirm = wtf.PasswordField('Confirm Password')
 
     def validate_password(form, field):
-        if not User.login(g.user.email, field.data):
+        if not User.login(g.user.username, field.data):
             raise wtf.ValidationError('Password is incorrect.')
 
 
 @account.before_app_request
 def set_user():
     g.user = None
-    if '_u' in session and '_ue' in session:
+    if '_u' in session and '_uu' in session:
         g.user = User.query.filter_by(
             id=session['_u'],
-            email=session['_ue']
+            username=session['_uu']
         ).first()
 
 
@@ -100,9 +105,9 @@ def login():
 
     form = UserLoginForm()
     if form.validate_on_submit():
-        u = User.by_email(form.email.data)
+        u = User.by_username(form.username.data)
         session['_u'] = u.id
-        session['_ue'] = u.email
+        session['_uu'] = u.username
         flash('Welcome back!', 'success')
         return redirect(url_for('public.landing'))
 
@@ -117,9 +122,8 @@ def logout():
     """
     if '_u' in session:
         del session['_u']
-    if '_ue' in session:
-        del session['_ue']
-
+    if '_uu' in session:
+        del session['_uu']
     return redirect(url_for('.login'))
 
 
@@ -140,7 +144,7 @@ def register():
     form = UserRegisterForm()
     if form.validate_on_submit():
         # Checks out, go ahead and create our new user.
-        u = User.new(form.email.data, form.password.data)
+        u = User.new(form.username.data, form.email.data, form.password.data)
         g.db.session.add(u)
         g.db.session.commit()
         # ... and send them back to the login screen.
@@ -165,6 +169,7 @@ def settings(do=None):
         g.user.set_password(password_form.password.data)
         flash('Your password has been changed.', 'success')
         g.db.session.commit()
+        return redirect(url_for('.settings'))
     elif do == 'd' and delete_form.validate_on_submit():
         # Delete this users account and all related data.
         # Clear the session.

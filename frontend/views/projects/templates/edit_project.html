@@ -4,13 +4,14 @@
 <div class="row-fluid">
     <div class="span12 well">
         <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-            <legend>Login</legend>
+            <legend>Edit Project</legend>
             {{ form.hidden_tag() }}
-            {{ forms.render_field(form.username) }}
-            {{ forms.render_field(form.password) }}
+            {{ forms.render_field(form.name, readonly=True) }}
+            {{ forms.render_field(form.website ) }}
+            {{ forms.render_field(form.public) }}
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Login</button>
-                <a href="{{ url_for('.register') }}" class="btn">Register</a>
+                <button type="submit" class="btn btn-success">Save Changes</button>
+                <a href="{{ url_for('.overview') }}" class="btn">Cancel</a>
             </div>
         </form>
     </div>
