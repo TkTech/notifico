@@ -46,6 +46,7 @@ def overview():
     Display an overview of all the user's projects with summary
     statistics.
     """
+    g.add_breadcrumb('Projects', url_for('.overview'))
     return render_template('overview.html')
 
 
@@ -55,6 +56,7 @@ def new():
     """
     Create a new project.
     """
+    g.add_breadcrumb('New Project', url_for('.new'))
     form = ProjectDetailsForm()
     if form.validate_on_submit():
         p = Project.new(

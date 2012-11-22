@@ -42,6 +42,22 @@
             </ul>
         </div>
     </div>
+    {#
+    {% if g.crumbs %}
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            {% for title, link in g.crumbs %}
+            <li>
+                <a href="{{ link }}" {% if loop.last %}class="active"{% endif %}>{{ title }}</a>
+                {% if not loop.last %}
+                <span class="divider">/</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    #}
     <div class="container-fluid">
         {%- with messages = get_flashed_messages(with_categories=True) -%}
             {%- if messages -%}

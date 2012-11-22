@@ -1,10 +1,13 @@
 # -*- coding: utf8 -*-
 from functools import wraps
+from collections import deque
+
 from flask import (
     Flask,
     g,
     redirect,
-    url_for
+    url_for,
+    session
 )
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.gravatar import Gravatar
@@ -53,6 +56,21 @@ def installation_variables():
 @app.before_request
 def set_db():
     g.db = db
+
+
+@app.before_request
+def set_crumbs():
+    g.add_breadcrumb = add_breadcrumb
+    g.crumbs = session.get('crumbs')
+
+
+def add_breadcrumb(title, link):
+    crumbs = session.setdefault('crumbs', deque(maxlen=5))
+    if crumbs:
+        last_title, _ = crumbs[-1]
+        if last_title == title:
+            return
+    crumbs.append((title, link))
 
 
 def start(debug=False):
