@@ -66,3 +66,24 @@ class User(db.Model):
         if u and u.password == cls._hash_password(password, u.salt):
             return u
         return None
+
+
+class Project(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+    public = db.Column(db.Boolean, default=True)
+    website = db.Column(db.String(1024))
+
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    owner = db.relationship('User', backref=db.backref(
+        'projects', order_by=id, lazy='dynamic'
+    ))
+
+    @classmethod
+    def new(cls, name, public=True, website=None):
+        c = cls()
+        c.name = name
+        c.public = public
+        c.website = website
+        return c

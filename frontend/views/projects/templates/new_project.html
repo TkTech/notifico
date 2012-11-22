@@ -1,0 +1,19 @@
+{% extends "base/body.html" %}
+{% import "forms.html" as forms %}
+{% block content %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+            <legend>Create New Project</legend>
+            {{ form.hidden_tag() }}
+            {{ forms.render_field(form.name) }}
+            {{ forms.render_field(form.website ) }}
+            {{ forms.render_field(form.public) }}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Account</button>
+                <a href="{{ url_for('.overview') }}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

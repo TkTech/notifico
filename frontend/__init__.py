@@ -34,8 +34,10 @@ def user_required(f):
 
 from frontend.views.account import account
 from frontend.views.public import public
+from frontend.views.projects import projects
 
 app.register_blueprint(account, url_prefix='/user')
+app.register_blueprint(projects, url_prefix='/projects')
 app.register_blueprint(public)
 
 

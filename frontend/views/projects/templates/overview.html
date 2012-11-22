@@ -1,0 +1,44 @@
+{% extends "base/body.html" %}
+{% import "forms.html" as forms %}
+{% block content %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <h1>Projects</h1>
+        <p>{{ site_label }} allows you to create <em>projects</em>, each of which can have their own <em>hooks</em> (which recieve events, such as a <a href="https://help.github.com/articles/post-receive-hooks">Github push</a>). These events are then forwarded to any <a href="http://en.wikipedia.org/wiki/Internet_Relay_Chat">IRC</a> channels you've added to your project.</p>
+        <a href="{{ url_for('.new') }}" class="btn btn-primary">Create New Project</a>
+    </div>
+</div>
+{% if g.user.projects.count() %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <table class="table table-borered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Website</th>
+                    <th>Created</th>
+                    <th>Public</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for project in g.user.projects %}
+                <tr>
+                    <td>{{ project.name }}</td>
+                    <td>
+                        {% if project.website %}
+                        <a href="{{ project.website }}">Link</a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{ project.created.strftime("%Y-%m-%d") }}</td>
+                    <td><i class="icon-{% if project.public %}ok{% else %}lock{% endif %}"></i></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('.new') }}" class="btn btn-info">Export Projects</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

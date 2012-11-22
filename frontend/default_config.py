@@ -35,7 +35,8 @@ HANDLE_STATIC = True
 # Usually-static variables injected into each template. Useful
 # for branding for internal use.
 TEMP_VARS = {
-    'site_title': 'Notifico!'
+    'site_title': 'Notifico!',
+    'site_label': 'Notifico'
 }
 
 # Should new users be allowed to register?
