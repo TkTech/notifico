@@ -3,10 +3,8 @@ from flask import (
     render_template,
     g,
     redirect,
-    current_app,
     flash,
     url_for,
-    session,
     abort
 )
 from flask.ext import wtf
