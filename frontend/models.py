@@ -106,6 +106,8 @@ class Project(db.Model):
         'projects', order_by=id, lazy='dynamic'
     ))
 
+    full_name = db.Column(db.String(101), nullable=False, unique=True)
+
     @classmethod
     def new(cls, name, public=True, website=None):
         c = cls()

@@ -55,6 +55,7 @@ def new():
             public=form.public.data,
             website=form.website.data
         )
+        p.full_name = '{0}/{1}'.format(g.user.username, p.name)
         g.db.session.add(p)
         g.user.projects.append(p)
         g.db.session.commit()
