@@ -42,12 +42,19 @@ class PasswordConfirmForm(wtf.Form):
 @projects.route('/')
 @user_required
 def overview():
+    """
+    Display an overview of all the user's projects with summary
+    statistics.
+    """
     return render_template('overview.html')
 
 
 @projects.route('/new', methods=['GET', 'POST'])
 @user_required
 def new():
+    """
+    Create a new project.
+    """
     form = ProjectDetailsForm()
     if form.validate_on_submit():
         p = Project.new(
@@ -68,6 +75,9 @@ def new():
 @projects.route('/edit/<int:pid>', methods=['GET', 'POST'])
 @user_required
 def edit_project(pid):
+    """
+    Edit an existing project.
+    """
     p = Project.query.get(pid)
     if not p:
         # Project doesn't exist (404 Not Found)
@@ -95,6 +105,9 @@ def edit_project(pid):
 @projects.route('/delete/<int:pid>', methods=['GET', 'POST'])
 @user_required
 def delete_project(pid):
+    """
+    Delete an existing project.
+    """
     p = Project.query.get(pid)
     if not p:
         # Project doesn't exist (404 Not Found)
@@ -121,6 +134,9 @@ def delete_project(pid):
 @projects.route('/<int:pid>')
 @user_required
 def details(pid):
+    """
+    Show an existing project's details.
+    """
     p = Project.query.get(pid)
     if not p:
         # Project doesn't exist (404 Not Found)
