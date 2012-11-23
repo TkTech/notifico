@@ -4,7 +4,7 @@ from flask import (
     g,
     url_for
 )
-from notifico.models import Project, User
+from notifico.models import Project, User, Channel, Hook
 
 public = Blueprint('public', __name__, template_folder='templates')
 
@@ -14,5 +14,7 @@ def landing():
     g.add_breadcrumb('Home', url_for('.landing'))
     return render_template('landing.html',
         Project=Project,
-        User=User
+        User=User,
+        Channel=Channel,
+        Hook=Hook
     )
