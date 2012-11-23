@@ -99,6 +99,7 @@ def github():
             p.full_name = '{0}/{1}'.format(g.user.username, p.name)
             g.user.projects.append(p)
             g.db.session.add(p)
+
             summary.append((
                 'Project {0} created.'.format(repo.name),
                 True
@@ -106,19 +107,22 @@ def github():
 
             if form.set_hooks.data:
                 # The user wanted us to auto-create web hooks for them.
+                # We need to commit first to generate the project.id.
                 g.db.session.commit()
 
+                # Create the hook on Notifico's side...
                 h = Hook.new(10)
                 p.hooks.append(h)
                 g.db.session.add(h)
+
+                # ... then create the hook on Github's side.
                 repo.create_hook('web', {
                     'url': url_for(
                         'projects.hook_recieve',
                         pid=p.id,
                         key=h.key,
                         _external=True
-                    ),
-                    'content_type': 'json'
+                    )
                 })
 
         g.db.session.commit()
