@@ -37,4 +37,19 @@
         </div>
     </div>
 </div>
+{% if Project.query.count() %}
+<div class="row-fluid">
+    <div class="span6 well">
+        <h2>Newest Projects</h2>
+        {% for project in Project.public_q().order_by(Project.created.desc()).limit(10) %}
+        <div>
+            <a href="{{ url_for('projects.details', pid=project.id) }}">{{ project.full_name }}</a><br/>
+            <small>Created: {{ project.created.strftime("%Y-%m-%d") }}</small>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="span6 well">
+    </div>
+</div>
+{% endif %}
 {% endblock %}

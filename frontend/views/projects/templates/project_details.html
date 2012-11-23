@@ -49,8 +49,10 @@
     <div class="span12 well">
         <a id="channels"></a>
         <h1>IRC Channels</h1>
-        <p>Any messages recieved by your project will be forwarded to any of the IRC channels you have added to them. An operator of the channel may blacklist your project, or ban the bot from entering their channel to prevent abuse.</p>
+        <p>Any messages recieved by your project will be forwarded to any of the IRC channels that have added to them. An operator of the channel may blacklist the project, or ban the bot from entering their channel to prevent abuse.</p>
+        {% if is_owner %}
         <a href="{{ url_for('.new') }}" class="btn btn-primary">Add New Channel</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

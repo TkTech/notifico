@@ -146,7 +146,6 @@ def delete_project(pid):
 
 
 @projects.route('/<int:pid>')
-@user_required
 def details(pid):
     """
     Show an existing project's details.

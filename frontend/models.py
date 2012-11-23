@@ -156,6 +156,14 @@ class Project(db.Model):
         q = q.filter(cls.name_i == name)
         return q.first()
 
+    @classmethod
+    def public_q(cls):
+        return cls.query.filter_by(public=True)
+
+    @classmethod
+    def private_q(cls):
+        return cls.query.filter_by(public=False)
+
 
 class Hook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
