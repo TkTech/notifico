@@ -14,21 +14,21 @@ class Service(object):
     WIKI = 'wiki'
 
     COLORS = dict(
-        RESET='\0x03',
-        WHITE='\0x03' + '00',
-        BLACK='\0x03' + '01',
-        BLUE='\0x03' + '02',
-        GREEN='\0x03' + '03',
-        RED='\0x03' + '04',
-        BROWN='\0x03' + '05',
-        PURPLE='\0x03' + '06',
-        ORANGE='\0x03' + '07',
-        YELLOW='\0x03' + '08',
-        LIGHT_GREEN='\0x03' + '09',
-        TEAL='\0x03' + '10',
-        LIGHT_CYAN='\0x03' + '11',
-        LIGHT_BLUE='\0x03' + '12',
-        PINK='\0x03' + '13'
+        RESET='\x03',
+        WHITE='\x03' + '00',
+        BLACK='\x03' + '01',
+        BLUE='\x03' + '02',
+        GREEN='\x03' + '03',
+        RED='\x03' + '04',
+        BROWN='\x03' + '05',
+        PURPLE='\x03' + '06',
+        ORANGE='\x03' + '07',
+        YELLOW='\x03' + '08',
+        LIGHT_GREEN='\x03' + '09',
+        TEAL='\x03' + '10',
+        LIGHT_CYAN='\x03' + '11',
+        LIGHT_BLUE='\x03' + '12',
+        PINK='\x03' + '13'
     )
 
     @staticmethod
