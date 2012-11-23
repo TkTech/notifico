@@ -30,11 +30,6 @@ class ProjectDetailsForm(wtf.Form):
         wtf.validators.URL()
     ])
 
-    def validate_name(form, field):
-        p = Project.by_name_and_owner(field.data, g.user)
-        if p:
-            raise wtf.ValidationError('Project name must be unique.')
-
 
 class HookDetailsForm(wtf.Form):
     service_id = wtf.SelectField('Service', validators=[
@@ -90,17 +85,23 @@ def new():
     g.add_breadcrumb('New Project', url_for('.new'))
     form = ProjectDetailsForm()
     if form.validate_on_submit():
-        p = Project.new(
-            form.name.data,
-            public=form.public.data,
-            website=form.website.data
-        )
-        p.full_name = '{0}/{1}'.format(g.user.username, p.name)
-        g.db.session.add(p)
-        g.user.projects.append(p)
-        g.db.session.commit()
-        flash('Your project has been created.', 'success')
-        return redirect(url_for('.overview'))
+        p = Project.by_name_and_owner(form.name.data, g.user)
+        if p:
+            form.name.errors = [
+                wtf.ValidationError('Project name must be unique.')
+            ]
+        else:
+            p = Project.new(
+                form.name.data,
+                public=form.public.data,
+                website=form.website.data
+            )
+            p.full_name = '{0}/{1}'.format(g.user.username, p.name)
+            g.db.session.add(p)
+            g.user.projects.append(p)
+            g.db.session.commit()
+            flash('Your project has been created.', 'success')
+            return redirect(url_for('.overview'))
 
     return render_template('new_project.html', form=form)
 
@@ -123,11 +124,18 @@ def edit_project(pid):
 
     form = ProjectDetailsForm(obj=p)
     if form.validate_on_submit():
-        p.website = form.website.data
-        p.public = form.public.data
-        g.db.session.commit()
-        flash('Your changes have been saved.', 'success')
-        return redirect(url_for('.overview'))
+        old_p = Project.by_name_and_owner(form.name.data, g.user)
+        if old_p and old_p.id != p.id:
+            form.name.errors = [
+                wtf.ValidationError('Project name must be unique.')
+            ]
+        else:
+            p.website = form.website.data
+            p.public = form.public.data
+            p.full_name = '{0}/{1}'.format(g.user.username, p.name)
+            g.db.session.commit()
+            flash('Your changes have been saved.', 'success')
+            return redirect(url_for('.overview'))
 
     return render_template('edit_project.html',
         project=p,
