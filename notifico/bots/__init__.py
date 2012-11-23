@@ -81,4 +81,4 @@ def start_manager():
         except Empty:
             pass
 
-        gevent.sleep()
+        gevent.sleep(0.5)
