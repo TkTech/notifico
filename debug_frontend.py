@@ -7,4 +7,4 @@ from frontend import start
 
 if __name__ == '__main__':
     app = start(debug=True)
-    app.run()
+    app.run(host='0.0.0.0')

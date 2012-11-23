@@ -1,0 +1,49 @@
+{% extends "base/body.html" %}
+{% import "forms.html" as forms %}
+{% block content %}
+{% if summary is none %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+            <legend>Import From Github</legend>
+            {{ form.hidden_tag() }}
+            {{ forms.render_field(form.projects, disabled=True) }}
+            {{ forms.render_field(form.set_hooks) }}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Import!</button>
+                <a href="{{ url_for('projects.overview') }}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% else %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <h1>Import Status</h1>
+        {% if not summary %}
+        <div class="alert alert-info">
+            Hm, doesn't look like there was anything to import!
+        </div>
+        {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result, status in summary %}
+                <tr>
+                    <td>{{ result }}</td>
+                    <td><i class="icon-{% if status %}ok{% else %}remove{% endif %}"></i></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        <a href="{{ url_for('projects.overview') }}" class="btn btn-primary">Done</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-__all__ = ('User',)
+__all__ = ('User', 'Project', 'AuthToken', 'Hook')
 import os
 import base64
 import hashlib
@@ -94,6 +94,28 @@ class User(db.Model):
         return CaseInsensitiveComparator(cls.username)
 
 
+class AuthToken(db.Model):
+    """
+    Service authentication tokens, such as those used for Github's OAuth.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+    name = db.Column(db.String(50), nullable=False)
+    token = db.Column(db.String(512), nullable=False)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    owner = db.relationship('User', backref=db.backref(
+        'tokens', order_by=id, lazy='dynamic'
+    ))
+
+    @classmethod
+    def new(cls, token, name):
+        c = cls()
+        c.token = token
+        c.name = name
+        return c
+
+
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
@@ -115,3 +137,38 @@ class Project(db.Model):
         c.public = public
         c.website = website
         return c
+
+    @hybrid_property
+    def name_i(self):
+        return self.name.lower()
+
+    @name_i.comparator
+    def name_i(cls):
+        return CaseInsensitiveComparator(cls.name)
+
+    @classmethod
+    def by_name(cls, name):
+        return cls.query.filter_by(name_i=name).first()
+
+
+class Hook(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+    key = db.Column(db.String(255), nullable=False)
+    service_id = db.Column(db.Integer)
+
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    project = db.relationship('Project', backref=db.backref(
+        'hooks', order_by=id, lazy='dynamic'
+    ))
+
+    @classmethod
+    def new(cls, service_id):
+        p = cls()
+        p.service_id = service_id
+        p.key = cls._new_key()
+        return p
+
+    @staticmethod
+    def _new_key():
+        return base64.urlsafe_b64encode(os.urandom(24))[:24]

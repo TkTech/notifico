@@ -11,6 +11,7 @@ from flask.ext import wtf
 
 from frontend import user_required
 from frontend.models import User, Project
+from frontend.services import registered_services
 
 projects = Blueprint('projects', __name__, template_folder='templates')
 
@@ -27,6 +28,12 @@ class ProjectDetailsForm(wtf.Form):
         wtf.Length(max=1024),
         wtf.validators.URL()
     ])
+
+
+class HookDetailsForm(wtf.Form):
+    service_id = wtf.SelectField('Service', validators=[
+        wtf.Required()
+    ], coerce=int)
 
 
 class PasswordConfirmForm(wtf.Form):
@@ -85,7 +92,7 @@ def edit_project(pid):
         # Project doesn't exist (404 Not Found)
         return abort(404)
 
-    if not p.public and p.owner.id != g.user.id:
+    if p.owner.id != g.user.id:
         # Project isn't public and the viewer isn't the project owner.
         # (403 Forbidden)
         return abort(403)
@@ -115,7 +122,7 @@ def delete_project(pid):
         # Project doesn't exist (404 Not Found)
         return abort(404)
 
-    if not p.public and p.owner.id != g.user.id:
+    if p.owner.id != g.user.id:
         # Project isn't public and the viewer isn't the project owner.
         # (403 Forbidden)
         return abort(403)
@@ -154,4 +161,30 @@ def details(pid):
     return render_template('project_details.html',
         project=p,
         is_owner=is_owner
+    )
+
+
+@projects.route('/hook/new/<int:pid>')
+@user_required
+def new_hook(pid):
+    p = Project.query.get(pid)
+    if not p:
+        # Project doesn't exist (404 Not Found)
+        return abort(404)
+
+    if p.owner.id != g.user.id:
+        # Project isn't public and the viewer isn't the project owner.
+        # (403 Forbidden)
+        return abort(403)
+
+    form = HookDetailsForm()
+    form.service_id.choices = [
+        (k, s.service_name()) for k, s in registered_services().items()
+    ]
+    if form.validate_on_submit():
+        pass
+
+    return render_template('new_hook.html',
+        project=p,
+        form=form
     )

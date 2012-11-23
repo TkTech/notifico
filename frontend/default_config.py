@@ -27,6 +27,12 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 
 # ---
+# Service integration configuration.
+# ---
+SERVICE_GITHUB_CLIENT_ID = None
+SERVICE_GITHUB_CLIENT_SECRET = None
+
+# ---
 # Misc. Settings
 # ---
 # Should Notifico route static assets (/css/, /js/, etc...)?

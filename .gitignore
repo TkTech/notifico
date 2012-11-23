@@ -2,4 +2,5 @@
 ENV/
 .DS_Store
 local_config
+remote_config
 testing.db

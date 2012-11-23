@@ -37,7 +37,7 @@
         <a id="hooks"></a>
         <h1>Hooks</h1>
         <p><em>Hooks</em> are endpoints for 3rd party services (and scripts) capable of making a HTTP POST request. For example, you can create a hook for Github's <a href="https://help.github.com/articles/post-receive-hooks">WebHooks</a> service. Hooks recieve messages, which are then formatted and forwarded to <a href="#channels">IRC channels</a>.</p>
-        <a href="{{ url_for('.new') }}" class="btn btn-primary">Create New Hook</a>
+        <a href="{{ url_for('.new_hook', pid=project.id) }}" class="btn btn-primary">Create New Hook</a>
     </div>
 </div>
 {% endif %}
