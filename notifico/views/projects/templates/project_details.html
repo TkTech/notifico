@@ -103,6 +103,7 @@
                     <th>Port</th>
                     <th>SSL</th>
                     {% if is_owner %}
+                    <td style="text-align: center;">Public</td>
                     <th></th>
                     {% endif %}
                 </tr>
@@ -115,6 +116,9 @@
                     <td>{{ channel.port }}</td>
                     <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
                     {% if is_owner %}
+                    <td style="text-align: center;">
+                        <i class="icon-{% if project.public %}ok{% else %}lock{% endif %}"></i>
+                    </td>
                     <td>
                         <div class="pull-right">
                             <div class="pull-right">
@@ -134,6 +138,9 @@
                     <td>{{ channel.host }}</td>
                     <td>{{ channel.port }}</td>
                     <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
+                    <td style="text-align: center;">
+                        <i class="icon-{% if project.public %}ok{% else %}lock{% endif %}"></i>
+                    </td>
                     <td>
                         <div class="pull-right">
                             <div class="pull-right">
