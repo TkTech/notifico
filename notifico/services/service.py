@@ -59,7 +59,14 @@ class Service(object):
             db=app.config['REDIS_DB']
         )
         for message in cls.handle_request(user, request, hook):
-            r.publish(
-                'message',
-                json.dumps(message)
-            )
+            for channel in hook.project.channels:
+                message['channel'] = dict(
+                    host=channel.host,
+                    port=channel.port,
+                    ssl=channel.ssl,
+                    channel=channel.channel
+                )
+                r.publish(
+                    'message',
+                    json.dumps(message)
+                )

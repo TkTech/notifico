@@ -38,34 +38,17 @@ class GithubService(Service):
         if 'commits' in j:
             # There are some new commits in this message.
             for commit in j['commits']:
-                message = dict(
+                yield dict(
                     type='message',
                     payload=dict(
                         msg=irc_format(hook, commit),
                         type=Service.COMMIT
                     )
                 )
-                for channel in hook.project.channels:
-                    message['channel'] = dict(
-                        host=channel.host,
-                        port=channel.port,
-                        ssl=channel.ssl,
-                        channel=channel.channel
-                    )
-                    yield message
-
-            message = dict(
+            yield dict(
                 type='message',
                 payload=dict(
                     msg=j['compare'],
                     type=Service.COMMIT
                 )
             )
-            for channel in hook.project.channels:
-                message['channel'] = dict(
-                    host=channel.host,
-                    port=channel.port,
-                    ssl=channel.ssl,
-                    channel=channel.channel
-                )
-                yield message
