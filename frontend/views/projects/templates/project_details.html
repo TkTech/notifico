@@ -50,6 +50,7 @@
                 <tr>
                     <th>Service Name</th>
                     <th>Hook URL</th>
+                    <th>Created</th>
                     <th></th>
                 </tr>
             </thead>
@@ -58,6 +59,7 @@
                 <tr>
                     <td>{{ hook.service.service_name() }}</td>
                     <td><a href="{{ url_for('.hook_recieve', pid=project.id, key=hook.key) }}">Link</a></td>
+                    <td>{{ hook.created.strftime("%Y-%m-%d") }}</td>
                     <td>
                         <div class="pull-right">
                             <a href="{{ url_for('.delete_hook', pid=project.id, hid=hook.id) }}" class="btn btn-mini btn-danger">
