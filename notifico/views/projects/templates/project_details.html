@@ -23,7 +23,7 @@
             </div>
             <div class="span4 pagination-centered">
                 <h2>Channels</h2>
-                <span class="count">0</span>
+                <span class="count">{{ project.channels.count() }}</span>
             </div>
         </div>
     </div>
@@ -86,7 +86,68 @@
         <h1>IRC Channels</h1>
         <p>Any messages recieved by your project will be forwarded to any of the IRC channels that have added to them. An operator of the channel may blacklist the project, or ban the bot from entering their channel to prevent abuse.</p>
         {% if is_owner %}
-        <a href="{{ url_for('.new') }}" class="btn btn-primary">Add New Channel</a>
+        <a href="{{ url_for('.new_channel', pid=project.id) }}" class="btn btn-primary">Add New Channel</a>
+        {% endif %}
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12 well">
+        {% if not project.channels.count() %}
+        <small>No channels have been added to this project.</small>
+        {% else %}
+        <table class="table" style='margin-bottom: 0;'>
+            <thead>
+                <tr>
+                    <th>Channel</th>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>SSL</th>
+                    {% if is_owner %}
+                    <th></th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for channel in project.channels.filter_by(public=True) %}
+                <tr>
+                    <td>{{ channel.channel }}</td>
+                    <td>{{ channel.host }}</td>
+                    <td>{{ channel.port }}</td>
+                    <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
+                    {% if is_owner %}
+                    <td>
+                        <div class="pull-right">
+                            <div class="pull-right">
+                            <a href="{{ url_for('.delete_channel', pid=project.id, cid=channel.id) }}" class="btn btn-mini btn-danger">
+                                <i class="icon-trash icon-white"></i> Delete
+                            </a>
+                        </div>
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                {% if is_owner %}
+                {% for channel in project.channels.filter_by(public=False) %}
+                <tr>
+                    <td>{{ channel.channel }}</td>
+                    <td>{{ channel.host }}</td>
+                    <td>{{ channel.port }}</td>
+                    <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
+                    <td>
+                        <div class="pull-right">
+                            <div class="pull-right">
+                            <a href="{{ url_for('.delete_channel', pid=project.id, cid=channel.id) }}" class="btn btn-mini btn-danger">
+                                <i class="icon-trash icon-white"></i> Delete
+                            </a>
+                        </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
         {% endif %}
     </div>
 </div>

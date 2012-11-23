@@ -11,7 +11,7 @@ from flask import (
 from flask.ext import wtf
 
 from notifico import user_required
-from notifico.models import User, Project, Hook
+from notifico.models import User, Project, Hook, Channel
 from notifico.services import registered_services, service_from_id
 
 projects = Blueprint('projects', __name__, template_folder='templates')
@@ -50,6 +50,24 @@ class PasswordConfirmForm(wtf.Form):
     def validate_password(form, field):
         if not User.login(g.user.username, field.data):
             raise wtf.ValidationError('Your password is incorrect.')
+
+
+class ChannelDetailsForm(wtf.Form):
+    channel = wtf.TextField('Channel', validators=[
+        wtf.Required(),
+        wtf.Length(min=1, max=80)
+    ])
+    host = wtf.TextField('Host', validators=[
+        wtf.Required(),
+        wtf.Length(min=1, max=255)
+    ], default='irc.freenode.net')
+    port = wtf.IntegerField('Port', validators=[
+        wtf.NumberRange(1024, 66552)
+    ], default=6667)
+    ssl = wtf.BooleanField('Use SSL', default=False)
+    public = wtf.BooleanField('Public', default=True, description=(
+        'Allow others to see that this channel exists.'
+    ))
 
 
 @projects.route('/')
@@ -254,4 +272,81 @@ def delete_hook(pid, hid):
     return render_template('delete_hook.html',
         project=p,
         hook=h
+    )
+
+
+@projects.route('/channel/new/<int:pid>', methods=['GET', 'POST'])
+@user_required
+def new_channel(pid):
+    p = Project.query.get(pid)
+    if not p:
+        # Project doesn't exist (404 Not Found)
+        return abort(404)
+
+    if p.owner.id != g.user.id:
+        # Project isn't public and the viewer isn't the project owner.
+        # (403 Forbidden)
+        return abort(403)
+
+    form = ChannelDetailsForm()
+    if form.validate_on_submit():
+        host = form.host.data.strip().lower()
+        channel = form.channel.data.strip().lower()
+
+        # Make sure this isn't a duplicate channel before we create it.
+        c = Channel.query.filter_by(
+            host=host,
+            channel=channel,
+            project_id=pid
+        ).first()
+        if not c:
+            c = Channel.new(
+                channel,
+                host,
+                port=form.port.data,
+                ssl=form.ssl.data,
+                public=form.public.data
+            )
+            p.channels.append(c)
+            g.db.session.add(c)
+            g.db.session.commit()
+            flash('Your channel has been created.', 'success')
+            return redirect(url_for('.details', pid=pid))
+        else:
+            form.channel.errors = [wtf.ValidationError(
+                'You cannot have a project in the same channel twice.'
+            )]
+
+    return render_template('new_channel.html',
+        project=p,
+        form=form
+    )
+
+
+@projects.route('/channel/delete/<int:pid>/<int:cid>', methods=['GET', 'POST'])
+@user_required
+def delete_channel(pid, cid):
+    """
+    Delete an existing service hook.
+    """
+    c = Channel.query.filter_by(id=cid, project_id=pid).first()
+    if not c:
+        # Project or channel doesn't exist (404 Not Found)
+        return abort(404)
+
+    if c.project.owner.id != g.user.id or c.project.id != pid:
+        # Project isn't public and the viewer isn't the project owner.
+        # (403 Forbidden)
+        return abort(403)
+
+    if request.method == 'POST' and request.form.get('do') == 'd':
+        c.project.channels.remove(c)
+        g.db.session.delete(c)
+        g.db.session.commit()
+        flash('The channel has been removed.', 'success')
+        return redirect(url_for('.details', pid=pid))
+
+    return render_template('delete_channel.html',
+        project=c.project,
+        channel=c
     )

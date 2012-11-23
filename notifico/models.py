@@ -201,3 +201,29 @@ class Hook(db.Model):
     @property
     def service(self):
         return service_from_id(self.service_id)
+
+
+class Channel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+
+    channel = db.Column(db.String(80), nullable=False)
+    host = db.Column(db.String(255), nullable=False)
+    port = db.Column(db.Integer, default=6667)
+    ssl = db.Column(db.Boolean, default=False)
+    public = db.Column(db.Boolean, default=False)
+
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    project = db.relationship('Project', backref=db.backref(
+        'channels', order_by=id, lazy='dynamic'
+    ))
+
+    @classmethod
+    def new(cls, channel, host, port=6667, ssl=False, public=False):
+        c = cls()
+        c.channel = channel
+        c.host = host
+        c.port = port
+        c.ssl = ssl
+        c.public = public
+        return c

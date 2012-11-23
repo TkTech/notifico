@@ -1,0 +1,16 @@
+{% extends "base/body.html" %}
+{% import "forms.html" as forms %}
+{% block content %}
+<div class="row-fluid">
+    <div class="span12 well">
+        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+            <legend>Remove Channel</legend>
+            <p>Are you sure you want to remove this channel?.</p>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger" value='d' name='do'>Remove Channel</button>
+                <a href="{{ url_for('.details', pid=project.id) }}" class="btn btn-success">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
