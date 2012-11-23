@@ -152,12 +152,13 @@ def details(pid):
     """
     p = Project.query.get(pid)
     if not p:
-        # Project doesn't exist (404 Not Found)
+        # Project doesn't exist (Not Found)
         return abort(404)
-
-    if not p.public and p.owner.id != g.user.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
+    elif not p.public and not g.user:
+        # Not public and no logged in user. (Forbidden)
+        return abort(403)
+    elif not p.public and p.owner.id != g.user.id:
+        # Not public and not owner. (Forbidden)
         return abort(403)
 
     is_owner = (g.user and g.user.id == p.owner_id)
