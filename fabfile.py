@@ -12,9 +12,6 @@ env.user = 'tyler'
 env.roledefs = {
     'web': [
         'n.tkte.ch'
-    ],
-    'db': [
-        'n.tkte.ch'
     ]
 }
 
@@ -30,7 +27,7 @@ def www_root():
 
 
 @roles('web')
-def deploy_web():
+def deploy():
     """
     Deploys the frontend project (http).
     """
@@ -46,8 +43,13 @@ def deploy_web():
     )
 
     with cd(www_root()):
+        # Update Supervisor's config.
         put('misc/deploy/supervisord.conf', 'supervisord.conf')
-        run('supervisord -c supervisord.conf')
+        # Restart it if it's running, otherwise start it.
+        if exists('/tmp/supervisord.pid'):
+            run('supervisorctl restart all')
+        else:
+            run('supervisord -c supervisord.conf')
 
     with cd(www_root()):
         # Update the SQLAlchemy tables.
@@ -67,13 +69,14 @@ def deploy_web():
 
 
 @roles('web')
-def init_web():
+def init():
     """
     Helper to set up a new frontent server.
     """
-    # Install the minimum packages.
+    # Install the minimum packages for Ubuntu
     sudo('apt-get install build-essential')
     sudo('apt-get install python-dev')
+    sudo('apt-get install redis')
     sudo('apt-get install lighttpd')
     sudo('apt-get install python-pip')
     sudo('apt-get install libevent-dev')
@@ -82,11 +85,3 @@ def init_web():
     with cd(www_root()):
         p = os.path.join(www_root(), 'misc', 'deploy', 'requirements.txt')
         sudo('pip install --requirement {0}'.format(p))
-
-
-@roles('db')
-def init_db():
-    """
-    Helper to set up a new db server.
-    """
-    suod('apt-get install redis')
