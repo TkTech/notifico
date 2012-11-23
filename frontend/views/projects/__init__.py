@@ -29,6 +29,11 @@ class ProjectDetailsForm(wtf.Form):
         wtf.validators.URL()
     ])
 
+    def validate_name(form, field):
+        p = Project.by_name_and_owner(field.data, g.user)
+        if p:
+            raise wtf.ValidationError('Project name must be unique.')
+
 
 class HookDetailsForm(wtf.Form):
     service_id = wtf.SelectField('Service', validators=[

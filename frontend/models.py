@@ -150,6 +150,12 @@ class Project(db.Model):
     def by_name(cls, name):
         return cls.query.filter_by(name_i=name).first()
 
+    @classmethod
+    def by_name_and_owner(cls, name, owner):
+        q = cls.query.filter(cls.owner_id == owner.id)
+        q = q.filter(cls.name_i == name)
+        return q.first()
+
 
 class Hook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
