@@ -9,6 +9,7 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy import func
 
 from frontend import db
+from frontend.services import service_from_id
 
 
 class CaseInsensitiveComparator(Comparator):
@@ -193,3 +194,7 @@ class Hook(db.Model):
             service_id=service_id,
             project_id=project_id
         ).first()
+
+    @property
+    def service(self):
+        return service_from_id(self.service_id)

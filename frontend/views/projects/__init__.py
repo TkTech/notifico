@@ -5,12 +5,13 @@ from flask import (
     redirect,
     flash,
     url_for,
-    abort
+    abort,
+    request
 )
 from flask.ext import wtf
 
 from frontend import user_required
-from frontend.models import User, Project
+from frontend.models import User, Project, Hook
 from frontend.services import registered_services
 
 projects = Blueprint('projects', __name__, template_folder='templates')
@@ -198,3 +199,33 @@ def new_hook(pid):
 @projects.route('/h/<int:pid>/<key>', methods=['POST'])
 def hook_recieve(pid, key):
     pass
+
+
+@projects.route('/hook/delete/<int:pid>/<int:hid>', methods=['GET', 'POST'])
+@user_required
+def delete_hook(pid, hid):
+    """
+    Delete an existing service hook.
+    """
+    p = Project.query.get(pid)
+    h = Hook.query.get(hid)
+    if not p or not h:
+        # Project doesn't exist (404 Not Found)
+        return abort(404)
+
+    if p.owner.id != g.user.id or h.project.id != p.id:
+        # Project isn't public and the viewer isn't the project owner.
+        # (403 Forbidden)
+        return abort(403)
+
+    if request.method == 'POST' and request.form.get('do') == 'd':
+        p.hooks.remove(h)
+        g.db.session.delete(h)
+        g.db.session.commit()
+        flash('The hook has been deleted.', 'success')
+        return redirect(url_for('.details', pid=pid))
+
+    return render_template('delete_hook.html',
+        project=p,
+        hook=h
+    )

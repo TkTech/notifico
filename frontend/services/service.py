@@ -32,7 +32,7 @@ class Service(object):
         raise NotImplementedError()
 
     @staticmethod
-    def format_request(request):
+    def format_request(user, request):
         """
         Called on each HTTP request.
         """

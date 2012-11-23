@@ -33,11 +33,41 @@
     Only the owner should be able to see hooks. 
 #}
 <div class="row-fluid">
-    <div class="span12 well">
+    <div class="span6 well">
         <a id="hooks"></a>
         <h1>Hooks</h1>
         <p><em>Hooks</em> are endpoints for 3rd party services (and scripts) capable of making a HTTP POST request. For example, you can create a hook for Github's <a href="https://help.github.com/articles/post-receive-hooks">WebHooks</a> service. Hooks recieve messages, which are then formatted and forwarded to <a href="#channels">IRC channels</a>.</p>
         <a href="{{ url_for('.new_hook', pid=project.id) }}" class="btn btn-primary">Create New Hook</a>
+    </div>
+    <div class="span6 well">
+        {% if not project.hooks.count() %}
+        <p>You haven't created any hooks yet.</p>
+        {% else %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Service Name</th>
+                    <th>Hook URL</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hook in project.hooks %}
+                <tr>
+                    <td>{{ hook.service.service_name() }}</td>
+                    <td><a href="{{ url_for('.hook_recieve', pid=project.id, key=hook.key) }}">Link</a></td>
+                    <td>
+                        <div class="pull-right">
+                            <a href="{{ url_for('.delete_hook', pid=project.id, hid=hook.id) }}" class="btn btn-mini btn-danger">
+                                <i class="icon-trash icon-white"></i> Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </div>
 </div>
 {% endif %}
