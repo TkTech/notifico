@@ -7,12 +7,18 @@ from notifico.services.service import Service
 def irc_format(hook, commit):
     line = []
     # Add the project name.
-    line.append('{0}:'.format(hook.project.full_name))
+    line.append('{BLUE}{0}{RESET}:'.format(
+        hook.project.full_name,
+        **Service.COLORS
+    ))
     line.append('{LIGHT_CYAN}{0}{RESET}'.format(
         commit['author']['username'],
         **Service.COLORS
     ))
-    line.append(commit['id'][:7])
+    line.append('{PINK}{0}{RESET}'.format(
+        commit['id'][:7],
+        **Service.COLORS
+    ))
     line.append(commit['message'][:50] + (commit['message'][50:] and '...'))
     return ' '.join(line)
 
