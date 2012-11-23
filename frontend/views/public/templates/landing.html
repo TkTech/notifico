@@ -44,7 +44,12 @@
         {% for project in Project.public_q().order_by(Project.created.desc()).limit(10) %}
         <div>
             <a href="{{ url_for('projects.details', pid=project.id) }}">{{ project.full_name }}</a><br/>
-            <small>Created: {{ project.created.strftime("%Y-%m-%d") }}</small>
+            <small>
+                Created: {{ project.created.strftime("%Y-%m-%d") }}
+                {% if project.website %}
+                | {{ project.website|urlize(40, True) }}
+                {% endif %}
+            </small>
         </div>
         {% endfor %}
     </div>
