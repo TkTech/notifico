@@ -13,6 +13,24 @@ class Service(object):
     ISSUE = 'issue'
     WIKI = 'wiki'
 
+    COLORS = dict(
+        RESET='\0x03',
+        WHITE='\0x03' + '00',
+        BLACK='\0x03' + '01',
+        BLUE='\0x03' + '02',
+        GREEN='\0x03' + '03',
+        RED='\0x03' + '04',
+        BROWN='\0x03' + '05',
+        PURPLE='\0x03' + '06',
+        ORANGE='\0x03' + '07',
+        YELLOW='\0x03' + '08',
+        LIGHT_GREEN='\0x03' + '09',
+        TEAL='\0x03' + '10',
+        LIGHT_CYAN='\0x03' + '11',
+        LIGHT_BLUE='\0x03' + '12',
+        PINK='\0x03' + '13'
+    )
+
     @staticmethod
     def service_id():
         """

@@ -8,7 +8,10 @@ def irc_format(hook, commit):
     line = []
     # Add the project name.
     line.append('{0}:'.format(hook.project.full_name))
-    line.append(commit['author']['username'])
+    line.append('{CYAN}{0}{RESET}'.format(
+        commit['author']['username'],
+        **Service.COLORS
+    ))
     line.append(commit['id'][:7])
     line.append(commit['message'][:50] + (commit['message'][50:] and '...'))
     return ' '.join(line)
