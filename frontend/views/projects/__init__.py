@@ -170,7 +170,7 @@ def details(pid):
     )
 
 
-@projects.route('/hook/new/<int:pid>')
+@projects.route('/hook/new/<int:pid>', methods=['GET', 'POST'])
 @user_required
 def new_hook(pid):
     p = Project.query.get(pid)
@@ -188,7 +188,12 @@ def new_hook(pid):
         (k, s.service_name()) for k, s in registered_services().items()
     ]
     if form.validate_on_submit():
-        pass
+        h = Hook.new(form.service_id.data)
+        p.hooks.append(h)
+        g.db.session.add(h)
+        g.db.session.commit()
+        flash('Your hook has been created.', 'success')
+        return redirect(url_for('.details', pid=pid))
 
     return render_template('new_hook.html',
         project=p,
