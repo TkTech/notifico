@@ -18,6 +18,9 @@ def irc_format(hook, commit):
 
 
 class GithubService(Service):
+    """
+    Service hook for http://github.com.
+    """
     @staticmethod
     def service_id():
         return 10
