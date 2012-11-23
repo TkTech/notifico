@@ -60,6 +60,6 @@ class Service(object):
         )
         for message in cls.handle_request(user, request, hook):
             r.publish(
-                'project/{0}'.format(hook.project.full_name),
+                'message',
                 json.dumps(message)
             )

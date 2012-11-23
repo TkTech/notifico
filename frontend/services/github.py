@@ -43,6 +43,12 @@ class GithubService(Service):
                     payload=dict(
                         msg=irc_format(hook, commit),
                         type=Service.COMMIT
+                    ),
+                    channel=dict(
+                        host='irc.freenode.net',
+                        port=6667,
+                        ssl=False,
+                        channel='#notifico'
                     )
                 )
 
@@ -51,5 +57,11 @@ class GithubService(Service):
                 payload=dict(
                     msg=j['compare'],
                     type=Service.COMMIT
+                ),
+                channel=dict(
+                    host='irc.freenode.net',
+                    port=6667,
+                    ssl=False,
+                    channel='#notifico'
                 )
             )

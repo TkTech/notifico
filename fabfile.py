@@ -40,6 +40,15 @@ def deploy_web():
         local_dir=os.path.abspath('./frontend')
     )
 
+    rsync_project(
+        remote_dir=www_root(),
+        local_dir=os.path.abspath('./utopia')
+    )
+
+    with cd(www_root()):
+        put('misc/deploy/supervisord.conf', 'supervisord.conf')
+        run('supervisord -c supervisord.conf')
+
     with cd(www_root()):
         # Update the SQLAlchemy tables.
         # run('python -m notifico.deploy.build')
@@ -62,16 +71,16 @@ def init_web():
     """
     Helper to set up a new frontent server.
     """
-    # Make sure the latest source is on the server already.
-    execute(deploy_web)
-
     # Install the minimum packages.
+    sudo('apt-get install build-essential')
+    sudo('apt-get install python-dev')
     sudo('apt-get install lighttpd')
     sudo('apt-get install python-pip')
+    sudo('apt-get install libevent-dev')
 
     # Install our python dependencies.
     with cd(www_root()):
-        p = os.path.join(www_root(), 'frontend', 'deploy', 'requirements.txt')
+        p = os.path.join(www_root(), 'misc', 'deploy', 'requirements.txt')
         sudo('pip install --requirement {0}'.format(p))
 
 
