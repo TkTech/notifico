@@ -12,7 +12,7 @@ from flask.ext import wtf
 
 from frontend import user_required
 from frontend.models import User, Project, Hook
-from frontend.services import registered_services
+from frontend.services import registered_services, service_from_id
 
 projects = Blueprint('projects', __name__, template_folder='templates')
 
@@ -201,9 +201,30 @@ def new_hook(pid):
     )
 
 
-@projects.route('/h/<int:pid>/<key>', methods=['POST'])
+@projects.route('/h/<int:pid>/<key>', methods=['GET', 'POST'])
 def hook_recieve(pid, key):
-    pass
+    h = Hook.query.filter_by(key=key, project_id=pid).first()
+    if not h:
+        return abort(404)
+
+    # Increment the hooks message_count....
+    Hook.query.filter_by(id=h.id).update({
+        Hook.message_count: Hook.message_count + 1
+    })
+    # ... and the project-wide message_count.
+    Project.query.filter_by(id=h.project.id).update({
+        Project.message_count: Project.message_count + 1
+    })
+
+    service = service_from_id(h.service_id)
+    if service is None:
+        # TODO: This should be logged somewhere.
+        return ''
+
+    service._request(h.project.owner, request, h)
+
+    g.db.session.commit()
+    return ''
 
 
 @projects.route('/hook/delete/<int:pid>/<int:hid>', methods=['GET', 'POST'])

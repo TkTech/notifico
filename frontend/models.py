@@ -130,6 +130,7 @@ class Project(db.Model):
     ))
 
     full_name = db.Column(db.String(101), nullable=False, unique=True)
+    message_count = db.Column(db.Integer, default=0)
 
     @classmethod
     def new(cls, name, public=True, website=None):
@@ -176,6 +177,8 @@ class Hook(db.Model):
     project = db.relationship('Project', backref=db.backref(
         'hooks', order_by=id, lazy='dynamic'
     ))
+
+    message_count = db.Column(db.Integer, default=0)
 
     @classmethod
     def new(cls, service_id):

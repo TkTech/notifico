@@ -15,7 +15,7 @@
         <div class="row-fluid">
             <div class="span4 pagination-centered">
                 <h2>Messages</h2>
-                <span class="count">0</span>
+                <span class="count">{{ project.message_count }}</span>
             </div>
             <div class="span4 pagination-centered">
                 <h2>Hooks</h2>
@@ -51,6 +51,7 @@
                     <th>Service Name</th>
                     <th>Hook URL</th>
                     <th>Created</th>
+                    <th style="text-align: center;">Messages</th>
                     <th></th>
                 </tr>
             </thead>
@@ -60,6 +61,7 @@
                     <td>{{ hook.service.service_name() }}</td>
                     <td><a href="{{ url_for('.hook_recieve', pid=project.id, key=hook.key) }}">Link</a></td>
                     <td>{{ hook.created.strftime("%Y-%m-%d") }}</td>
+                    <td style="text-align: center;">{{ hook.message_count }}</td>
                     <td>
                         <div class="pull-right">
                             <a href="{{ url_for('.delete_hook', pid=project.id, hid=hook.id) }}" class="btn btn-mini btn-danger">

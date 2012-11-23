@@ -1,8 +1,18 @@
 # -*- coding: utf8 -*-
 __all__ = ('Service',)
+import json
+
+import redis
+
+from frontend import app
 
 
 class Service(object):
+    COMMIT = 'commit'
+    RAW = 'raw'
+    ISSUE = 'issue'
+    WIKI = 'wiki'
+
     @staticmethod
     def service_id():
         """
@@ -32,8 +42,24 @@ class Service(object):
         raise NotImplementedError()
 
     @staticmethod
-    def format_request(user, request):
+    def handle_request(user, request, hook):
+        """
+        Called on each HTTP request to extract and emit messages.
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def _request(cls, user, request, hook):
         """
         Called on each HTTP request.
         """
-        raise NotImplementedError()
+        r = redis.StrictRedis(
+            host=app.config['REDIS_HOST'],
+            port=app.config['REDIS_PORT'],
+            db=app.config['REDIS_DB']
+        )
+        for message in cls.handle_request(user, request, hook):
+            r.publish(
+                'project/{0}'.format(hook.project.full_name),
+                json.dumps(message)
+            )
