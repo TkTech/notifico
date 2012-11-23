@@ -14,7 +14,7 @@ from flask.ext import wtf
 from github import Github
 
 from frontend import user_required, app
-from frontend.models import AuthToken, Project
+from frontend.models import AuthToken, Project, Hook
 
 pimport = Blueprint('pimport', __name__, template_folder='templates')
 
@@ -24,7 +24,7 @@ class GithubForm(wtf.Form):
         'Imports all of your public and private repositories. Private repos'
         ' will be imported as private and will never store messages.'
     ))
-    set_hooks = wtf.BooleanField('Set Hooks', default=True, description=(
+    set_hooks = wtf.BooleanField('Set Hooks', default=False, description=(
         'Sets up each project on your account with event hooks.'
     ))
 
@@ -103,6 +103,24 @@ def github():
                 'Project {0} created.'.format(repo.name),
                 True
             ))
+
+            if form.set_hooks.data:
+                # The user wanted us to auto-create web hooks for them.
+                g.db.session.commit()
+
+                h = Hook.new(10)
+                p.hooks.append(h)
+                g.db.session.add(h)
+                repo.create_hook('web', {
+                    'url': url_for(
+                        'projects.hook_recieve',
+                        pid=p.id,
+                        key=h.key,
+                        _external=True
+                    ),
+                    'content_type': 'json'
+                })
+
         g.db.session.commit()
 
     return render_template('github.html',

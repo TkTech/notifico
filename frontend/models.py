@@ -178,3 +178,10 @@ class Hook(db.Model):
     @staticmethod
     def _new_key():
         return base64.urlsafe_b64encode(os.urandom(24))[:24]
+
+    @classmethod
+    def by_service_and_project(cls, service_id, project_id):
+        return cls.query.filter_by(
+            service_id=service_id,
+            project_id=project_id
+        ).first()

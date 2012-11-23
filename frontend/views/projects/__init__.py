@@ -193,3 +193,8 @@ def new_hook(pid):
         project=p,
         form=form
     )
+
+
+@projects.route('/h/<int:pid>/<key>', methods=['POST'])
+def hook_recieve(pid, key):
+    pass
