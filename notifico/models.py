@@ -8,8 +8,8 @@ import datetime
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy import func
 
-from frontend import db
-from frontend.services import service_from_id
+from notifico import db
+from notifico.services import service_from_id
 
 
 class CaseInsensitiveComparator(Comparator):

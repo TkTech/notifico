@@ -4,7 +4,7 @@ from flask import (
     g,
     url_for
 )
-from frontend.models import Project, User
+from notifico.models import Project, User
 
 public = Blueprint('public', __name__, template_folder='templates')
 

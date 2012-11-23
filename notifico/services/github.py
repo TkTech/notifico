@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 import json
 
-from frontend.services.service import Service
+from notifico.services.service import Service
 
 
 def irc_format(hook, commit):

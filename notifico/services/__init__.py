@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
-from frontend.services.service import *
-from frontend.services.github import GithubService
+from notifico.services.service import *
+from notifico.services.github import GithubService
 
 
 _registered_services = {

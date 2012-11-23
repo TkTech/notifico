@@ -4,7 +4,7 @@ import json
 
 import redis
 
-from frontend import app
+from notifico import app
 
 
 class Service(object):

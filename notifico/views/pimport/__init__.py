@@ -13,8 +13,8 @@ from flask import (
 from flask.ext import wtf
 from github import Github
 
-from frontend import user_required, app
-from frontend.models import AuthToken, Project, Hook
+from notifico import user_required, app
+from notifico.models import AuthToken, Project, Hook
 
 pimport = Blueprint('pimport', __name__, template_folder='templates')
 

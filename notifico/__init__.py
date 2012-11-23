@@ -35,10 +35,10 @@ def user_required(f):
         return f(*args, **kwargs)
     return _wrapped
 
-from frontend.views.account import account
-from frontend.views.public import public
-from frontend.views.projects import projects
-from frontend.views.pimport import pimport
+from notifico.views.account import account
+from notifico.views.public import public
+from notifico.views.projects import projects
+from notifico.views.pimport import pimport
 
 app.register_blueprint(account, url_prefix='/user')
 app.register_blueprint(projects, url_prefix='/projects')
@@ -85,7 +85,7 @@ def start(debug=False):
     import os.path
     from werkzeug import SharedDataMiddleware
 
-    app.config.from_object('frontend.default_config')
+    app.config.from_object('notifico.default_config')
 
     if app.config.get('HANDLE_STATIC'):
         # We should handle routing for static assets ourself (handy for

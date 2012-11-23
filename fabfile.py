@@ -29,12 +29,12 @@ def www_root():
 @roles('web')
 def deploy():
     """
-    Deploys the frontend project (http).
+    Deploys the notifico project (http).
     """
     # Update the source files.
     rsync_project(
         remote_dir=www_root(),
-        local_dir=os.path.abspath('./frontend')
+        local_dir=os.path.abspath('./notifico')
     )
 
     rsync_project(
@@ -64,7 +64,7 @@ def deploy():
                 '-b 127.0.0.1:4000',
                 '-p notifico.pid',
                 '--daemon',
-                 '"frontend:start(debug=False)"'
+                 '"notifico:start(debug=False)"'
             ]))
 
 

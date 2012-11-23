@@ -10,9 +10,9 @@ from flask import (
 )
 from flask.ext import wtf
 
-from frontend import user_required
-from frontend.models import User, Project, Hook
-from frontend.services import registered_services, service_from_id
+from notifico import user_required
+from notifico.models import User, Project, Hook
+from notifico.services import registered_services, service_from_id
 
 projects = Blueprint('projects', __name__, template_folder='templates')
 
