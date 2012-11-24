@@ -43,15 +43,6 @@ def deploy():
     )
 
     with cd(www_root()):
-        # Update Supervisor's config.
-        put('misc/deploy/supervisord.conf', 'supervisord.conf')
-        # Restart it if it's running, otherwise start it.
-        if exists('/tmp/supervisord.pid'):
-            run('supervisorctl restart all')
-        else:
-            run('supervisord -c supervisord.conf')
-
-    with cd(www_root()):
         # Update the SQLAlchemy tables.
         # run('python -m notifico.deploy.build')
 
@@ -66,6 +57,18 @@ def deploy():
                 '--daemon',
                  '"notifico:start(debug=False)"'
             ]))
+
+
+@roles('web')
+def restart_bots():
+    with cd(www_root()):
+        # Update Supervisor's config.
+        put('misc/deploy/supervisord.conf', 'supervisord.conf')
+        # Restart it if it's running, otherwise start it.
+        if exists('/tmp/supervisord.pid'):
+            run('supervisorctl restart all')
+        else:
+            run('supervisord -c supervisord.conf')
 
 
 @roles('web')
