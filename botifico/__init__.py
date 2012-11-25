@@ -6,8 +6,8 @@ from multiprocessing import Process, Queue
 
 import redis
 
-from notifico import default_config as config
-from notifico.bots.bot import Bot
+from botifico import default_config as config
+from botifico.bot import Bot
 
 
 class BotState(object):

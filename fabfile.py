@@ -60,10 +60,21 @@ def deploy():
 
 
 @roles('web')
-def restart_bots():
+def deploy_bots():
     with cd(www_root()):
-        # Update Supervisor's config.
+        # Copy over the core IRC library.
+        rsync_project(
+            remote_dir=www_root(),
+            local_dir=os.path.abspath('./utopia')
+        )
+        # Copy over the Notifico Bot project.
+        rsync_project(
+            remote_dir=www_root(),
+            local_dir=os.path.abspath('./botifico')
+        )
+        # Update Supervisor's config, which ensures the bots keep running.
         put('misc/deploy/supervisord.conf', 'supervisord.conf')
+
         # Restart it if it's running, otherwise start it.
         if exists('/tmp/supervisord.pid'):
             run('supervisorctl restart all')
