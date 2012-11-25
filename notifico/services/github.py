@@ -15,6 +15,11 @@ class GithubConfigForm(wtf.Form):
         'A comma-seperated list of branches to forward, or blank for all.'
         ' Ex: "master, dev"'
     ))
+    use_colors = wtf.BooleanField('Use Colors', validators=[
+        wtf.Optional()
+    ], default=True, description=(
+        'If checked, commit messages will include minor mIRC coloring.'
+    ))
 
 
 def _irc_format(hook, j, commit):

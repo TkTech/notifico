@@ -100,6 +100,7 @@ class Service(object):
                     ssl=channel.ssl,
                     channel=channel.channel
                 )
+                # And finally send it on its way.
                 r.publish(
                     'message',
                     json.dumps(message)
