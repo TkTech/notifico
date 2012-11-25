@@ -98,6 +98,12 @@ def start(debug=False):
         # Override the configuration's DEBUG setting.
         app.config['DEBUG'] = True
 
+    if not app.debug:
+        import logging
+        file_handler = logging.FileHandler('notifico.log')
+        file_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(file_handler)
+
     # Let SQLAlchemy create any missing tables.
     db.create_all()
 
