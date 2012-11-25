@@ -9,6 +9,11 @@
     </style>
 {% endblock %}
 {% block content %}
+<div class="page-main-header">
+    <div class="container">
+        <h1>Welcome!</h1>
+    </div>
+</div>
 <div class="container page-content">
     {% if not g.user %}
     {# 
@@ -38,7 +43,7 @@
             {% endfor %}
         </div>
         <div class="span6">
-            <h2>Fun Stats</h2>
+            <h2>Stats</h2>
             <table class="table table-square">
                 <tbody>
                     <tr>
