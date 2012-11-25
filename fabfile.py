@@ -93,6 +93,21 @@ def deploy_bots():
 
 
 @roles('web')
+def upgrade():
+    """
+    !DANGER!
+    Update alembic and run remotely.
+    """
+    with cd(www_root()):
+        rsync_project(
+            remote_dir=www_root(),
+            local_dir=os.path.abspath('./alembic')
+        )
+        put('alembic.ini', 'alembic.ini')
+        run('PYTHONPATH=. alembic upgrade head')
+
+
+@roles('web')
 def init():
     """
     Helper to set up a new frontent server.
