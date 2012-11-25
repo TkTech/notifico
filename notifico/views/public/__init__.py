@@ -1,9 +1,6 @@
 from flask import (
     Blueprint,
-    render_template,
-    g,
-    url_for,
-    redirect
+    render_template
 )
 from notifico.models import Project, User, Channel, Hook
 
