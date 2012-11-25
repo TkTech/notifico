@@ -35,7 +35,7 @@ def _irc_format(hook, j, commit):
         commit['id'][:7],
         **Service.COLORS
     ))
-    line.append(commit['message'][:50] + (commit['message'][75:] and '...'))
+    line.append(commit['message'][:75] + (commit['message'][75:] and '...'))
     return ' '.join(line)
 
 
