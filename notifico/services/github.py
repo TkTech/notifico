@@ -1,7 +1,18 @@
 # -*- coding: utf8 -*-
 import json
 
+from flask.ext import wtf
+
 from notifico.services.service import Service
+
+
+class GithubConfigForm(wtf.Form):
+    branches = wtf.TextField('Branches', validators=[
+        wtf.Optional()
+    ], description=(
+        'A comma-seperated list of branches to forward, or blank for all.'
+        ' Ex: "master, dev"'
+    ))
 
 
 def irc_format(hook, commit):
@@ -38,6 +49,14 @@ class GithubService(Service):
     @staticmethod
     def service_url():
         return 'http://github.com'
+
+    @staticmethod
+    def service_form():
+        return GithubConfigForm
+
+    @staticmethod
+    def service_description():
+        return GithubService.env().get_template('github_desc.html').render()
 
     @staticmethod
     def handle_request(user, request, hook):

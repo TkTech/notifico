@@ -3,6 +3,7 @@ __all__ = ('Service',)
 import json
 
 import redis
+from jinja2 import Environment, PackageLoader
 
 from notifico import app
 
@@ -60,6 +61,14 @@ class Service(object):
         raise NotImplementedError()
 
     @staticmethod
+    def service_form():
+        """
+        If the service requires any complex configuration, it should implement
+        this method and return a wtforms `Form` object.
+        """
+        return None
+
+    @staticmethod
     def handle_request(user, request, hook):
         """
         Called on each HTTP request to extract and emit messages.
@@ -88,3 +97,12 @@ class Service(object):
                     'message',
                     json.dumps(message)
                 )
+
+    @classmethod
+    def env(cls):
+        """
+        Returns a Jinja2 `Environment` for template rendering.
+        """
+        return Environment(
+            loader=PackageLoader('notifico.services', 'templates')
+        )

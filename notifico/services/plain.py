@@ -19,6 +19,10 @@ class PlainTextService(Service):
         return None
 
     @staticmethod
+    def service_description():
+        return PlainTextService.env().get_template('plain_desc.html').render()
+
+    @staticmethod
     def handle_request(user, request, hook):
         p = request.form.get('payload', None)
         if not p:
@@ -29,8 +33,7 @@ class PlainTextService(Service):
         yield dict(
             type='message',
             payload=dict(
-                msg=p,
+                msg=p[:512],
                 type=Service.RAW
             )
         )
-

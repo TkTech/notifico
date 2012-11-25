@@ -93,7 +93,6 @@ def project_action(f):
 
 
 @projects.route('/<u>')
-@user_required
 def overview(u):
     """
     Display an overview of all the user's projects with summary
@@ -104,8 +103,11 @@ def overview(u):
         # No such user exists.
         return abort(404)
 
+    is_owner = (g.user and g.user.id == u.id)
+
     return render_template('overview.html',
-        user=u
+        user=u,
+        is_owner=is_owner
     )
 
 
@@ -133,7 +135,7 @@ def new():
             g.user.projects.append(p)
             g.db.session.commit()
             flash('Your project has been created.', 'success')
-            return redirect(url_for('.overview'))
+            return redirect(url_for('.overview', u=g.user.username))
 
     return render_template('new_project.html', form=form)
 
@@ -164,7 +166,7 @@ def edit_project(u, p):
             p.full_name = '{0}/{1}'.format(g.user.username, p.name)
             g.db.session.commit()
             flash('Your changes have been saved.', 'success')
-            return redirect(url_for('.overview'))
+            return redirect(url_for('.overview', u=u.username))
 
     return render_template('edit_project.html',
         project=p,
@@ -189,7 +191,7 @@ def delete_project(u, p):
         g.db.session.delete(p)
         g.db.session.commit()
         flash('Your project has been deleted.', 'success')
-        return redirect(url_for('.overview'))
+        return redirect(url_for('.overview', u=u.username))
 
     return render_template('delete_project.html',
         project=p,
@@ -219,21 +221,32 @@ def details(u, p):
     )
 
 
-@projects.route('/<u>/<p>/hook/new', methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/hook/new',
+    defaults={'sid': 10}, methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/hook/new/<int:sid>', methods=['GET', 'POST'])
 @user_required
 @project_action
-def new_hook(u, p):
+def new_hook(u, p, sid):
     if p.owner.id != g.user.id:
         # Project isn't public and the viewer isn't the project owner.
         # (403 Forbidden)
         return abort(403)
 
-    form = HookDetailsForm()
-    form.service_id.choices = [
-        (k, s.service_name()) for k, s in registered_services().items()
-    ]
-    if form.validate_on_submit():
-        h = Hook.new(form.service_id.data)
+    service = service_from_id(sid)
+    form = None
+    #form = service.service_form()
+    #if form:
+    #    form = form()
+
+    if form and form.validate_on_submit():
+        h = Hook.new(sid)
+        p.hooks.append(h)
+        g.db.session.add(h)
+        g.db.session.commit()
+        flash('Your hook has been created.', 'success')
+        return redirect(url_for('.details', p=p.name, u=u.username))
+    elif form is None and request.method == 'POST':
+        h = Hook.new(sid)
         p.hooks.append(h)
         g.db.session.add(h)
         g.db.session.commit()
@@ -242,6 +255,8 @@ def new_hook(u, p):
 
     return render_template('new_hook.html',
         project=p,
+        services=registered_services(),
+        service=service,
         form=form
     )
 

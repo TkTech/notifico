@@ -16,6 +16,8 @@ def landing():
         return redirect(
             url_for('projects.overview', u=g.user.username)
         )
+    else:
+        return redirect(url_for('account.login'))
 
     return render_template('landing.html',
         Project=Project,

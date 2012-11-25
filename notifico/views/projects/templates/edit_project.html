@@ -1,19 +1,25 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
 {% block content %}
-<div class="row-fluid">
-    <div class="span12 well">
-        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-            <legend>Edit Project</legend>
-            {{ form.hidden_tag() }}
-            {{ forms.render_field(form.name) }}
-            {{ forms.render_field(form.website ) }}
-            {{ forms.render_field(form.public) }}
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success">Save Changes</button>
-                <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn">Cancel</a>
-            </div>
-        </form>
+<div class="page-main-header">
+    <div class="container">
+        <h1>Edit Project</h1>
+    </div>
+</div>
+<div class="container page-content">
+    <div class="row-fluid">
+        <div class="span12 well">
+            <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+                {{ form.hidden_tag() }}
+                {{ forms.render_field(form.name) }}
+                {{ forms.render_field(form.website ) }}
+                {{ forms.render_field(form.public) }}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                    <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

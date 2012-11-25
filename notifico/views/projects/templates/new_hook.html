@@ -1,17 +1,67 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
+
+{% block css %}
+{{ super() }}
+<link href="/css/prettify.css" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block js %}
+{{ super() }}
+<script type="text/javascript" src="/js/prettify.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    prettyPrint();
+})
+</script>
+{% endblock %}
+
 {% block content %}
-<div class="row-fluid">
-    <div class="span12 well">
-        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-            <legend>Create New Hook</legend>
-            {{ form.hidden_tag() }}
-            {{ forms.render_field(form.service_id) }}
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Create Project</button>
-                <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
+<div class="page-main-header">
+    <div class="container">
+        <h1>Create Hook</h1>
+    </div>
+</div>
+<div class="container page-content">
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="row-fluid">
+                <div class="span4">
+                    <ul class="nav nav-list">
+                        <li class="nav-header">Available Services</li>
+                        {% for s in services.values() %}
+                        <li {% if s.service_id() == service.service_id() %}class="active"{% endif %}>
+                            <a href="{{ url_for('.new_hook', u=g.user.username, p=project.name, sid=s.service_id()) }}">
+                                {{ s.service_name() }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="span8">
+                    <h2>{{ service.service_name() }}</h2>
+                    {{ service.service_description()|safe }}
+                    <div class="row-fluid" style="margin-top: 20px;">
+                        <div class="span12">
+                            <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+                                {% if form %}
+                                {{ form.hidden_tag() }}
+                                {% for field in form %}
+                                    {% if field.id != 'csrf_token' %}
+                                        {{ forms.render_field(field) }}
+                                    {% endif %}
+                                {% endfor %}
+                                {% endif %}
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Create Hook</button>
+                                    <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,18 +1,24 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
 {% block content %}
-<div class="row-fluid">
-    <div class="span12 well">
-        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-            <legend>Delete Project</legend>
-            <p>Are you sure you want to delete the project <strong>{{ project.name }}</strong>?<br/>Enter your password to confirm.</p>
-            {{ form.hidden_tag() }}
-            {{ forms.render_field(form.password) }}
-            <div class="form-actions">
-                <button type="submit" class="btn btn-danger">Delete Project</button>
-                <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn btn-success">Cancel</a>
-            </div>
-        </form>
+<div class="page-main-header">
+    <div class="container">
+        <h1>Delete {{ project.full_name }}</h1>
+    </div>
+</div>
+<div class="container page-content">
+    <div class="row-fluid">
+        <div class="span12 well">
+            <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+                <p>If you're sure you want to delete the project <strong>{{ project.name }}</strong> enter your password.</p>
+                {{ form.hidden_tag() }}
+                {{ forms.render_field(form.password) }}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger">Delete Project</button>
+                    <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn btn-success">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

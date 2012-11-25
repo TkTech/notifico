@@ -1,71 +1,69 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
+
+{% macro row(project) %}
+    <tr>
+        <td>
+            {% if not project.public %}
+                <i class="icon-lock"></i>
+            {% else %}
+                <i class="icon-unlock"></i>    
+            {% endif %}
+            <a href="{{ url_for('.details', p=project.name, u=user.username) }}">{{ project.full_name }}</a>
+        </td>
+        <td style="text-align: center;">{{ project.message_count }}</td>
+        {% if is_owner %}
+        <td>
+            <div class="pull-right">
+                <a class="btn" href="{{ url_for('.edit_project', u=user.username, p=project.name) }}"><i class="icon-edit"></i> Edit</a>
+                <a class="btn btn-danger" href="{{ url_for('.delete_project', u=user.username, p=project.name) }}"><i class="icon-trash icon-white"></i> Delete</a>
+            </div>
+        </td>
+        {% endif %}
+    </tr>
+{% endmacro %}
+
 {% block content %}
-<div class="row-fluid">
-    <div class="span12 well">
-        <h1>Projects</h1>
-        <p>{{ site_label }} allows you to create <em>projects</em>, each of which can have their own <em>hooks</em> (which recieve events, such as a <a href="https://help.github.com/articles/post-receive-hooks">Github push</a>). These events are then forwarded to any <a href="http://en.wikipedia.org/wiki/Internet_Relay_Chat">IRC</a> channels you've added to your project.</p>
-        <a href="{{ url_for('.new') }}" class="btn btn-primary">Create New Project</a>
+<div class="page-main-header">
+    <div class="container">
+        <h1>{{ user.username }}</h1>
     </div>
 </div>
-{% if user.projects.count() %}
-<div class="row-fluid">
-    <div class="span12 well">
-        <table class="table table-borered">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Website</th>
-                    <th>Created</th>
-                    <th style="text-align: center;">Public</th>
-                    <th style="text-align: center;">Hooks</th>
-                    <th style="text-align: center;">Messages</th>
-                    <th style="text-align: center;">Channels</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for project in user.projects %}
-                <tr>
-                    <td>
-                        <a href="{{ url_for('.details', u=user.username, p=project.name) }}">
-                            {{ project.full_name }}
-                        </a>
-                    </td>
-                    <td>
-                        {% if project.website %}
-                        <a href="{{ project.website|fixlink }}">Link</a>
-                        {% else %}
-                        -
-                        {% endif %}
-                    </td>
-                    <td>{{ project.created.strftime("%Y-%m-%d") }}</td>
-                    <td style="text-align: center;">
-                        <i class="icon-{% if project.public %}ok{% else %}lock{% endif %}"></i>
-                    </td>
-                    <td style="text-align: center;">{{ project.hooks.count() }}</td>
-                    <td style="text-align: center;">{{ project.message_count }}</td>
-                    <td style="text-align: center;">{{ project.channels.count() }}</td>
-                    <th>
-                        <div class="pull-right">
-                            <a href="{{ url_for('.edit_project', u=user.username, p=project.name) }}" class="btn btn-mini">
-                                <i class="icon-edit"></i> Edit
-                            </a>
-                            <a href="{{ url_for('.delete_project', u=user.username, p=project.name) }}" class="btn btn-mini btn-danger">
-                                <i class="icon-trash icon-white"></i> Delete
-                            </a>
-                        </div>
-                    </th>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% if is_owner %}
+<div class="page-main-actions">
+    <div class="container">
+        <ul class="nav nav-pills">
+            <li><a href="{{ url_for('.new') }}">New Project</a></li>
+            <li><a href="{{ url_for('pimport.github') }}">Import From Github</a></li>
+        </ul>
     </div>
 </div>
 {% endif %}
-<div class="row-fluid">
-    <div class="span12 well">
-        <a href="{{ url_for('pimport.github') }}" class="btn btn-info">Import From Github</a>
+<div class="container page-content">
+    <div class="row-fluid">
+        <div class="span12">
+            <table class="table table-hover table-square table-vertical">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th style="text-align: center;">Messages</th>
+                        {% if is_owner %}
+                        <th></th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in user.public_projects %}
+                    {{ row(project) }}
+                    {% endfor %}
+                    {% if is_owner %}
+                        {% for project in user.private_projects %}
+                        {{ row(project) }}
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
