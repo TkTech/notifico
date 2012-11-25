@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 import os.path
 
+from fabric import colors
 from fabric.api import *
 from fabric.contrib.project import rsync_project
 from fabric.contrib.files import exists
@@ -56,7 +57,7 @@ def deploy():
                 '-p notifico.pid',
                 '--daemon',
                  '"notifico:start(debug=False)"'
-            ]))
+            ]), pty=False)
 
 
 @roles('web')
