@@ -38,15 +38,7 @@ def deploy():
         local_dir=os.path.abspath('./notifico')
     )
 
-    rsync_project(
-        remote_dir=www_root(),
-        local_dir=os.path.abspath('./utopia')
-    )
-
     with cd(www_root()):
-        # Update the SQLAlchemy tables.
-        # run('python -m notifico.deploy.build')
-
         if exists('notifico.pid'):
             run('kill -HUP `cat notifico.pid`')
         else:
