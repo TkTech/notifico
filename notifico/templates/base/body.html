@@ -21,6 +21,11 @@
             <a class="brand" href="{{ url_for('public.landing') }}">
                 {{ site_title }}
             </a>
+            {% if g.user %}
+            <ul class="nav">
+                <li><a href="{{ url_for('projects.overview', u=g.user.username) }}">My Projects</a></li>
+            </ul>
+            {% endif %}
             <ul class="nav pull-right">
                 {% if g.user %}
                 <li class="dropdown">

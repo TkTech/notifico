@@ -12,13 +12,6 @@ public = Blueprint('public', __name__, template_folder='templates')
 
 @public.route('/')
 def landing():
-    if g.user:
-        return redirect(
-            url_for('projects.overview', u=g.user.username)
-        )
-    else:
-        return redirect(url_for('account.login'))
-
     return render_template('landing.html',
         Project=Project,
         User=User,

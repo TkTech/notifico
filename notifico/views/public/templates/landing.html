@@ -9,53 +9,55 @@
     </style>
 {% endblock %}
 {% block content %}
+<div class="container page-content">
 {% if not g.user %}
 {# 
     No logged-in user, so lets show a little blurb.
 #}
-<div class="hero-unit">
-    <h1>{{ site_title }}</h1>
-    <p>{{ site_label }} is my personal, open-source (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a>) replacement for the now-defunct <a href="http://cia.vc">cia.vc</a> service.</p>
-    <p><a class="btn btn-primary btn-large" href="{{ url_for('account.register') }}">Sign Up</a></p>
-</div>
-{% endif %}
-<div class="row-fluid">
-    <div class="span12 well">
-        <div class="row-fluid">
-            <div class="span4 pagination-centered">
-                <h2>Users</h2>
-                <span class="count">{{ User.query.count() }}</span>
-            </div>
-            <div class="span4 pagination-centered">
-                <h2>Projects</h2>
-                <span class="count">{{ Project.query.count() }}</span>
-            </div>
-            <div class="span4 pagination-centered">
-                <h2>Channels</h2>
-                <span class="count">{{ Channel.query.count() }}</span>
+    <div class="hero-unit">
+        <h1>{{ site_title }}</h1>
+        <p>{{ site_label }} is my personal, open-source (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a>) replacement for the now-defunct <a href="http://cia.vc">cia.vc</a> service.</p>
+        <p><a class="btn btn-primary btn-large" href="{{ url_for('account.register') }}">Sign Up</a></p>
+    </div>
+    {% endif %}
+    <div class="row-fluid">
+        <div class="span12 well">
+            <div class="row-fluid">
+                <div class="span4 pagination-centered">
+                    <h2>Users</h2>
+                    <span class="count">{{ User.query.count() }}</span>
+                </div>
+                <div class="span4 pagination-centered">
+                    <h2>Projects</h2>
+                    <span class="count">{{ Project.query.count() }}</span>
+                </div>
+                <div class="span4 pagination-centered">
+                    <h2>Channels</h2>
+                    <span class="count">{{ Channel.query.count() }}</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% if Project.query.count() %}
-<div class="row-fluid">
-    <div class="span6 well">
-        <h2>Newest Projects</h2>
-        {% for project in Project.public_q().order_by(Project.created.desc()).limit(10) %}
-        <div>
-            <a href="{{ url_for('projects.details', u=project.owner.username, p=project.name) }}">{{ project.full_name }}</a><br/>
-            <small>
-                Created on {{ project.created.strftime("%Y-%m-%d") }} by <a href="{{ url_for('projects.overview', u=project.owner.username) }}">{{ project.owner.username }}</a>
-                {% if project.website %}
-                | {{ project.website|fixlink|urlize(40, True) }}
-                {% endif %}
-            </small>
+    {% if Project.query.count() %}
+    <div class="row-fluid">
+        <div class="span6 well">
+            <h2>Newest Projects</h2>
+            {% for project in Project.public_q().order_by(Project.created.desc()).limit(10) %}
+            <div>
+                <a href="{{ url_for('projects.details', u=project.owner.username, p=project.name) }}">{{ project.full_name }}</a><br/>
+                <small>
+                    Created on {{ project.created.strftime("%Y-%m-%d") }} by <a href="{{ url_for('projects.overview', u=project.owner.username) }}">{{ project.owner.username }}</a>
+                    {% if project.website %}
+                    | {{ project.website|fixlink|urlize(40, True) }}
+                    {% endif %}
+                </small>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
+        <div class="span6 well">
+            <h2>Fun Stats</h2>
+        </div>
     </div>
-    <div class="span6 well">
-        <h2>Fun Stats</h2>
-    </div>
+    {% endif %}
 </div>
-{% endif %}
 {% endblock %}
