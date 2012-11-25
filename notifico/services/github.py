@@ -1,5 +1,7 @@
 # -*- coding: utf8 -*-
+import re
 import json
+import requests
 
 from flask.ext import wtf
 
@@ -32,6 +34,17 @@ def irc_format(hook, commit):
     ))
     line.append(commit['message'][:50] + (commit['message'][50:] and '...'))
     return ' '.join(line)
+
+
+def _io_shorten(url):
+    # Make sure the URL hasn't already been shortened, since github
+    # may does this in the future for web hooks.
+    if re.search(r'^https?://git.io', url):
+        return url
+
+    return requests.post('http://git.io', data={
+        'url': url
+    }).headers['Location']
 
 
 class GithubService(Service):
@@ -79,7 +92,7 @@ class GithubService(Service):
             yield dict(
                 type='message',
                 payload=dict(
-                    msg=j['compare'],
+                    msg=_io_shorten(j['compare']),
                     type=Service.COMMIT
                 )
             )
