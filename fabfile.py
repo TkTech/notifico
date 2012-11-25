@@ -3,6 +3,7 @@ import os.path
 
 from fabric import colors
 from fabric.api import *
+from fabric.utils import puts
 from fabric.contrib.project import rsync_project
 from fabric.contrib.files import exists
 
@@ -51,9 +52,24 @@ def deploy():
                  '"notifico:start(debug=False)"'
             ]), pty=False)
 
+        # Make sure gunicorn actually started.
+        if exists('notifico.pid'):
+            with settings(warn_only=True):
+                result = run('kill -0 `cat notifico.pid`')
+
+            if result.failed:
+                puts(colors.red('Gunicorn is not running!'))
+            else:
+                puts(colors.green('Gunicorn started.'))
+        else:
+            puts(colors.red('Gunicorn is not running!'))
+
 
 @roles('web')
 def deploy_bots():
+    """
+    Deploys the botifico project (irc) and its dependencies.
+    """
     with cd(www_root()):
         # Copy over the core IRC library.
         rsync_project(
@@ -65,6 +81,7 @@ def deploy_bots():
             remote_dir=www_root(),
             local_dir=os.path.abspath('./botifico')
         )
+
         # Update Supervisor's config, which ensures the bots keep running.
         put('misc/deploy/supervisord.conf', 'supervisord.conf')
 
