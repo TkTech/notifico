@@ -239,6 +239,6 @@ class Channel(db.Model):
     @classmethod
     def channel_count_by_network(cls):
         q = db.session.query(Channel.host, func.count(Channel.channel))
-        q = q.group_by(Channel.host)
+        q = q.filter_by(public=True).group_by(Channel.host)
         for network, channel_count in q:
             yield network, channel_count
