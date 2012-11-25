@@ -18,6 +18,9 @@ class GithubConfigForm(wtf.Form):
 
 
 def irc_format(hook, commit):
+    """
+    Formats a Github commit destined for IRC.
+    """
     line = []
     # Add the project name.
     line.append('{BLUE}{0}{RESET}:'.format(
@@ -34,17 +37,6 @@ def irc_format(hook, commit):
     ))
     line.append(commit['message'][:50] + (commit['message'][50:] and '...'))
     return ' '.join(line)
-
-
-def _io_shorten(url):
-    # Make sure the URL hasn't already been shortened, since github
-    # may does this in the future for web hooks.
-    if re.search(r'^https?://git.io', url):
-        return url
-
-    return requests.post('http://git.io', data={
-        'url': url
-    }).headers['Location']
 
 
 class GithubService(Service):
@@ -92,7 +84,18 @@ class GithubService(Service):
             yield dict(
                 type='message',
                 payload=dict(
-                    msg=_io_shorten(j['compare']),
+                    msg=GithubService.shorten(j['compare']),
                     type=Service.COMMIT
                 )
             )
+
+    @classmethod
+    def shorten(cls, url):
+        # Make sure the URL hasn't already been shortened, since github
+        # may does this in the future for web hooks. Better safe than silly.
+        if re.search(r'^https?://git.io', url):
+            return url
+
+        return requests.post('http://git.io', data={
+            'url': url
+        }).headers['Location']

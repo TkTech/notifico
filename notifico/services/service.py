@@ -106,3 +106,11 @@ class Service(object):
         return Environment(
             loader=PackageLoader('notifico.services', 'templates')
         )
+
+    @classmethod
+    def shorten(cls, url):
+        """
+        If possible, return a shorter version of `url` shortened by a 3rd
+        party service.
+        """
+        return url
