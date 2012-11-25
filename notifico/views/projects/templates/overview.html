@@ -34,7 +34,7 @@
                     </td>
                     <td>
                         {% if project.website %}
-                        <a href="{{ project.website }}">Link</a>
+                        <a href="{{ project.website|fixlink }}">Link</a>
                         {% else %}
                         -
                         {% endif %}

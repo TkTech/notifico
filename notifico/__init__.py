@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+import re
 from functools import wraps
 from collections import deque
 
@@ -58,6 +59,13 @@ def installation_variables():
 @app.before_request
 def set_db():
     g.db = db
+
+
+@app.template_filter('fixlink')
+def fix_link(s):
+    if not re.match(r'^https?://', s):
+        s = 'http://{0}'.format(s)
+    return s
 
 
 @app.before_request

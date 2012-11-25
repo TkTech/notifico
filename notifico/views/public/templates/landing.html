@@ -47,7 +47,7 @@
             <small>
                 Created: {{ project.created.strftime("%Y-%m-%d") }}
                 {% if project.website %}
-                | {{ project.website|urlize(40, True) }}
+                | {{ project.website|fixlink|urlize(40, True) }}
                 {% endif %}
             </small>
         </div>
