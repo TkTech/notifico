@@ -45,7 +45,7 @@ def _fmt_summary(hook, j):
         j['repository']['name'],
         **Service.COLORS
     ))
-    line.append('{0} pushed {RED}{1}{RESET} {3}'.format(
+    line.append('{0} pushed {RED}{1}{RESET} {2}'.format(
         j['pusher']['name'],
         len(j['commits']),
         'commit' if len(j['commits']) == 1 else 'commits',
