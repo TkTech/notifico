@@ -80,7 +80,7 @@ def github():
 
         git = Github(access_token.token)
         for repo in git.get_user().get_repos():
-            p = Project.by_name(repo.name)
+            p = Project.by_name_and_owner(repo.name, g.user)
             if p is not None:
                 summary.append((
                     (
