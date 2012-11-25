@@ -41,10 +41,10 @@ from notifico.views.public import public
 from notifico.views.projects import projects
 from notifico.views.pimport import pimport
 
-app.register_blueprint(account, url_prefix='/user')
-app.register_blueprint(projects, url_prefix='/projects')
+app.register_blueprint(account, url_prefix='/u')
+app.register_blueprint(projects, url_prefix='/p')
 app.register_blueprint(public)
-app.register_blueprint(pimport, url_prefix='/import')
+app.register_blueprint(pimport, url_prefix='/i')
 
 
 @app.context_processor
