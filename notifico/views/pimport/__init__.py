@@ -79,7 +79,7 @@ def github():
         form.projects.data = True
 
         git = Github(access_token.token)
-        for repo in git.get_user().get_repos():
+        for repo in git.get_user().get_repos(type='owner'):
             p = Project.by_name_and_owner(repo.name, g.user)
             if p is not None:
                 summary.append((
