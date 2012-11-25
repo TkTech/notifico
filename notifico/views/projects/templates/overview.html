@@ -12,6 +12,8 @@
             <a href="{{ url_for('.details', p=project.name, u=user.username) }}">{{ project.full_name }}</a>
         </td>
         <td style="text-align: center;">{{ project.message_count }}</td>
+        <td style="text-align: center;">{{ project.channels.count() }}</td>
+        <td style="text-align: center;">{{ project.hooks.count() }}</td>
         {% if is_owner %}
         <td>
             <div class="pull-right">
@@ -47,6 +49,8 @@
                     <tr>
                         <th>Project</th>
                         <th style="text-align: center;">Messages</th>
+                        <th style="text-align: center;">Channels</th>
+                        <th style="text-align: center;">Hooks</th>
                         {% if is_owner %}
                         <th></th>
                         {% endif %}
