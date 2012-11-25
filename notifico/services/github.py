@@ -23,7 +23,7 @@ def _irc_format(hook, j, commit):
     """
     line = []
     # Add the project name.
-    line.append('[{BLUE}{0}{RESET}]'.format(
+    line.append('{RESET}[{BLUE}{0}{RESET}]'.format(
         j['repository']['name'],
         **Service.COLORS
     ))
@@ -41,8 +41,11 @@ def _irc_format(hook, j, commit):
 
 def _fmt_summary(hook, j):
     line = []
-    line.append('[{BLUE}{0}{RESET}] {1} pushed {RED}{2}{RESET} {3}'.format(
+    line.append('{RESET}[{BLUE}{0}{RESET}]'.format(
         j['repository']['name'],
+        **Service.COLORS
+    ))
+    line.append('{0} pushed {RED}{1}{RESET} {3}'.format(
         j['pusher']['name'],
         len(j['commits']),
         'commit' if len(j['commits']) == 1 else 'commits',
