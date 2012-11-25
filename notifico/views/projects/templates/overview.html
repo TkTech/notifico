@@ -8,7 +8,7 @@
         <a href="{{ url_for('.new') }}" class="btn btn-primary">Create New Project</a>
     </div>
 </div>
-{% if g.user.projects.count() %}
+{% if user.projects.count() %}
 <div class="row-fluid">
     <div class="span12 well">
         <table class="table table-borered">
@@ -25,10 +25,10 @@
                 </tr>
             </thead>
             <tbody>
-                {% for project in g.user.projects %}
+                {% for project in user.projects %}
                 <tr>
                     <td>
-                        <a href="{{ url_for('.details', pid=project.id) }}">
+                        <a href="{{ url_for('.details', u=user.username, p=project.name) }}">
                             {{ project.full_name }}
                         </a>
                     </td>
@@ -48,10 +48,10 @@
                     <td style="text-align: center;">{{ project.channels.count() }}</td>
                     <th>
                         <div class="pull-right">
-                            <a href="{{ url_for('.edit_project', pid=project.id) }}" class="btn btn-mini">
+                            <a href="{{ url_for('.edit_project', u=user.username, p=project.name) }}" class="btn btn-mini">
                                 <i class="icon-edit"></i> Edit
                             </a>
-                            <a href="{{ url_for('.delete_project', pid=project.id) }}" class="btn btn-mini btn-danger">
+                            <a href="{{ url_for('.delete_project', u=user.username, p=project.name) }}" class="btn btn-mini btn-danger">
                                 <i class="icon-trash icon-white"></i> Delete
                             </a>
                         </div>

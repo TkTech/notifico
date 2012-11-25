@@ -14,6 +14,9 @@ from notifico import user_required
 from notifico.models import User
 
 account = Blueprint('account', __name__, template_folder='templates')
+# Usernames that cannot be registered because they clash with internal
+# routes.
+_reserved = ('new',)
 
 
 class UserRegisterForm(wtf.Form):
@@ -36,7 +39,7 @@ class UserRegisterForm(wtf.Form):
 
     def validate_username(form, field):
         username = field.data.strip().lower()
-        if User.username_exists(username):
+        if username in _reserved or User.username_exists(username):
             raise wtf.ValidationError(
                 'Sorry, but that username is taken.'
             )

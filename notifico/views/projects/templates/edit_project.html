@@ -11,7 +11,7 @@
             {{ forms.render_field(form.public) }}
             <div class="form-actions">
                 <button type="submit" class="btn btn-success">Save Changes</button>
-                <a href="{{ url_for('.overview') }}" class="btn">Cancel</a>
+                <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn">Cancel</a>
             </div>
         </form>
     </div>

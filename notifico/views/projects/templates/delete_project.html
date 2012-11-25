@@ -10,7 +10,7 @@
             {{ forms.render_field(form.password) }}
             <div class="form-actions">
                 <button type="submit" class="btn btn-danger">Delete Project</button>
-                <a href="{{ url_for('.overview') }}" class="btn btn-success">Cancel</a>
+                <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn btn-success">Cancel</a>
             </div>
         </form>
     </div>

@@ -11,7 +11,7 @@
             {{ forms.render_field(form.set_hooks) }}
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Import!</button>
-                <a href="{{ url_for('projects.overview') }}" class="btn">Cancel</a>
+                <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn">Cancel</a>
             </div>
         </form>
     </div>
@@ -42,7 +42,7 @@
             </tbody>
         </table>
         {% endif %}
-        <a href="{{ url_for('projects.overview') }}" class="btn btn-primary">Done</a>
+        <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn btn-primary">Done</a>
     </div>
 </div>
 {% endif %}

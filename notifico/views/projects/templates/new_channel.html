@@ -13,7 +13,7 @@
             {{ forms.render_field(form.public) }}
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Add Channel</button>
-                <a href="{{ url_for('.details', pid=project.id) }}" class="btn">Cancel</a>
+                <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
             </div>
         </form>
     </div>

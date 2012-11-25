@@ -1,14 +1,12 @@
 # -*- coding: utf8 -*-
 import re
 from functools import wraps
-from collections import deque
 
 from flask import (
     Flask,
     g,
     redirect,
-    url_for,
-    session
+    url_for
 )
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.gravatar import Gravatar
@@ -42,7 +40,7 @@ from notifico.views.projects import projects
 from notifico.views.pimport import pimport
 
 app.register_blueprint(account, url_prefix='/u')
-app.register_blueprint(projects, url_prefix='/p')
+app.register_blueprint(projects)
 app.register_blueprint(public)
 app.register_blueprint(pimport, url_prefix='/i')
 
@@ -63,24 +61,13 @@ def set_db():
 
 @app.template_filter('fixlink')
 def fix_link(s):
+    """
+    If the string `s` (which is a link) does not begin with http or https,
+    append http and return it.
+    """
     if not re.match(r'^https?://', s):
         s = 'http://{0}'.format(s)
     return s
-
-
-@app.before_request
-def set_crumbs():
-    g.add_breadcrumb = add_breadcrumb
-    g.crumbs = session.get('crumbs')
-
-
-def add_breadcrumb(title, link):
-    crumbs = session.setdefault('crumbs', deque(maxlen=5))
-    if crumbs:
-        last_title, _ = crumbs[-1]
-        if last_title == title:
-            return
-    crumbs.append((title, link))
 
 
 def start(debug=False):
@@ -107,6 +94,8 @@ def start(debug=False):
         app.config['DEBUG'] = True
 
     if not app.debug:
+        # If the app is not running with the built-in debugger, log
+        # exceptions to a file.
         import logging
         file_handler = logging.FileHandler('notifico.log')
         file_handler.setLevel(logging.WARNING)

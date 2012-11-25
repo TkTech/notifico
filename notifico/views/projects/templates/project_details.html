@@ -42,7 +42,7 @@
         <a id="hooks"></a>
         <h1>Hooks</h1>
         <p><em>Hooks</em> are endpoints for 3rd party services (and scripts) capable of making a HTTP POST request. For example, you can create a hook for Github's <a href="https://help.github.com/articles/post-receive-hooks">WebHooks</a> service. Hooks recieve messages, which are then formatted and forwarded to <a href="#channels">IRC channels</a>.</p>
-        <a href="{{ url_for('.new_hook', pid=project.id) }}" class="btn btn-primary">Create New Hook</a>
+        <a href="{{ url_for('.new_hook', p=project.name, u=user.username) }}" class="btn btn-primary">Create New Hook</a>
     </div>
 </div>
 <div class="row-fluid">
@@ -69,7 +69,7 @@
                     <td style="text-align: center;">{{ hook.message_count }}</td>
                     <td>
                         <div class="pull-right">
-                            <a href="{{ url_for('.delete_hook', pid=project.id, hid=hook.id) }}" class="btn btn-mini btn-danger">
+                            <a href="{{ url_for('.delete_hook', p=project.name, u=user.username, hid=hook.id) }}" class="btn btn-mini btn-danger">
                                 <i class="icon-trash icon-white"></i> Delete
                             </a>
                         </div>
@@ -91,7 +91,7 @@
         <h1>IRC Channels</h1>
         <p>Any messages recieved by your project will be forwarded to any of the IRC channels that have added to them. An operator of the channel may blacklist the project, or ban the bot from entering their channel to prevent abuse.</p>
         {% if is_owner %}
-        <a href="{{ url_for('.new_channel', pid=project.id) }}" class="btn btn-primary">Add New Channel</a>
+        <a href="{{ url_for('.new_channel', p=project.name, u=user.username) }}" class="btn btn-primary">Add New Channel</a>
         {% endif %}
     </div>
 </div>
@@ -127,7 +127,7 @@
                     <td>
                         <div class="pull-right">
                             <div class="pull-right">
-                            <a href="{{ url_for('.delete_channel', pid=project.id, cid=channel.id) }}" class="btn btn-mini btn-danger">
+                            <a href="{{ url_for('.delete_channel', p=project.name, u=user.username, cid=channel.id) }}" class="btn btn-mini btn-danger">
                                 <i class="icon-trash icon-white"></i> Delete
                             </a>
                         </div>
@@ -149,7 +149,7 @@
                     <td>
                         <div class="pull-right">
                             <div class="pull-right">
-                            <a href="{{ url_for('.delete_channel', pid=project.id, cid=channel.id) }}" class="btn btn-mini btn-danger">
+                            <a href="{{ url_for('.delete_channel', p=project.name, u=user.username, cid=channel.id) }}" class="btn btn-mini btn-danger">
                                 <i class="icon-trash icon-white"></i> Delete
                             </a>
                         </div>

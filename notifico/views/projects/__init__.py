@@ -1,3 +1,4 @@
+from functools import wraps
 from flask import (
     Blueprint,
     render_template,
@@ -65,15 +66,47 @@ class ChannelDetailsForm(wtf.Form):
     ))
 
 
-@projects.route('/')
+def project_action(f):
+    """
+    A decorator for views which act on a project. The function
+    should take two kwargs, `u` (the username) and `p` (the project name),
+    which will be resolved and replaced, or a 404 will be raised if either
+    could not be found.
+    """
+    @wraps(f)
+    def _wrapped(*args, **kwargs):
+        u = User.by_username(kwargs.pop('u'))
+        if not u:
+            # No such user exists.
+            return abort(404)
+
+        p = Project.by_name_and_owner(kwargs.pop('p'), u)
+        if not p:
+            # Project doesn't exist (404 Not Found)
+            return abort(404)
+
+        kwargs['p'] = p
+        kwargs['u'] = u
+
+        return f(*args, **kwargs)
+    return _wrapped
+
+
+@projects.route('/<u>')
 @user_required
-def overview():
+def overview(u):
     """
     Display an overview of all the user's projects with summary
     statistics.
     """
-    g.add_breadcrumb('Projects', url_for('.overview'))
-    return render_template('overview.html')
+    u = User.by_username(u)
+    if not u:
+        # No such user exists.
+        return abort(404)
+
+    return render_template('overview.html',
+        user=u
+    )
 
 
 @projects.route('/new', methods=['GET', 'POST'])
@@ -82,7 +115,6 @@ def new():
     """
     Create a new project.
     """
-    g.add_breadcrumb('New Project', url_for('.new'))
     form = ProjectDetailsForm()
     if form.validate_on_submit():
         p = Project.by_name_and_owner(form.name.data, g.user)
@@ -106,17 +138,13 @@ def new():
     return render_template('new_project.html', form=form)
 
 
-@projects.route('/edit/<int:pid>', methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/edit', methods=['GET', 'POST'])
 @user_required
-def edit_project(pid):
+@project_action
+def edit_project(u, p):
     """
     Edit an existing project.
     """
-    p = Project.query.get(pid)
-    if not p:
-        # Project doesn't exist (404 Not Found)
-        return abort(404)
-
     if p.owner.id != g.user.id:
         # Project isn't public and the viewer isn't the project owner.
         # (403 Forbidden)
@@ -144,17 +172,13 @@ def edit_project(pid):
     )
 
 
-@projects.route('/delete/<int:pid>', methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/delete', methods=['GET', 'POST'])
 @user_required
-def delete_project(pid):
+@project_action
+def delete_project(u, p):
     """
     Delete an existing project.
     """
-    p = Project.query.get(pid)
-    if not p:
-        # Project doesn't exist (404 Not Found)
-        return abort(404)
-
     if p.owner.id != g.user.id:
         # Project isn't public and the viewer isn't the project owner.
         # (403 Forbidden)
@@ -173,16 +197,13 @@ def delete_project(pid):
     )
 
 
-@projects.route('/<int:pid>')
-def details(pid):
+@projects.route('/<u>/<p>')
+@project_action
+def details(u, p):
     """
     Show an existing project's details.
     """
-    p = Project.query.get(pid)
-    if not p:
-        # Project doesn't exist (Not Found)
-        return abort(404)
-    elif not p.public and not g.user:
+    if not p.public and not g.user:
         # Not public and no logged in user. (Forbidden)
         return abort(403)
     elif not p.public and p.owner.id != g.user.id:
@@ -193,18 +214,15 @@ def details(pid):
 
     return render_template('project_details.html',
         project=p,
-        is_owner=is_owner
+        is_owner=is_owner,
+        user=u
     )
 
 
-@projects.route('/hook/new/<int:pid>', methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/hook/new', methods=['GET', 'POST'])
 @user_required
-def new_hook(pid):
-    p = Project.query.get(pid)
-    if not p:
-        # Project doesn't exist (404 Not Found)
-        return abort(404)
-
+@project_action
+def new_hook(u, p):
     if p.owner.id != g.user.id:
         # Project isn't public and the viewer isn't the project owner.
         # (403 Forbidden)
@@ -220,7 +238,7 @@ def new_hook(pid):
         g.db.session.add(h)
         g.db.session.commit()
         flash('Your hook has been created.', 'success')
-        return redirect(url_for('.details', pid=pid))
+        return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('new_hook.html',
         project=p,
@@ -254,15 +272,15 @@ def hook_recieve(pid, key):
     return ''
 
 
-@projects.route('/hook/delete/<int:pid>/<int:hid>', methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/hook/delete/<int:hid>', methods=['GET', 'POST'])
 @user_required
-def delete_hook(pid, hid):
+@project_action
+def delete_hook(u, p, hid):
     """
     Delete an existing service hook.
     """
-    p = Project.query.get(pid)
     h = Hook.query.get(hid)
-    if not p or not h:
+    if not h:
         # Project doesn't exist (404 Not Found)
         return abort(404)
 
@@ -276,7 +294,7 @@ def delete_hook(pid, hid):
         g.db.session.delete(h)
         g.db.session.commit()
         flash('The hook has been deleted.', 'success')
-        return redirect(url_for('.details', pid=pid))
+        return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('delete_hook.html',
         project=p,
@@ -284,14 +302,10 @@ def delete_hook(pid, hid):
     )
 
 
-@projects.route('/channel/new/<int:pid>', methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/channel/new', methods=['GET', 'POST'])
 @user_required
-def new_channel(pid):
-    p = Project.query.get(pid)
-    if not p:
-        # Project doesn't exist (404 Not Found)
-        return abort(404)
-
+@project_action
+def new_channel(u, p):
     if p.owner.id != g.user.id:
         # Project isn't public and the viewer isn't the project owner.
         # (403 Forbidden)
@@ -306,7 +320,7 @@ def new_channel(pid):
         c = Channel.query.filter_by(
             host=host,
             channel=channel,
-            project_id=pid
+            project_id=p.id
         ).first()
         if not c:
             c = Channel.new(
@@ -320,7 +334,7 @@ def new_channel(pid):
             g.db.session.add(c)
             g.db.session.commit()
             flash('Your channel has been created.', 'success')
-            return redirect(url_for('.details', pid=pid))
+            return redirect(url_for('.details', p=p.name, u=u.username))
         else:
             form.channel.errors = [wtf.ValidationError(
                 'You cannot have a project in the same channel twice.'
@@ -332,18 +346,23 @@ def new_channel(pid):
     )
 
 
-@projects.route('/channel/delete/<int:pid>/<int:cid>', methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/channel/delete/<int:cid>', methods=['GET', 'POST'])
 @user_required
-def delete_channel(pid, cid):
+@project_action
+def delete_channel(u, p, cid):
     """
     Delete an existing service hook.
     """
-    c = Channel.query.filter_by(id=cid, project_id=pid).first()
+    c = Channel.query.filter_by(
+        id=cid,
+        project_id=p.id
+    ).first()
+
     if not c:
         # Project or channel doesn't exist (404 Not Found)
         return abort(404)
 
-    if c.project.owner.id != g.user.id or c.project.id != pid:
+    if c.project.owner.id != g.user.id or c.project.id != p.id:
         # Project isn't public and the viewer isn't the project owner.
         # (403 Forbidden)
         return abort(403)
@@ -353,7 +372,7 @@ def delete_channel(pid, cid):
         g.db.session.delete(c)
         g.db.session.commit()
         flash('The channel has been removed.', 'success')
-        return redirect(url_for('.details', pid=pid))
+        return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('delete_channel.html',
         project=c.project,

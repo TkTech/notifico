@@ -2,7 +2,8 @@ from flask import (
     Blueprint,
     render_template,
     g,
-    url_for
+    url_for,
+    redirect
 )
 from notifico.models import Project, User, Channel, Hook
 
@@ -11,7 +12,11 @@ public = Blueprint('public', __name__, template_folder='templates')
 
 @public.route('/')
 def landing():
-    g.add_breadcrumb('Home', url_for('.landing'))
+    if g.user:
+        return redirect(
+            url_for('projects.overview', u=g.user.username)
+        )
+
     return render_template('landing.html',
         Project=Project,
         User=User,
