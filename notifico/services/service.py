@@ -1,11 +1,15 @@
 # -*- coding: utf8 -*-
 __all__ = ('Service',)
+import re
 import json
 
 import redis
 from jinja2 import Environment, PackageLoader
 
 from notifico import app
+
+
+_STRIP_R = re.compile('\x03(?:\d{1,2}(?:,\d{1,2})?)?', re.UNICODE)
 
 
 class Service(object):
@@ -80,12 +84,15 @@ class Service(object):
         """
         Called on each HTTP request.
         """
+        # Make our connection to redis.
         r = redis.StrictRedis(
             host=app.config['REDIS_HOST'],
             port=app.config['REDIS_PORT'],
             db=app.config['REDIS_DB']
         )
         for message in cls.handle_request(user, request, hook):
+            # Send each message to every active channel attached to this
+            # project.
             for channel in hook.project.channels:
                 message['channel'] = dict(
                     host=channel.host,
@@ -114,3 +121,10 @@ class Service(object):
         party service.
         """
         return url
+
+    @staticmethod
+    def strip_colors(msg):
+        """
+        Strip mIRC color codes from `msg` and return it.
+        """
+        return _STRIP_R.sub('', msg)
