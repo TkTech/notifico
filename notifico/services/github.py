@@ -17,14 +17,14 @@ class GithubConfigForm(wtf.Form):
     ))
 
 
-def irc_format(hook, commit):
+def _irc_format(hook, j, commit):
     """
     Formats a Github commit destined for IRC.
     """
     line = []
     # Add the project name.
-    line.append('{BLUE}{0}{RESET}:'.format(
-        hook.project.full_name,
+    line.append('[{BLUE}{0}{RESET}]'.format(
+        j['repository']['name'],
         **Service.COLORS
     ))
     line.append('{LIGHT_CYAN}{0}{RESET}'.format(
@@ -35,7 +35,22 @@ def irc_format(hook, commit):
         commit['id'][:7],
         **Service.COLORS
     ))
-    line.append(commit['message'][:50] + (commit['message'][50:] and '...'))
+    line.append(commit['message'][:50] + (commit['message'][75:] and '...'))
+    return ' '.join(line)
+
+
+def _fmt_summary(hook, j):
+    line = []
+    line.append('[{BLUE}{0}{RESET}] Pushed {RED}{1}{RESET} {2}'.format(
+        j['repository']['name'],
+        len(j['commits']),
+        'commit' if len(j['commits']) == 1 else 'commits',
+        **Service.COLORS
+    ))
+    line.append('{PINK}{0}{RESET}'.format(
+        GithubService.shorten(j['compare']),
+        **Service.COLORS
+    ))
     return ' '.join(line)
 
 
@@ -72,22 +87,23 @@ class GithubService(Service):
         j = json.loads(p)
 
         if 'commits' in j:
+            yield dict(
+                type='message',
+                payload=dict(
+                    msg=_fmt_summary(hook, j),
+                    type=Service.COMMIT
+                )
+            )
+
             # There are some new commits in this message.
             for commit in j['commits']:
                 yield dict(
                     type='message',
                     payload=dict(
-                        msg=irc_format(hook, commit),
+                        msg=_irc_format(hook, j, commit),
                         type=Service.COMMIT
                     )
                 )
-            yield dict(
-                type='message',
-                payload=dict(
-                    msg=GithubService.shorten(j['compare']),
-                    type=Service.COMMIT
-                )
-            )
 
     @classmethod
     def shorten(cls, url):
