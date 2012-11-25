@@ -1,10 +1,12 @@
 # -*- coding: utf8 -*-
 from notifico.services.service import *
 from notifico.services.github import GithubService
+from notifico.services.plain import PlainTextService
 
 
 _registered_services = {
-    GithubService.service_id(): GithubService
+    GithubService.service_id(): GithubService,
+    PlainTextService.service_id(): PlainTextService
 }
 
 
