@@ -130,6 +130,7 @@ def edit_project(pid):
                 wtf.ValidationError('Project name must be unique.')
             ]
         else:
+            p.name = form.name.data
             p.website = form.website.data
             p.public = form.public.data
             p.full_name = '{0}/{1}'.format(g.user.username, p.name)
