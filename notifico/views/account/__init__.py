@@ -181,6 +181,7 @@ def settings(do=None):
         if '_ue' in session:
             del session['_ue']
         # Remove the user from the DB.
+        g.user.projects.order_by(False).delete()
         g.db.session.delete(g.user)
         g.db.session.commit()
 
