@@ -30,16 +30,16 @@ $(document).ready(function(){
                     <ul class="nav nav-list">
                         <li class="nav-header">Available Services</li>
                         {% for s in services.values() %}
-                        <li {% if s.service_id() == service.service_id() %}class="active"{% endif %}>
-                            <a href="{{ url_for('.new_hook', u=g.user.username, p=project.name, sid=s.service_id()) }}">
-                                {{ s.service_name() }}
+                        <li {% if s.SERVICE_ID == service.SERVICE_ID %}class="active"{% endif %}>
+                            <a href="{{ url_for('.new_hook', u=g.user.username, p=project.name, sid=s.SERVICE_ID) }}">
+                                {{ s.SERVICE_NAME }}
                             </a>
                         </li>
                         {% endfor %}
                     </ul>
                 </div>
                 <div class="span8">
-                    <h2>{{ service.service_name() }}</h2>
+                    <h2>{{ service.SERVICE_NAME }}</h2>
                     {{ service.service_description()|safe }}
                     <div class="row-fluid" style="margin-top: 20px;">
                         <div class="span12">

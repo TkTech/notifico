@@ -180,6 +180,7 @@ class Hook(db.Model):
     created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
     key = db.Column(db.String(255), nullable=False)
     service_id = db.Column(db.Integer)
+    config = db.Column(db.PickleType)
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     project = db.relationship('Project', backref=db.backref(
@@ -189,10 +190,11 @@ class Hook(db.Model):
     message_count = db.Column(db.Integer, default=0)
 
     @classmethod
-    def new(cls, service_id):
+    def new(cls, service_id, config=None):
         p = cls()
         p.service_id = service_id
         p.key = cls._new_key()
+        p.config = config
         return p
 
     @staticmethod

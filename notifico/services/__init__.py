@@ -5,8 +5,8 @@ from notifico.services.plain import PlainTextService
 
 
 _registered_services = {
-    GithubService.service_id(): GithubService,
-    PlainTextService.service_id(): PlainTextService
+    GithubService.SERVICE_ID: GithubService,
+    PlainTextService.SERVICE_ID: PlainTextService
 }
 
 

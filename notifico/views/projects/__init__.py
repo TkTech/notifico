@@ -233,13 +233,12 @@ def new_hook(u, p, sid):
         return abort(403)
 
     service = service_from_id(sid)
-    form = None
-    #form = service.service_form()
-    #if form:
-    #    form = form()
+    form = service.form()
+    if form:
+        form = form()
 
-    if form and form.validate_on_submit():
-        h = Hook.new(sid)
+    if form and service.validate(form, request):
+        h = Hook.new(sid, config=service.form_to_config(form))
         p.hooks.append(h)
         g.db.session.add(h)
         g.db.session.commit()
