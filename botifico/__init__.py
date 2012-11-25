@@ -66,7 +66,6 @@ def start_manager():
     while True:
         try:
             m = q.get(False)
-            print m
             if m['type'] == 'message':
                 channel = m['channel']
                 payload = m['payload']
