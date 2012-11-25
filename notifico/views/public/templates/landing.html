@@ -64,6 +64,22 @@
                     </tr>
                 </tbody>
             </table>
+            <table class="table table-square">
+                <thead>
+                    <tr>
+                        <th>Network</th>
+                        <th>Channels</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for network, channel_count in Channel.channel_count_by_network() %}
+                    <tr>
+                        <td>{{ network }}</td>
+                        <td>{{ channel_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
     {% endif %}
