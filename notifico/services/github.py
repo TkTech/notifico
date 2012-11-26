@@ -102,9 +102,23 @@ class GithubService(Service):
         if re.search(r'^https?://git.io', url):
             return url
 
-        return requests.post('http://git.io', data={
-            'url': url
-        }).headers['Location']
+        # Only github URLs can be shortened by the git.io service, which
+        # will return a 201 created on success and return the new url
+        # in the Location header.
+        try:
+            r = requests.post('http://git.io', data={
+                'url': url
+            }, timeout=4.0)
+        except requests.exceptions.Timeout:
+            return url
+
+        # Something went wrong, usually means we're being throttled.
+        # TODO: If we are being throttled, handle this smarter instead
+        #       of trying again on the next message.
+        if r.status_code != 201:
+            return url
+
+        return r.headers['Location']
 
     @classmethod
     def form(cls):
