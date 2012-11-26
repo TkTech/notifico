@@ -92,7 +92,7 @@ def project_action(f):
     return _wrapped
 
 
-@projects.route('/<u>')
+@projects.route('/<u>/')
 def overview(u):
     """
     Display an overview of all the user's projects with summary
