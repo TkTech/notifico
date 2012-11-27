@@ -32,7 +32,7 @@ def channels(network):
                 channel=channel.channel
             ).order_by(BotEvent.created.desc()).first()
             if latests_event is None:
-                status_cache[channel.id] = 'unknown'
+                status_cache[channel.id] = '-'
             else:
                 status_cache[channel.id] = latests_event.status
         return status_cache[channel.id]
