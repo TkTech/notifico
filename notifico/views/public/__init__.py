@@ -25,3 +25,13 @@ def channels(network):
         channels=q,
         network=network
     )
+
+
+@public.route('/s/users/')
+@public.route('/s/users/<int:page>')
+def users(page=1):
+    q = User.query.order_by(False).order_by(User.joined.desc())
+
+    return render_template('users.html',
+        users=q
+    )

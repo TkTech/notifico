@@ -1,0 +1,47 @@
+{% extends "base/body.html" %}
+{% block css %}
+    {{ super() }}
+    <style>
+    .count {
+        font-size: 28px; 
+        font-weight: 300;
+    }
+    </style>
+{% endblock %}
+{% block content %}
+<div class="page-main-header">
+    <div class="container">
+        <h1>Users</h1>
+    </div>
+</div>
+<div class="container page-content">
+    <div class="row-fluid">
+        <div class="span12">
+            {% if users.count() == 0 %}
+            <div class="alert alert-info">
+                There are no users yet on this instance of {{ site_label }}.
+            </div>
+            {% else %}
+            <table class="table table-square table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Joined</th>
+                        <th>Public Projects</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td><a href="{{ url_for('projects.overview', u=user.username) }}">{{ user.username }}</a></td>
+                        <td>{{ user.joined.strftime("%Y-%m-%d") }}</td>
+                        <td>{{ user.projects.filter_by(public=True).count() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

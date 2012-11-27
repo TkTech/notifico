@@ -143,9 +143,9 @@ class Project(db.Model):
     @classmethod
     def new(cls, name, public=True, website=None):
         c = cls()
-        c.name = name
+        c.name = name.strip()
         c.public = public
-        c.website = website
+        c.website = website.strip()
         return c
 
     @hybrid_property

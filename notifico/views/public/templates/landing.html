@@ -52,7 +52,7 @@
                     </tr>
                     <tr>
                         <td>Users:</td>
-                        <td style="text-align: center;">{{ User.query.count() }}</td>
+                        <td style="text-align: center;"><a href="{{ url_for('.users') }}">{{ User.query.count() }}</a></td>
                     </tr>
                     <tr>
                         <td>Channels:</td>
