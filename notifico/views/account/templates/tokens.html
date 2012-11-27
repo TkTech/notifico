@@ -1,0 +1,46 @@
+{% extends "base/body.html" %}
+{% import "forms.html" as forms %}
+{% block content %}
+<div class="page-main-header">
+    <div class="container">
+        <h1>OAuth Tokens</h1>
+    </div>
+</div>
+<div class="container page-content">
+    <div class="row-fluid">
+        <div class="span12">
+            <p>OAuth tokens are used by {{ site_label }} to authenticate with 3rd party services on
+                your behalf. You may delete these at any time to erase them from {{ site_label }}.
+                They can simply be re-added later if you require them again.</p>
+            {% if g.user.tokens.count() == 0 %}
+            <div class="alert alert-info">
+                You do not have any services authenticated with {{ site_label }}.
+            </div>
+            {% else %}
+            <table class="table table-square table-hover table-vertical">
+                <thead>
+                    <tr>
+                        <th>Service Name</th>
+                        <th>Created</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for token in g.user.tokens %}
+                    <tr>
+                        <td>{{ token.name }}</td>
+                        <td>{{ token.created }}</td>
+                        <td>
+                            <div class="pull-right">
+                                <a href="{{ url_for('.tokens', tid=token.id) }}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

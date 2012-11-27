@@ -6,12 +6,13 @@ from flask import (
     current_app,
     flash,
     url_for,
-    session
+    session,
+    abort
 )
 from flask.ext import wtf
 
 from notifico import user_required
-from notifico.models import User
+from notifico.models import User, AuthToken
 
 account = Blueprint('account', __name__, template_folder='templates')
 # Usernames that cannot be registered because they clash with internal
@@ -195,3 +196,30 @@ def settings(do=None):
         password_form=password_form,
         delete_form=delete_form
     )
+
+
+@account.route('/tokens/')
+@account.route('/tokens/<int:tid>')
+@user_required
+def tokens(tid=None):
+    """
+    Allows the user to view their OAuth tokens stored with Notifico.
+    """
+    if tid is not None:
+        t = AuthToken.query.get(tid)
+        if t is None:
+            # The token no longer exists.
+            return abort(404)
+
+        if t.owner.id != g.user.id:
+            # Forbidden, you don't own this token.
+            return abort(403)
+
+        t.owner.tokens.remove(t)
+        g.db.session.delete(t)
+        g.db.session.commit()
+
+        flash('That token has been deleted.', 'success')
+        return redirect(url_for('.tokens'))
+
+    return render_template('tokens.html')
