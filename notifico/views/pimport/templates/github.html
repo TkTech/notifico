@@ -11,9 +11,9 @@
     <div class="row-fluid">
         <div class="span12 well">
             <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-                {{ form.hidden_tag() }}
-                {{ forms.render_field(form.projects, disabled=True) }}
-                {{ forms.render_field(form.set_hooks) }}
+                {{ options_form.hidden_tag() }}
+                {{ forms.render_field(options_form.projects, disabled=True) }}
+                {{ forms.render_field(options_form.set_hooks) }}
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Import!</button>
                     <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn">Cancel</a>

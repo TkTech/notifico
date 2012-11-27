@@ -31,7 +31,7 @@ class GithubForm(wtf.Form):
 
 @pimport.route('/github', methods=['GET', 'POST'])
 @user_required
-def github():
+def github(do=None):
     """
     Import/merge the users existing Github projects, optionally setting up
     web hooks for them.
@@ -53,7 +53,7 @@ def github():
         g.db.session.commit()
         return redirect(url_for('.github'))
 
-    # Check to make sure the user has previously authenticated.
+    # Check to see if the user has previously authenticated.
     access_token = AuthToken.query.filter_by(
         name='github',
         owner_id=g.user.id
@@ -72,11 +72,11 @@ def github():
         )
 
     summary = None
-    form = GithubForm()
-    if form.validate_on_submit():
+    options_form = GithubForm()
+    if options_form.validate_on_submit():
         summary = []
         # WTForms "forgets" disabled fields. This should /always/ be True.
-        form.projects.data = True
+        options_form.projects.data = True
 
         git = Github(access_token.token)
         for repo in git.get_user().get_repos(type='owner'):
@@ -105,7 +105,7 @@ def github():
                 True
             ))
 
-            if form.set_hooks.data:
+            if options_form.set_hooks.data:
                 # The user wanted us to auto-create web hooks for them.
                 # We need to commit first to generate the project.id.
                 g.db.session.commit()
@@ -128,6 +128,6 @@ def github():
         g.db.session.commit()
 
     return render_template('github.html',
-        form=form,
+        options_form=options_form,
         summary=summary
     )
