@@ -21,11 +21,12 @@ pimport = Blueprint('pimport', __name__, template_folder='templates')
 
 class GithubForm(wtf.Form):
     projects = wtf.BooleanField('Import Projects', default=True, description=(
-        'Imports all of your public and private repositories. Private repos'
+        'Imports your public and private repositories. Private repos'
         ' will be imported as private and will never store messages.'
     ))
     set_hooks = wtf.BooleanField('Set Hooks', default=False, description=(
-        'Sets up each project on your account with event hooks.'
+        'Sets up each project you select with event hooks, so that they'
+        ' immediately recieve commits.'
     ))
 
 
