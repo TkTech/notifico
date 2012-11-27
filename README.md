@@ -17,8 +17,6 @@ The disk layout is organized as such:
 	|		- The UI.
 	|	-> botifico
 	|		- The bots that idle in channels.
-	|	-> alembic
-	|		- SQLAlchemy migration tool.
 	|	-> utopia
 	|		- Toy IRC library used for botifico.
 	|	-> misc
@@ -29,8 +27,6 @@ The disk layout is organized as such:
 	|		- That fabric deploy script.
 	|	-> README.md
 	|		- This file.
-	|	-> alembic.ini
-	|		- Alembic configuration.
 
 
 When running, it produces various other files in the running directory:
