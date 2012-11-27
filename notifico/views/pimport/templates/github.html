@@ -51,7 +51,7 @@
                     </tr>
                     {% for repo in user_repos %}
                     <tr>
-                        <td>{% if repo.private %}<i class="icon-lock"></i> {% endif %}{{ repo.name }}</td>
+                        <td>{% if repo.private %}<i class="icon-lock"></i> {% endif %}{{ repo.full_name }}</td>
                         <td><a href="https://github.com/{{ repo.owner.login }}">{{ repo.owner.login }}</a></td>
                         <td><i class="icon-{% if repo.fork %}ok{% else %}remove{% endif %}"></i></td>
                         <td style="text-align: center;">
