@@ -1,4 +1,6 @@
 # -*- coding: utf8 -*-
+import logging
+
 from collections import defaultdict, deque
 
 from utopia.client import CoreClient
@@ -17,8 +19,18 @@ class NickRegisterPlugin(RegisterPlugin):
 
 
 class LoggingPlugin(Plugin):
+    """
+    Log all _incoming_ IRC messages.
+    """
+    def __init__(self, *args, **kwargs):
+        super(LoggingPlugin, self).__init__(*args, **kwargs)
+        self.logger = logging.basicConfig(
+            filename='botifico.log',
+            level=logging.DEBUG
+        )
+
     def msg_not_handled(self, client, message):
-        print('[{0}] {1!r}'.format(client.address, message))
+        self.logger.debug('[{0}] {1!r}'.format(client.address, message))
 
 
 class JoinedChannelPlugin(Plugin):
