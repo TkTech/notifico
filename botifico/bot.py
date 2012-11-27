@@ -9,6 +9,9 @@ from utopia.plugins.core import RegisterPlugin, PingPlugin
 
 
 class NickRegisterPlugin(RegisterPlugin):
+    """
+    Keep trying incremental nicks until we find one that is free.
+    """
     def __init__(self, *args, **kwargs):
         super(NickRegisterPlugin, self).__init__(*args, **kwargs)
         self._tries = 0
@@ -34,6 +37,9 @@ class LoggingPlugin(Plugin):
 
 
 class ChannelPlugin(Plugin):
+    """
+    Handle channel-wise events, such as joining or leaving.
+    """
     def msg_join(self, client, message):
         client.joined_channel(message.args[0])
 
@@ -54,8 +60,13 @@ class Bot(CoreClient):
         self.plugins.add(ChannelPlugin())
 
     def send_message(self, channel, message):
-        # Ignore any line formatting both for security, and because
-        # we'll handle the wordwrap.
+        """
+        Sends `message` to `channel`, wraping as needed. If the bot is
+        not already in `channel`, the message is queue'd and waits for the
+        ``JOIN`` to complete.
+        """
+        # Ignore any newlines both for security, and because we'll handle
+        # wordwrapping to compact long commits.
         message = message.replace('\n', ' ')
 
         # 7 (PRIVMSG) + 1 (space) + <channel> + 2 (space :) + 2 (\r\n)
@@ -83,6 +94,9 @@ class Bot(CoreClient):
 
     @property
     def channels(self):
+        """
+        The list of channels this bot currently occupies.
+        """
         return self._channels
 
     def joined_channel(self, channel):
