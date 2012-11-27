@@ -24,13 +24,13 @@ class LoggingPlugin(Plugin):
     """
     def __init__(self, *args, **kwargs):
         super(LoggingPlugin, self).__init__(*args, **kwargs)
-        self.logger = logging.basicConfig(
+        logging.basicConfig(
             filename='botifico.log',
             level=logging.DEBUG
         )
 
     def msg_not_handled(self, client, message):
-        self.logger.debug('[{0}] {1!r}'.format(client.address, message))
+        logging.debug('[{0}] {1!r}'.format(client.address, message))
 
 
 class JoinedChannelPlugin(Plugin):
