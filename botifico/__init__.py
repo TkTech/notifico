@@ -1,5 +1,4 @@
 # -*- coding: utf8 -*-
-import sys
 import json
 import signal
 from Queue import Empty
@@ -7,6 +6,9 @@ from collections import defaultdict
 from multiprocessing import Process, Queue
 
 import redis
+
+from notifico import db, start
+from notifico.models import BotEvent
 
 from botifico import default_config as config
 from botifico.bot import Bot
@@ -42,7 +44,9 @@ class BotState(object):
         using SSL.
         """
         b = Bot(self, host=network, port=port, use_ssl=ssl)
+        self.bot_event(b, 'Connecting...', 'connect', 'ok')
         b.connect()
+        self.bot_event(b, 'Connected.', 'connect', 'ok')
         self._bots[(network, port, ssl)].append(b)
         return b
 
@@ -54,16 +58,21 @@ class BotState(object):
         bot = self.bot_for_channel(network, channel, port, ssl)
         bot.send_message(channel, message)
 
-    def bot_event(self, bot, message):
+    def bot_event(self, bot, message, event, status, channel=None):
         """
         Send a bot event (such as a disconnect or kick) to redis.
         """
-        self._redis.rpush('botevent', json.dumps({
-            'network': bot.address[0],
-            'port': bot.address[1],
-            'ssl': bot.use_ssl,
-            'payload': message
-        }))
+        b = BotEvent.new(
+            host=bot.address[0],
+            port=bot.address[1],
+            ssl=bot.use_ssl,
+            message=message,
+            event=event,
+            status=status,
+            channel=channel
+        )
+        db.session.add(b)
+        db.session.commit()
 
 
 def wait_for_message(q):
@@ -86,6 +95,11 @@ def wait_for_message(q):
 
 def start_manager():
     import gevent
+
+    # Setup (but don't *really*) start Notifico so that our
+    # database configuration is completely loaded.
+    start()
+
     gevent.signal(signal.SIGQUIT, gevent.shutdown)
 
     r = redis.StrictRedis(

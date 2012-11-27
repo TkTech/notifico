@@ -44,12 +44,13 @@ class ChannelPlugin(Plugin):
         client.joined_channel(message.args[0])
 
     def msg_kick(self, client, message):
-        client.left_channel(message.args[0])
+        client.kicked_from_channel(message.args[0])
 
 
 class Bot(CoreClient):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, bot_state, *args, **kwargs):
         super(Bot, self).__init__(*args, **kwargs)
+        self._bot_state = bot_state
         self._wait_to_send = defaultdict(deque)
         self._channels = set()
         self._joining = set()
@@ -106,6 +107,7 @@ class Bot(CoreClient):
         the queue deleted.
         """
         self._channels.add(channel)
+        self.bot_event('Joined channel.', 'join', 'ok', channel=channel)
 
         # Send any messages we were waiting to send.
         if channel in self._wait_to_send:
@@ -116,6 +118,28 @@ class Bot(CoreClient):
 
     def left_channel(self, channel):
         """
-        The bot has left a channel for some reason (usually a kick).
+        The bot has left a channel for some *good* reason.
+        """
+        self.bot_event('Left channel.', 'part', 'ok', channel=channel)
+        self._remove_channel(channel)
+
+    def kicked_from_channel(self, channel):
+        """
+        The bot was kicked from the channel.
+        """
+        self.bot_event(
+            'Kicked from channel.',
+            'kick',
+            'warning',
+            channel=channel
+        )
+        self._remove_channel(channel)
+
+    def _remove_channel(self, channel):
+        """
+        Remove `channel` from the internal set.
         """
         self._channels.discard(channel)
+
+    def bot_event(self, *args, **kwargs):
+        self._bot_state.bot_event(self, *args, **kwargs)

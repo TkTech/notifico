@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-__all__ = ('User', 'Project', 'AuthToken', 'Hook')
+__all__ = ('User', 'Project', 'AuthToken', 'Hook', 'BotEvent')
 import os
 import base64
 import hashlib
@@ -244,3 +244,29 @@ class Channel(db.Model):
         q = q.filter_by(public=True).group_by(Channel.host)
         for network, channel_count in q:
             yield network, channel_count
+
+
+class BotEvent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+
+    channel = db.Column(db.String(80))
+    host = db.Column(db.String(255), nullable=False)
+    port = db.Column(db.Integer, default=6667)
+    ssl = db.Column(db.Boolean, default=False)
+
+    message = db.Column(db.Text())
+    status = db.Column(db.String(30))
+    event = db.Column(db.String(255))
+
+    @classmethod
+    def new(cls, host, port, ssl, message, status, event, channel=None):
+        c = cls()
+        c.host = host
+        c.port = port
+        c.ssl = ssl
+        c.message = message
+        c.status = status
+        c.event = event
+        c.channel = channel
+        return c
