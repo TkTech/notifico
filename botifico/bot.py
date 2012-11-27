@@ -33,9 +33,12 @@ class LoggingPlugin(Plugin):
         logging.debug('[{0}] {1!r}'.format(client.address, message))
 
 
-class JoinedChannelPlugin(Plugin):
+class ChannelPlugin(Plugin):
     def msg_join(self, client, message):
         client.joined_channel(message.args[0])
+
+    def msg_kick(self, client, message):
+        client.left_channel(message.args[0])
 
 
 class Bot(CoreClient):
@@ -48,7 +51,7 @@ class Bot(CoreClient):
         self.plugins.add(LoggingPlugin())
         self.plugins.add(NickRegisterPlugin('Notifico-000', 'Notifico'))
         self.plugins.add(PingPlugin())
-        self.plugins.add(JoinedChannelPlugin())
+        self.plugins.add(ChannelPlugin())
 
     def send_message(self, channel, message):
         # Ignore any line formatting both for security, and because
@@ -83,6 +86,11 @@ class Bot(CoreClient):
         return self._channels
 
     def joined_channel(self, channel):
+        """
+        Called when the bot has successfully joined `channel`. Any
+        queue'd messages waiting to go to this channel are sent and
+        the queue deleted.
+        """
         self._channels.add(channel)
 
         # Send any messages we were waiting to send.
@@ -91,3 +99,9 @@ class Bot(CoreClient):
             while waiting:
                 self.send_message(channel, waiting.popleft())
             del self._wait_to_send[channel]
+
+    def left_channel(self, channel):
+        """
+        The bot has left a channel for some reason (usually a kick).
+        """
+        self._channels.discard(channel)
