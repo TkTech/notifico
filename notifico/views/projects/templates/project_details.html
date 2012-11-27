@@ -58,7 +58,7 @@
                 <tbody>
                     {% for hook in project.hooks %}
                     <tr>
-                        <td>{{ hook.service.SERVICE_NAME }}</td>
+                        <td>{{ hook.hook.SERVICE_NAME }}</td>
                         <td><a href="{{ url_for('.hook_recieve', pid=project.id, key=hook.key) }}">Link</a></td>
                         <td>{{ hook.created.strftime("%Y-%m-%d") }}</td>
                         <td style="text-align: center;">{{ hook.message_count }}</td>

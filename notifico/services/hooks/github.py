@@ -1,11 +1,13 @@
 # -*- coding: utf8 -*-
+__all__ = ('GithubHook',)
+
 import re
 import json
 import requests
 
 from flask.ext import wtf
 
-from notifico.services.service import Service
+from notifico.services.hooks import HookService
 
 
 class GithubConfigForm(wtf.Form):
@@ -31,15 +33,15 @@ def _irc_format(hook, j, commit):
     # Add the project name.
     line.append('{RESET}[{BLUE}{0}{RESET}]'.format(
         j['repository']['name'],
-        **Service.colors
+        **HookService.colors
     ))
     line.append('{LIGHT_CYAN}{0}{RESET}'.format(
         commit['author']['username'],
-        **Service.colors
+        **HookService.colors
     ))
     line.append('{PINK}{0}{RESET}'.format(
         commit['id'][:7],
-        **Service.colors
+        **HookService.colors
     ))
     line.append(commit['message'][:75] + (commit['message'][75:] and '...'))
     return ' '.join(line)
@@ -49,31 +51,31 @@ def _fmt_summary(hook, j):
     line = []
     line.append('{RESET}[{BLUE}{0}{RESET}]'.format(
         j['repository']['name'],
-        **Service.colors
+        **HookService.colors
     ))
     line.append('{0} pushed {RED}{1}{RESET} {2}'.format(
         j['pusher']['name'],
         len(j['commits']),
         'commit' if len(j['commits']) == 1 else 'commits',
-        **Service.colors
+        **HookService.colors
     ))
     line.append('{PINK}{0}{RESET}'.format(
-        GithubService.shorten(j['compare']),
-        **Service.colors
+        GithubHook.shorten(j['compare']),
+        **HookService.colors
     ))
     return ' '.join(line)
 
 
-class GithubService(Service):
+class GithubHook(HookService):
     """
-    Service hook for http://github.com.
+    HookService hook for http://github.com.
     """
     SERVICE_NAME = 'Github'
     SERVICE_ID = 10
 
-    @staticmethod
-    def service_description():
-        return GithubService.env().get_template('github_desc.html').render()
+    @classmethod
+    def service_description(cls):
+        return cls.env().get_template('github_desc.html').render()
 
     @classmethod
     def handle_request(cls, user, request, hook):

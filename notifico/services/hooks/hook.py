@@ -1,39 +1,20 @@
 # -*- coding: utf8 -*-
-__all__ = ('Service',)
-import re
+__all__ = ('HookService',)
 import json
 
 import redis
 from jinja2 import Environment, PackageLoader
 
 from notifico import app
+from notifico.util import irc
 
 
-_STRIP_R = re.compile('\x03(?:\d{1,2}(?:,\d{1,2})?)?', re.UNICODE)
-
-
-class Service(object):
+class HookService(object):
     """
     The base type for any `Service`.
     """
-    #: Common mIRC color codes.
-    colors = dict(
-        RESET='\x03',
-        WHITE='\x03' + '00',
-        BLACK='\x03' + '01',
-        BLUE='\x03' + '02',
-        GREEN='\x03' + '03',
-        RED='\x03' + '04',
-        BROWN='\x03' + '05',
-        PURPLE='\x03' + '06',
-        ORANGE='\x03' + '07',
-        YELLOW='\x03' + '08',
-        LIGHT_GREEN='\x03' + '09',
-        TEAL='\x03' + '10',
-        LIGHT_CYAN='\x03' + '11',
-        LIGHT_BLUE='\x03' + '12',
-        PINK='\x03' + '13'
-    )
+    #: Alias to `notifico.util.irc.colors`
+    colors = irc.mirc_colors()
 
     SERVICE_NAME = None
     SERVICE_ID = None
@@ -51,7 +32,7 @@ class Service(object):
         Returns a Jinja2 `Environment` for template rendering.
         """
         return Environment(
-            loader=PackageLoader('notifico.services', 'templates')
+            loader=PackageLoader('notifico.services.hooks', 'templates')
         )
 
     @classmethod
@@ -68,7 +49,7 @@ class Service(object):
         """
         Strip mIRC color codes from `msg` and return it.
         """
-        return _STRIP_R.sub('', msg)
+        return irc.strip_mirc_colors(msg)
 
     @classmethod
     def message(cls, message, type_='commit', strip=True):

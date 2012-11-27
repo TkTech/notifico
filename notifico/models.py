@@ -9,7 +9,7 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy import func
 
 from notifico import db
-from notifico.services import service_from_id
+from notifico.services import hook_by_id
 
 
 class CaseInsensitiveComparator(Comparator):
@@ -209,8 +209,8 @@ class Hook(db.Model):
         ).first()
 
     @property
-    def service(self):
-        return service_from_id(self.service_id)
+    def hook(self):
+        return hook_by_id(self.service_id)
 
 
 class Channel(db.Model):

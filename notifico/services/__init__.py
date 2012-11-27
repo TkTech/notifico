@@ -1,18 +1,29 @@
 # -*- coding: utf8 -*-
-from notifico.services.service import *
-from notifico.services.github import GithubService
-from notifico.services.plain import PlainTextService
+__all__ = ('hook_by_id',)
 
 
-_registered_services = {
-    GithubService.SERVICE_ID: GithubService,
-    PlainTextService.SERVICE_ID: PlainTextService
+from notifico.services.hooks.github import *
+from notifico.services.hooks.plain import *
+
+# TODO: This really needs to be re-evaluated. At the moment, this must
+#       be updated on each addition. Maybe __subclasses__() is mature enough
+#       to use in a portable fashion.
+_default_hooks = {
+    GithubHook.SERVICE_ID: GithubHook,
+    PlainTextHook.SERVICE_ID: PlainTextHook
 }
 
 
-def registered_services():
-    return _registered_services
+def hook_by_id(service_id):
+    """
+    Returns a HookService given it's internal id, or ``None`` if it
+    could not be found.
+    """
+    return _default_hooks.get(service_id, None)
 
 
-def service_from_id(service_id):
-    return _registered_services.get(service_id, None)
+def registered_hooks():
+    """
+    Returns a list of all registered HookService's.
+    """
+    return _default_hooks.values()

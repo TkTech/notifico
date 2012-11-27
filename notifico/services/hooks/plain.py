@@ -1,17 +1,19 @@
 # -*- coding: utf8 -*-
-from notifico.services.service import Service
+__all__ = ('PlainTextHook',)
+
+from notifico.services.hooks import HookService
 
 
-class PlainTextService(Service):
+class PlainTextHook(HookService):
     """
     Simple service hook that just accepts text.
     """
     SERVICE_ID = 20
     SERVICE_NAME = 'Plain Text'
 
-    @staticmethod
-    def service_description():
-        return PlainTextService.env().get_template('plain_desc.html').render()
+    @classmethod
+    def service_description(cls):
+        return cls.env().get_template('plain_desc.html').render()
 
     @classmethod
     def handle_request(cls, user, request, hook):

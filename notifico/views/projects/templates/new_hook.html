@@ -29,7 +29,7 @@ $(document).ready(function(){
                 <div class="span4">
                     <ul class="nav nav-list">
                         <li class="nav-header">Available Services</li>
-                        {% for s in services.values() %}
+                        {% for s in services %}
                         <li {% if s.SERVICE_ID == service.SERVICE_ID %}class="active"{% endif %}>
                             <a href="{{ url_for('.new_hook', u=g.user.username, p=project.name, sid=s.SERVICE_ID) }}">
                                 {{ s.SERVICE_NAME }}
