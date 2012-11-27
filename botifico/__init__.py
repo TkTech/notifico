@@ -13,10 +13,15 @@ from botifico.bot import Bot
 
 
 class BotState(object):
-    def __init__(self):
+    def __init__(self, redis):
         self._bots = defaultdict(list)
+        self._redis = redis
 
     def bot_for_channel(self, network, channel, port=6667, ssl=False):
+        """
+        Returns or creates a bot suitable for use on `network`:`port` in
+        `channel`, optionally using SSL.
+        """
         bots = self.bots_for_network(network, port, ssl)
         if not bots:
             bot = self.create_bot(network, port, ssl)
@@ -26,17 +31,39 @@ class BotState(object):
         return bot
 
     def bots_for_network(self, network, port=6667, ssl=False):
+        """
+        Return a list of bots active on `network`:`port`.
+        """
         return self._bots.get((network, port, ssl))
 
     def create_bot(self, network, port=6667, ssl=False):
-        b = Bot(host=network, port=port, use_ssl=ssl)
+        """
+        Create a new bot and connect it for `network`:`port`, optionally
+        using SSL.
+        """
+        b = Bot(self, host=network, port=port, use_ssl=ssl)
         b.connect()
         self._bots[(network, port, ssl)].append(b)
         return b
 
     def send_to_channel(self, message, channel, network, port, ssl):
+        """
+        Send the given `message` to `channel` on `network`:`port`, optionally
+        using SSL.
+        """
         bot = self.bot_for_channel(network, channel, port, ssl)
         bot.send_message(channel, message)
+
+    def bot_event(self, bot, message):
+        """
+        Send a bot event (such as a disconnect or kick) to redis.
+        """
+        self._redis.rpush('botevent', json.dumps({
+            'network': bot.address[0],
+            'port': bot.address[1],
+            'ssl': bot.use_ssl,
+            'payload': message
+        }))
 
 
 def wait_for_message(q):
@@ -61,7 +88,13 @@ def start_manager():
     import gevent
     gevent.signal(signal.SIGQUIT, gevent.shutdown)
 
-    bs = BotState()
+    r = redis.StrictRedis(
+        host=config.REDIS_HOST,
+        port=config.REDIS_PORT,
+        db=config.REDIS_DB
+    )
+
+    bs = BotState(r)
     q = Queue()
     p = Process(target=wait_for_message, args=(q,))
     p.start()
