@@ -30,12 +30,13 @@
                         <th>Port</th>
                         <th>SSL</th>
                         <th>Project</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for channel in channels %}
                     <tr>
-                        <td><a href="{{ url_for('.events', network=channel.host, channel=channel.channel) }}">{{ channel.channel }}</a></td>
+                        <td>{{ channel.channel }}</td>
                         <td>{{ channel.host }}</td>
                         <td>{{ channel.port }}</td>
                         <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
@@ -45,6 +46,19 @@
                             {% else %}
                             <i class="icon-lock"></i>
                             {% endif %}
+                        </td>
+                        <td>
+                            {% if channel_status(channel) == 'ok' %}
+                            <span class="text-success">
+                            {% elif channel_status(channel) == 'fatal' %}
+                            <span class="text-error">
+                            {% elif channel_status(channel) == 'warning' %}
+                            <span class="text-warning">
+                            {% else %}
+                            <span>
+                            {% endif %}
+                                {{ channel_status(channel) }}
+                            </span>
                         </td>
                     </tr>
                     {% endfor %}

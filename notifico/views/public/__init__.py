@@ -21,10 +21,26 @@ def landing():
 @public.route('/s/channels/<network>')
 def channels(network):
     q = Channel.query.filter_by(host=network, public=True)
+    status_cache = {}
+
+    def channel_status(channel):
+        if channel.id not in status_cache:
+            latests_event = BotEvent.query.filter_by(
+                host=channel.host,
+                port=channel.port,
+                ssl=channel.ssl,
+                channel=channel.channel
+            ).order_by(BotEvent.created.desc()).first()
+            if latests_event is None:
+                status_cache[channel.id] = 'unknown'
+            else:
+                status_cache[channel.id] = latests_event.status
+        return status_cache[channel.id]
 
     return render_template('channels.html',
         channels=q,
-        network=network
+        network=network,
+        channel_status=channel_status
     )
 
 
@@ -38,7 +54,6 @@ def users(page=1):
     )
 
 
-@public.route('/s/channels/<network>/<channel>')
 def events(network, channel):
     q = Channel.query.filter_by(
         public=True,
