@@ -56,3 +56,34 @@ Botifico is based around:
 	- Redis
 	- gevent
 	- utopia (bundled irc library)
+
+## Running
+
+Because I built this with myself and my use cases in mind, deployment
+requires a bit of work, but is a 30-minute afair if you have any
+familiarity with Python & redis.
+
+To start with, copy the ``notifico/default_config.py`` file to the top
+level of the project and name it ``local_config.py``. Make any minor
+customizations you want here, such as site name and title, or redis
+and SQL database settings. If this module exists, it is used to
+override the defaults in Notifico and Botifico.
+
+To start the UI for testing,
+
+	python debug_frontend.py
+
+To run the bots for testing,
+
+	python -m botifico
+
+## Deploying
+
+Notifico is designed to run everything within a folder (not really,
+but that's the easiest way to do it on a single instance). None
+of the notifico tasks should ever run as root and you should instead
+run it using a WSGI server like gunicorn and proxy to it from nginx.
+
+You'll need to do a bit of work to get the deploy script running. It
+is not well written.
+
