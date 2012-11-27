@@ -12,7 +12,13 @@
             <a href="{{ url_for('.details', p=project.name, u=user.username) }}">{{ project.full_name }}</a>
         </td>
         <td style="text-align: center;">{{ project.message_count }}</td>
-        <td style="text-align: center;">{{ project.channels.count() }}</td>
+        <td style="text-align: center;">
+            {% if is_owner %}
+            {{ project.channels.count() }}
+            {% else %}
+            {{ project.channels.filter_by(public=True).count() }}
+            {% endif %}
+        </td>
         <td style="text-align: center;">{{ project.hooks.count() }}</td>
         {% if is_owner %}
         <td>
