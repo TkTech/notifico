@@ -43,7 +43,7 @@ def _irc_format(hook, j, commit):
         commit['id'][:7],
         **HookService.colors
     ))
-    line.append(commit['message'][:75] + (commit['message'][75:] and '...'))
+    line.append(commit['message'])
     return ' '.join(line)
 
 
@@ -125,7 +125,3 @@ class GithubHook(HookService):
     @classmethod
     def form(cls):
         return GithubConfigForm
-
-    @classmethod
-    def validate(cls, form, request):
-        return form.validate_on_submit()
