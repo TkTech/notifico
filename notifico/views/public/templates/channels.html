@@ -30,7 +30,6 @@
                         <th>Port</th>
                         <th>SSL</th>
                         <th>Project</th>
-                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,19 +45,6 @@
                             {% else %}
                             <i class="icon-lock"></i>
                             {% endif %}
-                        </td>
-                        <td>
-                            {% if channel_status(channel) == 'ok' %}
-                            <span class="text-success">
-                            {% elif channel_status(channel) == 'fatal' %}
-                            <span class="text-error">
-                            {% elif channel_status(channel) == 'warning' %}
-                            <span class="text-warning">
-                            {% else %}
-                            <span>
-                            {% endif %}
-                                {{ channel_status(channel) }}
-                            </span>
                         </td>
                     </tr>
                     {% endfor %}

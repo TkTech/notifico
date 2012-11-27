@@ -21,21 +21,10 @@ def landing():
 @public.route('/s/channels/<network>')
 def channels(network):
     q = Channel.query.filter_by(host=network, public=True)
-    status_cache = {}
-
-    def channel_status(channel):
-        if channel.id not in status_cache:
-            last_event = channel.last_event()
-            if last_event is None:
-                status_cache[channel.id] = '-'
-            else:
-                status_cache[channel.id] = last_event.status
-        return status_cache[channel.id]
 
     return render_template('channels.html',
         channels=q,
-        network=network,
-        channel_status=channel_status
+        network=network
     )
 
 
