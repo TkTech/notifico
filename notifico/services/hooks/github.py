@@ -129,10 +129,3 @@ class GithubHook(HookService):
     @classmethod
     def validate(cls, form, request):
         return form.validate_on_submit()
-
-    @classmethod
-    def form_to_config(cls, form):
-        return dict(
-            strip=not form.use_colors.data,
-            branches=form.branches.data
-        )

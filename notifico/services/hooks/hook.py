@@ -106,12 +106,15 @@ class HookService(object):
     def validate(cls, form, request):
         """
         Returns `True` if the form passes validation, `False` otherwise.
+        Should be subclassed by complex service configurations.
         """
-        raise NotImplementedError()
+        return form.validate_on_submit()
 
     @classmethod
-    def form_to_config(cls, form):
+    def pack_form(cls, form):
         """
-        Returns a dictionary of configuration options.
+        Returns a dictionary of configuration options processed from `form`.
+        By default, simply iterates all fields, taking their ``.id`` as the
+        key and ``.data`` as value.
         """
-        raise NotImplementedError()
+        return dict((f.id, f.data) for f in form)

@@ -241,7 +241,7 @@ def new_hook(u, p, sid):
         form = form()
 
     if form and hook.validate(form, request):
-        h = Hook.new(sid, config=hook.form_to_config(form))
+        h = Hook.new(sid, config=hook.pack_form(form))
         p.hooks.append(h)
         g.db.session.add(h)
         g.db.session.commit()
@@ -278,12 +278,12 @@ def hook_recieve(pid, key):
         Project.message_count: Project.message_count + 1
     })
 
-    service = service_from_id(h.service_id)
-    if service is None:
+    hook = hook_by_id(h.service_id)
+    if hook is None:
         # TODO: This should be logged somewhere.
         return ''
 
-    service._request(h.project.owner, request, h)
+    hook._request(h.project.owner, request, h)
 
     g.db.session.commit()
     return ''
