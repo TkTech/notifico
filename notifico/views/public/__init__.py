@@ -1,8 +1,9 @@
 from flask import (
     Blueprint,
-    render_template
+    render_template,
+    abort
 )
-from notifico.models import Project, User, Channel, Hook
+from notifico.models import Project, User, Channel, Hook, BotEvent
 
 public = Blueprint('public', __name__, template_folder='templates')
 
@@ -34,4 +35,26 @@ def users(page=1):
 
     return render_template('users.html',
         users=q
+    )
+
+
+@public.route('/s/channels/<network>/<channel>')
+def events(network, channel):
+    q = Channel.query.filter_by(
+        public=True,
+        channel=channel,
+        host=network
+    ).first()
+    if q is None:
+        # If there isn't at least one public channel listing
+        # for this channel, we display nothing.
+        return abort(404)
+
+    q = BotEvent.query.filter_by(
+        host=network,
+        channel=channel
+    ).order_by(BotEvent.created.desc())
+
+    return render_template('events.html',
+        events=q
     )

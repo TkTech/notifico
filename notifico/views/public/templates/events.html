@@ -1,0 +1,40 @@
+{% extends "base/body.html" %}
+{% block content %}
+<div class="page-main-header">
+    <div class="container">
+        <h1>Network Events</h1>
+    </div>
+</div>
+<div class="container page-content">
+    <div class="row-fluid">
+        <div class="span12">
+            <table class="table table-square table-hover">
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Network</th>
+                        <th>Port</th>
+                        <th>SSL</th>
+                        <th>Message</th>
+                        <th>Event</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>{{ event.channel|default('-', True) }}</td>
+                        <td>{{ event.host }}</td>
+                        <td>{{ event.port }}</td>
+                        <td><i class="icon-{% if event.ssl %}ok{% else %}remove{% endif %}"></i></td>
+                        <td>{{ event.message }}</td>
+                        <td>{{ event.event }}</td>
+                        <td>{{ event.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

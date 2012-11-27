@@ -35,7 +35,7 @@
                 <tbody>
                     {% for channel in channels %}
                     <tr>
-                        <td>{{ channel.channel }}</td>
+                        <td><a href="{{ url_for('.events', network=channel.host, channel=channel.channel) }}">{{ channel.channel }}</a></td>
                         <td>{{ channel.host }}</td>
                         <td>{{ channel.port }}</td>
                         <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
