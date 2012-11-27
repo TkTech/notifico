@@ -39,9 +39,23 @@ class Bot(CoreClient):
         self.plugins.add(JoinedChannelPlugin())
 
     def send_message(self, channel, message):
-        # ... just in case.
+        # Ignore any line formatting both for security, and because
+        # we'll handle the wordwrap.
         message = message.replace('\n', ' ')
 
+        # 7 (PRIVMSG) + 1 (space) + <channel> + 2 (space :) + 2 (\r\n)
+        prefix_length = 12 + len(channel)
+
+        if message + prefix_length >= 512:
+            # The total message exceeds IRC's mandatory 512 byte limit.
+            max_chunk = 512 - prefix_length
+            for i in xrange(0, len(message), max_chunk):
+                self._send_message(channel, message[i:i + max_chunk])
+        else:
+            # Our message is small enough to fit in a single PRIVMSG.
+            self._send_message(channel, message)
+
+    def _send_message(self, channel, message):
         if channel not in self._channels:
             # Queue the message to send after we've joined this channel.
             self._wait_to_send[channel].append(message)
