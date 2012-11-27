@@ -34,7 +34,19 @@
                         <td><i class="icon-{% if event.ssl %}ok{% else %}remove{% endif %}"></i></td>
                         <td>{{ event.message }}</td>
                         <td>{{ event.event }}</td>
-                        <td>{{ event.status }}</td>
+                        <td>
+                            {% if event.status == 'ok' %}
+                            <span class="text-success">
+                            {% elif event.status == 'fatal' %}
+                            <span class="text-error">
+                            {% elif event.status == 'warning' %}
+                            <span class="text-warning">
+                            {% else %}
+                            <span>
+                            {% endif %}
+                                {{ event.status }}
+                            </span>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
