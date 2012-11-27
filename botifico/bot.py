@@ -46,7 +46,7 @@ class Bot(CoreClient):
         # 7 (PRIVMSG) + 1 (space) + <channel> + 2 (space :) + 2 (\r\n)
         prefix_length = 12 + len(channel)
 
-        if message + prefix_length >= 512:
+        if len(message) + prefix_length >= 512:
             # The total message exceeds IRC's mandatory 512 byte limit.
             max_chunk = 512 - prefix_length
             for i in xrange(0, len(message), max_chunk):
