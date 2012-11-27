@@ -22,7 +22,10 @@ _reserved = ('new',)
 class UserRegisterForm(wtf.Form):
     username = wtf.TextField('Username', validators=[
         wtf.Required(),
-        wtf.Length(min=2, max=50)
+        wtf.Length(min=2, max=50),
+        wtf.Regexp('^[a-zA-Z0-9_]*$', message=(
+            'Username must only contain a to z, 0 to 9, and underscores.'
+        ))
     ], description=(
         'Your username is public and used as part of your project name.'
     ))
