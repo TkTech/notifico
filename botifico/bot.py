@@ -39,6 +39,9 @@ class Bot(CoreClient):
         self.plugins.add(JoinedChannelPlugin())
 
     def send_message(self, channel, message):
+        # ... just in case.
+        message = message.replace('\n', ' ')
+
         if channel not in self._channels:
             # Queue the message to send after we've joined this channel.
             self._wait_to_send[channel].append(message)
