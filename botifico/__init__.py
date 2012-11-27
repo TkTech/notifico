@@ -1,5 +1,7 @@
 # -*- coding: utf8 -*-
+import sys
 import json
+import signal
 from Queue import Empty
 from collections import defaultdict
 from multiprocessing import Process, Queue
@@ -57,6 +59,7 @@ def wait_for_message(q):
 
 def start_manager():
     import gevent
+    gevent.signal(signal.SIGQUIT, gevent.shutdown)
 
     bs = BotState()
     q = Queue()
