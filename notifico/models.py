@@ -145,7 +145,7 @@ class Project(db.Model):
         c = cls()
         c.name = name.strip()
         c.public = public
-        c.website = website.strip()
+        c.website = website.strip() if website else None
         return c
 
     @hybrid_property
