@@ -8,6 +8,11 @@
 <div class="container page-content">
     <div class="row-fluid">
         <div class="span12">
+            {% if events.count() == 0 %}
+            <div class="alert alert-info">
+                No events have yet occured for this channel on this network.
+            </div>
+            {% else %}
             <table class="table table-square table-hover">
                 <thead>
                     <tr>
@@ -34,6 +39,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% endif %}
         </div>
     </div>
 </div>
