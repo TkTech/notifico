@@ -1,5 +1,20 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
+
+{% block js %}
+    {{ super() }}
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('#uncheck-all').click(function(e){
+            $('.check-toggle').attr('checked', false);
+        });
+        $('#check-all').click(function(e){
+            $('.check-toggle').attr('checked', true);
+        });
+    });
+    </script>
+{% endblock %}
+
 {% block content %}
 <div class="page-main-header">
     <div class="container">
@@ -8,19 +23,61 @@
 </div>
 <div class="container page-content">
     {% if summary is none %}
+    <form class="form form-horizontal" method='POST' action="{{ url_for('.github') }}">
     <div class="row-fluid">
         <div class="span12 well">
-            <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-                {{ options_form.hidden_tag() }}
-                {{ forms.render_field(options_form.projects, disabled=True) }}
-                {{ forms.render_field(options_form.set_hooks) }}
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Import!</button>
-                    <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn">Cancel</a>
-                </div>
-            </form>
+            {{ options_form.hidden_tag() }}
+            {{ forms.render_field(options_form.projects, disabled=True) }}
+            {{ forms.render_field(options_form.set_hooks) }}
         </div>
     </div>
+    <div class="row-fluid">
+        <div class="span12">
+            <table class="table table-square table-hover">
+                <thead>
+                    <tr>
+                        <th>Repo Name</th>
+                        <th>Owner</th>
+                        <th>Fork?</th>
+                        <th style="text-align: center;">Import</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4" style="text-align: right;">
+                            <button class="btn btn-mini" id="check-all" type="button">Check All</button>
+                            <button class="btn btn-mini" id="uncheck-all" type="button">Uncheck All</button>
+                        </td>
+                    </tr>
+                    {% for repo in user_repos %}
+                    <tr>
+                        <td>{% if repo.private %}<i class="icon-lock"></i> {% endif %}{{ repo.name }}</td>
+                        <td><a href="https://github.com/{{ repo.owner.login }}">{{ repo.owner.login }}</a></td>
+                        <td><i class="icon-{% if repo.fork %}ok{% else %}remove{% endif %}"></i></td>
+                        <td style="text-align: center;">
+                            <input id="{{ repo.id }}" name="{{ repo.id }}" type="checkbox" value="y" checked class="check-toggle">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="4" style="text-align: right;">
+                            <button class="btn btn-mini" id="check-all" type="button">Check All</button>
+                            <button class="btn btn-mini" id="uncheck-all" type="button">Uncheck All</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Import!</button>
+                <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn">Cancel</a>
+            </div>
+        </div>
+    </div>
+    </form>
     {% else %}
     <div class="row-fluid">
         <div class="span12">

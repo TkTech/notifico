@@ -31,7 +31,7 @@ class GithubForm(wtf.Form):
 
 @pimport.route('/github', methods=['GET', 'POST'])
 @user_required
-def github(do=None):
+def github():
     """
     Import/merge the users existing Github projects, optionally setting up
     web hooks for them.
@@ -71,6 +71,13 @@ def github(do=None):
             )
         )
 
+    # Set authentication and pull a JSON blob of all their
+    # repos that they have actually created (or forked).
+    # If we leave type as the default ("all") we also get
+    # repos they have permission on, which we probably don't want.
+    git = Github(access_token.token)
+    user_repos = git.get_user().get_repos(type='all')
+
     summary = None
     options_form = GithubForm()
     if options_form.validate_on_submit():
@@ -78,8 +85,13 @@ def github(do=None):
         # WTForms "forgets" disabled fields. This should /always/ be True.
         options_form.projects.data = True
 
-        git = Github(access_token.token)
-        for repo in git.get_user().get_repos(type='owner'):
+        for repo in user_repos:
+            # User didn't check the box, don't import this project.
+            # A hack-ish solution to wtform's BooleanField limitation,
+            # or I would be using wtf.FieldList(wtf.BooleanField(...)).
+            if request.form.get(str(repo.id), None) != 'y':
+                continue
+
             p = Project.by_name_and_owner(repo.name, g.user)
             if p is not None:
                 summary.append((
@@ -129,5 +141,6 @@ def github(do=None):
 
     return render_template('github.html',
         options_form=options_form,
-        summary=summary
+        summary=summary,
+        user_repos=user_repos
     )
