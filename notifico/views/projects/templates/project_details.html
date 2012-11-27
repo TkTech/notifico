@@ -101,9 +101,9 @@
                         <th>Host</th>
                         <th>Port</th>
                         <th>SSL</th>
+                        <th>Status</th>
                         {% if is_owner %}
                         <th style="text-align: center;">Public</th>
-                        <th>Status</th>
                         <th></th>
                         {% endif %}
                     </tr>
@@ -115,10 +115,6 @@
                         <td>{{ channel.host }}</td>
                         <td>{{ channel.port }}</td>
                         <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-                        {% if is_owner %}
-                        <td style="text-align: center;">
-                            <i class="icon-{% if project.public %}ok{% else %}lock{% endif %}"></i>
-                        </td>
                         <td>
                             {% if channel_status(channel) == 'ok' %}
                             <span class="text-success">
@@ -131,6 +127,10 @@
                             {% endif %}
                                 {{ channel_status(channel) }}
                             </span>
+                        </td>
+                        {% if is_owner %}
+                        <td style="text-align: center;">
+                            <i class="icon-{% if project.public %}ok{% else %}lock{% endif %}"></i>
                         </td>
                         <td>
                             <div class="pull-right">
@@ -151,9 +151,6 @@
                         <td>{{ channel.host }}</td>
                         <td>{{ channel.port }}</td>
                         <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-                        <td style="text-align: center;">
-                            <i class="icon-{% if channel.public %}ok{% else %}lock{% endif %}"></i>
-                        </td>
                         <td>
                             {% if channel_status(channel) == 'ok' %}
                             <span class="text-success">
@@ -166,6 +163,9 @@
                             {% endif %}
                                 {{ channel_status(channel) }}
                             </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <i class="icon-{% if channel.public %}ok{% else %}lock{% endif %}"></i>
                         </td>
                         <td>
                             <div class="pull-right">
