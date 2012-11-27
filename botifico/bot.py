@@ -69,6 +69,7 @@ class Bot(CoreClient):
         # Ignore any newlines both for security, and because we'll handle
         # wordwrapping to compact long commits.
         message = message.replace('\n', ' ')
+        channel = channel.lower()
 
         # 7 (PRIVMSG) + 1 (space) + <channel> + 2 (space :) + 2 (\r\n)
         prefix_length = 12 + len(channel)
@@ -106,6 +107,7 @@ class Bot(CoreClient):
         queue'd messages waiting to go to this channel are sent and
         the queue deleted.
         """
+        channel = channel.lower()
         self._channels.add(channel)
         self.bot_event('Joined channel.', 'join', 'ok', channel=channel)
 
@@ -139,7 +141,7 @@ class Bot(CoreClient):
         """
         Remove `channel` from the internal set.
         """
-        self._channels.discard(channel)
+        self._channels.discard(channel.lower())
 
     def bot_event(self, *args, **kwargs):
         self._bot_state.bot_event(self, *args, **kwargs)

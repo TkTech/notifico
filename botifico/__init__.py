@@ -69,7 +69,7 @@ class BotState(object):
             message=message,
             event=event,
             status=status,
-            channel=channel
+            channel=channel.lower() if channel else None
         )
         db.session.add(b)
         db.session.commit()
