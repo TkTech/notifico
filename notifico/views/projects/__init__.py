@@ -217,10 +217,22 @@ def details(u, p):
 
     is_owner = (g.user and g.user.id == p.owner_id)
 
+    status_cache = {}
+
+    def channel_status(channel):
+        if channel.id not in status_cache:
+            last_event = channel.last_event()
+            if last_event is None:
+                status_cache[channel.id] = '-'
+            else:
+                status_cache[channel.id] = last_event.status
+        return status_cache[channel.id]
+
     return render_template('project_details.html',
         project=p,
         is_owner=is_owner,
-        user=u
+        user=u,
+        channel_status=channel_status
     )
 
 
