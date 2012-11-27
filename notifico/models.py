@@ -245,6 +245,17 @@ class Channel(db.Model):
         for network, channel_count in q:
             yield network, channel_count
 
+    def last_event(self):
+        """
+        Returns the latest BotEvent to occur for this channel.
+        """
+        return BotEvent.query.filter_by(
+            host=self.host,
+            port=self.port,
+            ssl=self.ssl,
+            channel=self.channel
+        ).order_by(BotEvent.created.desc()).first()
+
 
 class BotEvent(db.Model):
     id = db.Column(db.Integer, primary_key=True)

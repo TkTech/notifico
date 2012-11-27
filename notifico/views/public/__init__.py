@@ -25,16 +25,11 @@ def channels(network):
 
     def channel_status(channel):
         if channel.id not in status_cache:
-            latests_event = BotEvent.query.filter_by(
-                host=channel.host,
-                port=channel.port,
-                ssl=channel.ssl,
-                channel=channel.channel
-            ).order_by(BotEvent.created.desc()).first()
-            if latests_event is None:
+            last_event = channel.last_event()
+            if last_event is None:
                 status_cache[channel.id] = '-'
             else:
-                status_cache[channel.id] = latests_event.status
+                status_cache[channel.id] = last_event.status
         return status_cache[channel.id]
 
     return render_template('channels.html',
