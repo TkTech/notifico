@@ -87,7 +87,7 @@ class GithubHook(HookService):
         # Config may not exist for pre-migrate hooks.
         config = hook.config or {}
         # Should we get rid of mIRC colors before sending?
-        strip = config.get('strip', False)
+        strip = not config.get('use_colors', True)
 
         if 'commits' in j:
             # There are some new commits in this message,
