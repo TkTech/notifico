@@ -275,6 +275,49 @@ def new_hook(u, p, sid):
     )
 
 
+@projects.route('/<u>/<p>/hook/edit/<int:hid>', methods=['GET', 'POST'])
+@user_required
+@project_action
+def edit_hook(u, p, hid):
+    if p.owner.id != g.user.id:
+        return abort(403)
+
+    h = Hook.query.get(hid)
+    if h is None:
+        # You can't edit a hook that doesn't exist!
+        return abort(404)
+
+    if h.project.owner.id != g.user.id:
+        # You can't edit a hook that isn't yours!
+        return abort(403)
+
+    hook_service = h.hook()
+    form = hook_service.form()
+    if form:
+        form = form()
+
+    if form and hook_service.validate(form, request):
+        h.config = hook_service.pack_form(form)
+        g.db.session.add(h)
+        g.db.session.commit()
+        flash('Your hook has been saved.', 'success')
+        return redirect(url_for('.details', p=p.name, u=u.username))
+    elif form is None and request.method == 'POST':
+        g.db.session.add(h)
+        g.db.session.commit()
+        flash('Your hook has been saved.', 'success')
+        return redirect(url_for('.details', p=p.name, u=u.username))
+    elif form:
+        hook_service.load_form(form, h.config)
+
+    return render_template('edit_hook.html',
+        project=p,
+        services=registered_hooks(),
+        service=hook_service,
+        form=form
+    )
+
+
 @projects.route('/h/<int:pid>/<key>', methods=['GET', 'POST'])
 def hook_recieve(pid, key):
     h = Hook.query.filter_by(key=key, project_id=pid).first()

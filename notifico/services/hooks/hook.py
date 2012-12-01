@@ -118,3 +118,17 @@ class HookService(object):
         key and ``.data`` as value.
         """
         return dict((f.id, f.data) for f in form)
+
+    @classmethod
+    def load_form(cls, form, config):
+        """
+        Loads a Hook configuration into an existing Form object, returning it.
+        """
+        if config is None:
+            return
+
+        for f in form:
+            if f.id in config:
+                f.data = config[f.id]
+
+        return form
