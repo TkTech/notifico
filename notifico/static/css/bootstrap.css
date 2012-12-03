@@ -4979,7 +4979,7 @@ h2,
 h3,
 h4,
 h5 {
-  font-weight: 800;
+  font-weight: 400;
 }
 .required {
   color: #DA4F49;
@@ -5064,19 +5064,6 @@ input[type="color"],
 .navbar .nav li.dropdown.active > .dropdown-toggle,
 .navbar .nav li.dropdown.open.active > .dropdown-toggle {
   background-color: #FFFFFF;
-}
-.page-main-actions .nav-pills {
-  margin-bottom: 0;
-}
-.page-main-actions .nav-pills > li > a {
-  line-height: 20px;
-}
-.page-main-actions .nav-pills > li > a:hover {
-  background-color: #29a9df;
-  color: white;
-  -webkit-border-radius: 0px;
-  -moz-border-radius: 0px;
-  border-radius: 0px;
 }
 .page-content {
   margin-top: 12px;
