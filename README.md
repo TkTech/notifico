@@ -56,7 +56,7 @@ Botifico is based around:
 ## Running
 
 Because I built this with myself and my use cases in mind, deployment
-requires a bit of work, but is a 30-minute afair if you have any
+requires a bit of work, but is a 30-minute affair if you have any
 familiarity with Python & redis.
 
 To start with, copy the ``notifico/default_config.py`` file to the top
