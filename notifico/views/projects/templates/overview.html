@@ -31,23 +31,18 @@
 {% endmacro %}
 
 {% block content %}
-<div class="page-main-header">
-    <div class="container">
-        <h1>{{ user.username }}</h1>
-    </div>
-</div>
-{% if is_owner %}
-<div class="page-main-actions">
-    <div class="container">
-        <ul class="nav nav-pills">
-            <li><a href="{{ url_for('.new') }}">New Project</a></li>
-            <li><a href="{{ url_for('pimport.github') }}">Import From Github</a></li>
-        </ul>
-    </div>
-</div>
-{% endif %}
 {{ alerts() }}
-<div class="container page-content">
+<div class="container-fluid page-content">
+    {% if is_owner %}
+    <div class="row-fluid">
+        <div class="span12">
+            <p>
+                <a href="{{ url_for('.new') }}" class="btn btn-primary">New Project</a>
+                <a href="{{ url_for('pimport.github') }}" class="btn">Import From Github</a>
+            </p>
+        </div>
+    </div>
+    {% endif %}
     <div class="row-fluid">
         <div class="span12">
             <table class="table table-hover table-square table-vertical">

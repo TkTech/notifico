@@ -1,8 +1,9 @@
-{% macro nav_link(filter, endpoint, label) %}
-    <li class="{%- if request.endpoint.startswith(filter) -%}active{%- endif -%}">
-        <a href="{{ url_for(endpoint) }}">{{ label }}</a>
-    </li>
+{% macro active(end) %}
+{% if request.endpoint.startswith(end) %}
+active
+{% endif %}
 {% endmacro %}
+
 {% macro alerts() %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -19,7 +20,7 @@
 <head>
     <meta charset="utf-8">
     <title>{{ site_title }}</title>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,800' rel='stylesheet' type='text/css'>
     <link href="/css/bootstrap.css" rel="stylesheet" media="screen">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/css/custom.css" rel="stylesheet" media="screen">
@@ -27,35 +28,50 @@
 </head>
 <body>
     {# Site-wide navbar -#}
-    <div class="navbar page-main-navbar">
+    <div id="main-navbar" class="navbar">
         <div class="navbar-inner">
-            <a class="brand" href="{{ url_for('public.landing') }}">
-                {{ site_title }}
-            </a>
-            {% if g.user %}
-            <ul class="nav">
-                <li><a href="{{ url_for('projects.overview', u=g.user.username) }}">My Projects</a></li>
-            </ul>
-            {% endif %}
-            <ul class="nav pull-right">
-                {% if g.user %}
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <img src="{{ g.user.email | gravatar(size="20") }}"/>
-                        {{ g.user.username }}
-                        <b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="{{ url_for('account.settings') }}">Settings</a></li>
-                        <li><a href="{{ url_for('account.tokens') }}">OAuth Tokens</a></li>
-                        <li class="divider"></li>
-                        <li><a href="{{ url_for('account.logout') }}">Logout</a></li>
-                    </ul>
-                </li>
-                {% else %}
-                {{ nav_link('account.login', 'account.login', 'Login') }}
-                {% endif %}
-            </ul>
+            <div class="container">
+                <a class="brand" href="{{ url_for('public.landing') }}">
+                    {{ site_title }}
+                </a>
+                <ul class="nav pull-right">
+                    <li class="{{ active('public.landing') }}">
+                        <a href="{{ url_for('public.landing') }}">
+                            Home
+                        </a>
+                    </li>
+                    {% if g.user %}
+                    <li class="{{ active('projects.') }}">
+                        <a href="{{ url_for('projects.overview', u=g.user.username) }}">
+                            Projects
+                        </a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            {{ g.user.username }}
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('account.settings') }}">Settings</a></li>
+                            <li><a href="{{ url_for('account.tokens') }}">OAuth Tokens</a></li>
+                            <li class="divider"></li>
+                            <li><a href="{{ url_for('account.logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="{{ active('account.login') }}">
+                        <a href="{{ url_for('account.login') }}">
+                            Login
+                        </a>
+                    </li>
+                    <li class="{{ active('account.register') }}">
+                        <a href="{{ url_for('account.register') }}">
+                            Register
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </div>
 

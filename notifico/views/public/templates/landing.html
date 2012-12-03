@@ -1,27 +1,13 @@
 {% extends "base/body.html" %}
-{% block css %}
-    {{ super() }}
-    <style>
-    .count {
-        font-size: 28px; 
-        font-weight: 300;
-    }
-    </style>
-{% endblock %}
 {% block content %}
-<div class="page-main-header">
-    <div class="container">
-        <h1>Welcome!</h1>
-    </div>
-</div>
-<div class="container page-content">
+<div class="container-fluid page-content">
     {% if not g.user %}
     {# 
         No logged-in user, so lets show a little blurb.
     #}
     <div class="hero-unit">
         <h1>{{ site_title }}</h1>
-        <p>{{ site_label }} is my personal, open-source (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a>) replacement for the now-defunct <a href="http://cia.vc">cia.vc</a> service.</p>
+        <p>{{ site_label }} is an open-source (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a>) replacement for the now-defunct <a href="http://cia.vc">cia.vc</a> service. Notifico recieves messages from services and scripts and delivers them to IRC channels.</p>
         <p><a class="btn btn-primary btn-large" href="{{ url_for('account.register') }}">Sign Up</a></p>
     </div>
     {% endif %}

@@ -1,15 +1,11 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
 {% block content %}
-<div class="page-main-header">
-    <div class="container">
-        <h1>Delete Channel</h1>
-    </div>
-</div>
-<div class="container page-content">
+<div class="container-fluid page-content">
     <div class="row-fluid">
         <div class="span12 well">
             <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+                <legend>Delete Channel</legend>
                 <p>Are you sure you want to remove this channel? If you change your mind, you can always re-add it later.</p>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-danger" value='d' name='do'>Remove Channel</button>

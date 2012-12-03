@@ -1,37 +1,22 @@
 {% extends "base/body.html" %}
-{% import "forms.html" as forms %}
-{% block css %}
-    {{ super() }}
-    <style>
-    .count {
-        font-size: 28px; 
-        font-weight: 300;
-    }
-    </style>
-{% endblock %}
 {% block content %}
-<div class="page-main-header">
-    <div class="container">
-        <h1><a href="{{ url_for('.overview', u=user.username)}}">{{ user.username }}</a>/{{ project.name}}</h1>
-    </div>
-</div>
-{% if is_owner %}
-<div class="page-main-actions">
-    <div class="container">
-        <ul class="nav nav-pills">
-            <li><a href="{{ url_for('.new_hook', p=project.name, u=user.username) }}">Create New Hook</a></li>
-            <li><a href="{{ url_for('.new_channel', p=project.name, u=user.username) }}">Add New Channel</a></li>
-            <li><a href="{{ url_for('.edit_project', u=user.username, p=project.name) }}">Edit Project</a></li>
-        </ul>
-    </div>
-</div>
-{% endif %}
-{{ alerts() }}
-<div class="container page-content">
+<div class="container-fluid page-content">
     {% if is_owner %}
-    {#
-        Only the owner should be able to see hooks. 
-    #}
+    <div class="row-fluid">
+        <div class="span12">
+            <a href="{{ url_for('.edit_project', u=user.username, p=project.name) }}" class="btn btn-primary">
+                Edit Project
+            </a>
+            <a href="{{ url_for('.new_hook', p=project.name, u=user.username) }}" class="btn">
+                Create New Hook
+            </a>
+            <a href="{{ url_for('.new_channel', p=project.name, u=user.username) }}" class="btn">
+                Add New Channel
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    {% if is_owner %}
     <div class="row-fluid">
         <div class="span12">
             <a id="hooks"></a>

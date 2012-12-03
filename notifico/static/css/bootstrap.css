@@ -4969,6 +4969,118 @@ a.badge:hover {
 .hero-unit li {
   line-height: 30px;
 }
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400;
+  padding-bottom: 20px;
+}
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: 800;
+}
+.required {
+  color: #DA4F49;
+}
+.table-square {
+  border: 1px solid #dddddd;
+}
+.table-vertical tbody td {
+  vertical-align: middle;
+}
+.btn,
+.square {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+}
+select,
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"],
+.uneditable-input {
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
+}
+#main-navbar {
+  margin-bottom: 0;
+}
+#main-navbar .navbar-inner {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  background-color: #ffffff;
+  background-image: -moz-linear-gradient(top, #ffffff, #ffffff);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#ffffff));
+  background-image: -webkit-linear-gradient(top, #ffffff, #ffffff);
+  background-image: -o-linear-gradient(top, #ffffff, #ffffff);
+  background-image: linear-gradient(to bottom, #ffffff, #ffffff);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffffffff', GradientType=0);
+  box-shadow: none;
+  border: none;
+  border-bottom: 2px solid black;
+}
+#main-navbar .navbar-inner .nav > li > a {
+  padding: 20px 10px 20px 10px;
+  font-size: 18px;
+  box-shadow: none;
+  color: #000000;
+  text-shadow: none;
+}
+#main-navbar .navbar-inner .nav > li > a:hover {
+  color: #c44d58;
+}
+#main-navbar .navbar-inner .nav > .active > a,
+#main-navbar .navbar-inner .nav > .active > a:hover,
+#main-navbar .navbar-inner .nav > .active > a:focus {
+  box-shadow: none;
+  background-color: #ffffff;
+  color: #c44d58;
+}
+#main-navbar .navbar-inner .brand {
+  font-size: 30px;
+  line-height: 40px;
+  font-weight: 800;
+  text-shadow: none;
+  color: #000000;
+}
+.navbar .nav li.dropdown.open > .dropdown-toggle,
+.navbar .nav li.dropdown.active > .dropdown-toggle,
+.navbar .nav li.dropdown.open.active > .dropdown-toggle {
+  background-color: #FFFFFF;
+}
+.page-main-actions .nav-pills {
+  margin-bottom: 0;
+}
+.page-main-actions .nav-pills > li > a {
+  line-height: 20px;
+}
+.page-main-actions .nav-pills > li > a:hover {
+  background-color: #29a9df;
+  color: white;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
+}
+.page-content {
+  margin-top: 12px;
+}
 .pull-right {
   float: right;
 }

@@ -1,20 +1,6 @@
 {% extends "base/body.html" %}
-{% block css %}
-    {{ super() }}
-    <style>
-    .count {
-        font-size: 28px; 
-        font-weight: 300;
-    }
-    </style>
-{% endblock %}
 {% block content %}
-<div class="page-main-header">
-    <div class="container">
-        <h1>Users</h1>
-    </div>
-</div>
-<div class="container page-content">
+<div class="container-fluid page-content">
     <div class="row-fluid">
         <div class="span12">
             {% if users.count() == 0 %}

@@ -16,12 +16,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-main-header">
-    <div class="container">
-        <h1>Import From Github</h1>
-    </div>
-</div>
-<div class="container page-content">
+<div class="container-fluid page-content">
     {% if summary is none %}
     <form class="form form-horizontal" method='POST' action="{{ url_for('.github') }}">
     <div class="row-fluid">

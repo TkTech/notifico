@@ -1,20 +1,7 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
 {% block content %}
-<div class="page-main-header">
-    <div class="container">
-        <h1>Account Settings</h1>
-    </div>
-</div>
-<div class="page-main-actions">
-    <div class="container">
-        <ul class="nav nav-pills">
-            <li><a href="{{ url_for('.tokens') }}">OAuth Tokens</a></li>
-        </ul>
-    </div>
-</div>
-{{ alerts() }}
-<div class="container page-content">
+<div class="container-fluid page-content">
     <div class="row-fluid">
         <div class="span12 well">
             <form class="form form-horizontal" method="POST" action="{{ url_for('.settings', do='p') }}">
