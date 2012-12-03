@@ -5042,6 +5042,7 @@ input[type="color"],
   box-shadow: none;
   color: #000000;
   text-shadow: none;
+  font-weight: 300;
 }
 #main-navbar .navbar-inner .nav > li > a:hover {
   color: #c44d58;
