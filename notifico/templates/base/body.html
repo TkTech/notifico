@@ -86,7 +86,9 @@ active
         </div>
     </div>
 
-    {%- block pre_content -%}{%- endblock %}
+    {%- block pre_content -%}
+        {{ alerts() }}
+    {%- endblock %}
     {%- block content -%}{%- endblock -%}
     {%- block post_content -%}{%- endblock %}
 
