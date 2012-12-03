@@ -36,13 +36,13 @@ active
                 <ul class="nav pull-right">
                     <li class="{{ active('public.landing') }}">
                         <a href="{{ url_for('public.landing') }}">
-                            Home
+                            {% trans %}Home{% endtrans %}
                         </a>
                     </li>
                     {% if g.user %}
                     <li class="{{ active('projects.') }}">
                         <a href="{{ url_for('projects.overview', u=g.user.username) }}">
-                            Projects
+                            {% trans %}Projects{% endtrans %}
                         </a>
                     </li>
                     <li class="dropdown">
@@ -51,21 +51,33 @@ active
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="{{ url_for('account.settings') }}">Settings</a></li>
-                            <li><a href="{{ url_for('account.tokens') }}">OAuth Tokens</a></li>
+                            <li>
+                                <a href="{{ url_for('account.settings') }}">
+                                    {% trans %}Settings{% endtrans %}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('account.tokens') }}">
+                                    {% trans %}OAuth Tokens{% endtrans %}
+                                </a>
+                            </li>
                             <li class="divider"></li>
-                            <li><a href="{{ url_for('account.logout') }}">Logout</a></li>
+                            <li>
+                                <a href="{{ url_for('account.logout') }}">
+                                    {% trans %}Logout{% endtrans %}
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="{{ active('account.login') }}">
                         <a href="{{ url_for('account.login') }}">
-                            Login
+                            {% trans %}Login{% endtrans %}
                         </a>
                     </li>
                     <li class="{{ active('account.register') }}">
                         <a href="{{ url_for('account.register') }}">
-                            Register
+                            {% trans %}Register{% endtrans %}
                         </a>
                     </li>
                     {% endif %}

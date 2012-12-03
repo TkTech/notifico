@@ -10,6 +10,7 @@ from flask import (
 )
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.gravatar import Gravatar
+from flask.ext.babel import Babel
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
@@ -21,6 +22,7 @@ gravatar = Gravatar(
     force_default=False,
     force_lower=False
 )
+babel = Babel(app)
 
 
 def user_required(f):
