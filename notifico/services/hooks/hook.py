@@ -7,12 +7,14 @@ from jinja2 import Environment, PackageLoader
 
 from notifico import app
 from notifico.util import irc
+from notifico.services import Service
 
 
 class HookService(object):
     """
     The base type for any `Service`.
     """
+    __metaclass__ = Service
     #: Alias to `notifico.util.irc.colors`
     colors = irc.mirc_colors()
 

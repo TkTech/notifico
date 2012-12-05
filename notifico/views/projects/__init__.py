@@ -13,7 +13,7 @@ from flask.ext import wtf
 
 from notifico import user_required
 from notifico.models import User, Project, Hook, Channel
-from notifico.services import hook_by_id, registered_hooks
+from notifico.services.hooks import HookService
 
 projects = Blueprint('projects', __name__, template_folder='templates')
 
@@ -247,7 +247,7 @@ def new_hook(u, p, sid):
         # (403 Forbidden)
         return abort(403)
 
-    hook = hook_by_id(sid)
+    hook = HookService.services.get(sid)
     form = hook.form()
     if form:
         form = form()
@@ -269,7 +269,7 @@ def new_hook(u, p, sid):
 
     return render_template('new_hook.html',
         project=p,
-        services=registered_hooks(),
+        services=HookService.services,
         service=hook,
         form=form
     )
@@ -312,7 +312,7 @@ def edit_hook(u, p, hid):
 
     return render_template('edit_hook.html',
         project=p,
-        services=registered_hooks(),
+        services=HookService.services,
         service=hook_service,
         form=form
     )
@@ -333,7 +333,7 @@ def hook_recieve(pid, key):
         Project.message_count: Project.message_count + 1
     })
 
-    hook = hook_by_id(h.service_id)
+    hook = HookService.services.get(h.service_id)
     if hook is None:
         # TODO: This should be logged somewhere.
         return ''

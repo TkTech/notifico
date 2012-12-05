@@ -1,3 +1,6 @@
 # -*- coding: utf8 -*-
-__all__ = ('HookService',)
 from notifico.services.hooks.hook import *
+from notifico.services.hooks.bitbucket import *
+from notifico.services.hooks.github import *
+from notifico.services.hooks.hook import *
+from notifico.services.hooks.plain import *
