@@ -35,10 +35,19 @@ def _irc_format(hook, j, commit):
         j['repository']['name'],
         **HookService.colors
     ))
-    line.append('{LIGHT_CYAN}{0}{RESET}'.format(
-        commit['author']['username'],
-        **HookService.colors
-    ))
+    # Github does not always have complete details on the commiter,
+    # in particular when a 3rd part is pushing for a user with an
+    # unlinked email address.
+    identifier = commit['author'].get('username')
+    if not identifier:
+        identifier = commit['author'].get('name')
+
+    if identifier:
+        line.append('{LIGHT_CYAN}{0}{RESET}'.format(
+            identifier,
+            **HookService.colors
+        ))
+
     line.append('{PINK}{0}{RESET}'.format(
         commit['id'][:7],
         **HookService.colors
@@ -53,8 +62,16 @@ def _fmt_summary(hook, j):
         j['repository']['name'],
         **HookService.colors
     ))
-    line.append('{0} pushed {RED}{1}{RESET} {2}'.format(
-        j['pusher']['name'],
+
+    # Note: Github occasionally does not send the pusher field,
+    # and sometimes it sends it as None/nil.
+    # - Seems to occur when using "Test Hook" or other github-sourced
+    #   commits (such as pages editor)
+    if 'pusher' in j:
+        if j['pusher'].get('name'):
+            line.append(j['pusher']['name'])
+
+    line.append('pushed {RED}{1}{RESET} {2}'.format(
         len(j['commits']),
         'commit' if len(j['commits']) == 1 else 'commits',
         **HookService.colors
