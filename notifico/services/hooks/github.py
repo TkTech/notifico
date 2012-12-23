@@ -71,7 +71,7 @@ def _fmt_summary(hook, j):
         if j['pusher'].get('name'):
             line.append(j['pusher']['name'])
 
-    line.append('pushed {RED}{1}{RESET} {2}'.format(
+    line.append('pushed {RED}{0}{RESET} {1}'.format(
         len(j['commits']),
         'commit' if len(j['commits']) == 1 else 'commits',
         **HookService.colors
