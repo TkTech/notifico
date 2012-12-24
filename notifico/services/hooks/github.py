@@ -52,7 +52,7 @@ def _irc_format(hook, j, commit):
         commit['id'][:7],
         **HookService.colors
     ))
-    line.append(commit['message'])
+    line.append(commit['message'].split('\n', 1)[0])
     return ' '.join(line)
 
 
