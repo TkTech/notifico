@@ -10,11 +10,24 @@ public = Blueprint('public', __name__, template_folder='templates')
 
 @public.route('/')
 def landing():
+    """
+    Public landing page visible to everyone with summary statistics
+    and an intro blurb for unregistered users.
+    """
+    # Find the 10 most recently created projects.
+    new_projects = (
+        Project.query.filter_by(public=True)
+        .order_by(False)
+        .order_by(Project.created.desc())
+        .limit(10)
+    )
+
     return render_template('landing.html',
         Project=Project,
         User=User,
         Channel=Channel,
-        Hook=Hook
+        Hook=Hook,
+        new_projects=new_projects
     )
 
 

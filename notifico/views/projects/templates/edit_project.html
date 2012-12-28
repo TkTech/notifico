@@ -2,19 +2,24 @@
 {% import "forms.html" as forms %}
 {% block content %}
 <div class="container-fluid page-content">
-    <div class="row-fluid">
-        <div class="span12 well">
-            <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-                {{ form.hidden_tag() }}
-                {{ forms.render_field(form.name) }}
-                {{ forms.render_field(form.website ) }}
-                {{ forms.render_field(form.public) }}
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-success">Save Changes</button>
-                    <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
-                </div>
-            </form>
-        </div>
-    </div>
+  <div class="row-fluid">
+    <section>
+      <header>
+        <h2>Edit Project</h2>
+      </header>
+      <div class="content">
+        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+          {{ form.hidden_tag() }}
+          {{ forms.render_field(form.name) }}
+          {{ forms.render_field(form.website ) }}
+          {{ forms.render_field(form.public) }}
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}

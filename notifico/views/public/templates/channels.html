@@ -1,43 +1,50 @@
 {% extends "base/body.html" %}
 {% block content %}
 <div class="container-fluid page-content">
-    <div class="row-fluid">
-        <div class="span12">
-            {% if channels.count() == 0 %}
-            <div class="alert alert-info">
-                There are no public channels for the network {{ network }}.
-            </div>
-            {% else %}
-            <table class="table table-square table-hover">
-                <thead>
-                    <tr>
-                        <th>Channel</th>
-                        <th>Network</th>
-                        <th>Port</th>
-                        <th>SSL</th>
-                        <th>Project</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for channel in channels %}
-                    <tr>
-                        <td>{{ channel.channel }}</td>
-                        <td>{{ channel.host }}</td>
-                        <td>{{ channel.port }}</td>
-                        <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-                        <td>
-                            {% if channel.project.public %}
-                            <a href="{{ url_for('projects.details', u=channel.project.owner.username, p=channel.project.name) }}">{{ channel.project.full_name }}</a>
-                            {% else %}
-                            <i class="icon-lock"></i>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
+  <div class="row-fluid">
+    <div class="span12">
+      <section>
+        <header>
+          <h2>Channels</h2>
+        </header>
+        <div class="content">
+          {% if channels.count() == 0 %}
+          <div class="alert alert-info">
+            There are no public channels for the network {{ network }}.
+          </div>
+          {% else %}
+          <table class="table table-vertical table-striped">
+            <thead>
+              <tr>
+                <th>Channel</th>
+                <th>Network</th>
+                <th>Port</th>
+                <th>SSL</th>
+                <th>Project</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for channel in channels %}
+              <tr>
+                <td>{{ channel.channel }}</td>
+                <td>{{ channel.host }}</td>
+                <td>{{ channel.port }}</td>
+                <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
+                <td>
+                  {% if channel.project.public %}
+                  <a href="{{ url_for('projects.details', u=channel.project.owner.username, p=channel.project.name) }}">{{ channel.project.full_name }}</a>
+                  {% else %}
+                  <i class="icon-lock"></i>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% endif %}
         </div>
+      </section>
     </div>
+  </div>
 </div>
 {% endblock %}

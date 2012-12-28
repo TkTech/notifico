@@ -1,110 +1,49 @@
-{% macro active(end) %}
-{% if request.endpoint.startswith(end) %}
-active
-{% endif %}
-{% endmacro %}
 
-{% macro alerts() %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-      <div class="container-fluid">
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }}" style="margin: 20px 0 2px 0;">{{ message }}</div>
-        {% endfor %}
-      </div>
-      {% endif %}
-    {% endwith %}
-{% endmacro %}
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="en">
+  <head>
     <meta charset="utf-8">
-    <title>{{ site_title }}</title>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,800' rel='stylesheet' type='text/css'>
-    <link href="/css/bootstrap.css" rel="stylesheet" media="screen">
+    <title>{{ page_title|default('Notifico!') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {%- block css -%}{%- endblock -%}
-</head>
-<body>
-    {# Site-wide navbar -#}
-    <div id="main-navbar" class="navbar">
-        <div class="navbar-inner">
-            <div class="container">
-                <a class="brand" href="{{ url_for('public.landing') }}">
-                    {{ site_title }}
-                </a>
-                <ul class="nav pull-right">
-                    <li class="{{ active('public.landing') }}">
-                        <a href="{{ url_for('public.landing') }}">
-                            {% trans %}Home{% endtrans %}
-                        </a>
-                    </li>
-                    {% if g.user %}
-                    <li class="{{ active('projects.') }}">
-                        <a href="{{ url_for('projects.overview', u=g.user.username) }}">
-                            {% trans %}Projects{% endtrans %}
-                        </a>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            {{ g.user.username }}
-                            <b class="caret"></b>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a href="{{ url_for('account.settings') }}">
-                                    {% trans %}Settings{% endtrans %}
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ url_for('account.tokens') }}">
-                                    {% trans %}OAuth Tokens{% endtrans %}
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="{{ url_for('account.logout') }}">
-                                    {% trans %}Logout{% endtrans %}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    {% else %}
-                    <li class="{{ active('account.login') }}">
-                        <a href="{{ url_for('account.login') }}">
-                            {% trans %}Login{% endtrans %}
-                        </a>
-                    </li>
-                    <li class="{{ active('account.register') }}">
-                        <a href="{{ url_for('account.register') }}">
-                            {% trans %}Register{% endtrans %}
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </div>
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-    {%- block pre_content -%}
-        {{ alerts() }}
-    {%- endblock %}
-    {%- block content -%}{%- endblock -%}
-    {%- block post_content -%}{%- endblock %}
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    {% block style %}
+    <style>
+    body {
+      padding-top: 60px;
+    }
+    </style>
+    {% endblock style %}
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
 
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-    <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-11145163-15']);
-      _gaq.push(['_trackPageview']);
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
 
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
+  <body>
+    {% include "base/nav.html" %}
+
+    {% block content %}
+    {% endblock content %}
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/jquery-1.8.3.min.js"><\/script>')</script>
+    <script src="/js/bootstrap.js"></script>
+    {% block script %}
+    <script>
+    $(function(){
+        // Focus on the username box, but only if
+        // the user hasn't already focused on something else.
+        if($(document.activeElement).is('body')) {
+            $('.focus').focus();
+        }
+    });
     </script>
-    {% block js -%}{%- endblock -%}
-</body>
+    {% endblock %}
+  </body>
 </html>

@@ -1,0 +1,11 @@
+{% macro panel(header, anchor=None) %}
+  <section>
+    <header>
+      {% if anchor %}<a id="{{ anchor }}"></a>{% endif %}
+      <h2>{{ header }}</h2>
+    </header>
+    <div class="content">
+      {{ caller() }}
+    </div>
+  </section>
+{% endmacro %}

@@ -20,85 +20,102 @@
     {% if summary is none %}
     <form class="form form-horizontal" method='POST' action="{{ url_for('.github') }}">
     <div class="row-fluid">
-        <div class="span12 well">
-            {{ options_form.hidden_tag() }}
-            {{ forms.render_field(options_form.projects, disabled=True) }}
-            {{ forms.render_field(options_form.set_hooks) }}
+        <div class="span12">
+            <section>
+                <header>
+                    <h2>Import Options</h2>
+                </header>
+                <div class="content">
+                    {{ options_form.hidden_tag() }}
+                    {{ forms.render_field(options_form.projects, disabled=True) }}
+                    {{ forms.render_field(options_form.set_hooks) }}
+                </div>
+            </section>
         </div>
     </div>
     <div class="row-fluid">
         <div class="span12">
-            <table class="table table-square table-hover">
-                <thead>
-                    <tr>
-                        <th>Repo Name</th>
-                        <th>Owner</th>
-                        <th>Fork?</th>
-                        <th style="text-align: center;">Import</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="4" style="text-align: right;">
-                            <button class="btn btn-mini" id="check-all" type="button">Check All</button>
-                            <button class="btn btn-mini" id="uncheck-all" type="button">Uncheck All</button>
-                        </td>
-                    </tr>
-                    {% for repo in user_repos %}
-                    <tr>
-                        <td>{% if repo.private %}<i class="icon-lock"></i> {% endif %}{{ repo.full_name }}</td>
-                        <td><a href="https://github.com/{{ repo.owner.login }}">{{ repo.owner.login }}</a></td>
-                        <td><i class="icon-{% if repo.fork %}ok{% else %}remove{% endif %}"></i></td>
-                        <td style="text-align: center;">
-                            <input id="{{ repo.id }}" name="{{ repo.id }}" type="checkbox" value="y" checked class="check-toggle">
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td colspan="4" style="text-align: right;">
-                            <button class="btn btn-mini" id="check-all" type="button">Check All</button>
-                            <button class="btn btn-mini" id="uncheck-all" type="button">Uncheck All</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="row-fluid">
-        <div class="span12">
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Import!</button>
-                <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn">Cancel</a>
-            </div>
+            <section>
+                <header>
+                    <h2>Repos</h2>
+                </header>
+                <div class="content">
+                    <table class="table table-vertical table-hover">
+                        <thead>
+                            <tr>
+                                <th>Repo Name</th>
+                                <th>Owner</th>
+                                <th>Fork?</th>
+                                <th style="text-align: center;">Import</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" style="text-align: right;">
+                                    <button class="btn btn-mini" id="check-all" type="button">Check All</button>
+                                    <button class="btn btn-mini" id="uncheck-all" type="button">Uncheck All</button>
+                                </td>
+                            </tr>
+                            {% for repo in user_repos %}
+                            <tr>
+                                <td>{% if repo.private %}<i class="icon-lock"></i> {% endif %}{{ repo.full_name }}</td>
+                                <td><a href="https://github.com/{{ repo.owner.login }}">{{ repo.owner.login }}</a></td>
+                                <td><i class="icon-{% if repo.fork %}ok{% else %}remove{% endif %}"></i></td>
+                                <td style="text-align: center;">
+                                    <input id="{{ repo.id }}" name="{{ repo.id }}" type="checkbox" value="y" checked class="check-toggle">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td colspan="4" style="text-align: right;">
+                                    <button class="btn btn-mini" id="check-all" type="button">Check All</button>
+                                    <button class="btn btn-mini" id="uncheck-all" type="button">Uncheck All</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Import!</button>
+                    <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn">Cancel</a>
+                </div>
+            </section>
         </div>
     </div>
     </form>
     {% else %}
     <div class="row-fluid">
         <div class="span12">
-            {% if not summary %}
-            <div class="alert alert-info">
-                Hm, doesn't look like there was anything to import!
-            </div>
-            {% else %}
-            <table class="table table-square">
-                <thead>
-                    <tr>
-                        <th>Action</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result, status in summary %}
-                    <tr>
-                        <td>{{ result }}</td>
-                        <td><i class="icon-{% if status %}ok{% else %}remove{% endif %}"></i></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
-            <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn btn-primary">Done</a>
+            <section>
+                <header>
+                    <h2>Summary</h2>
+                </header>
+                <div class="content">
+                    {% if not summary %}
+                    <div class="alert alert-info">
+                        Hm, doesn't look like there was anything to import!
+                    </div>
+                    {% else %}
+                    <table class="table table-vertical table-striped">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result, status in summary %}
+                            <tr>
+                                <td>{{ result }}</td>
+                                <td><i class="icon-{% if status %}ok{% else %}remove{% endif %}"></i></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                    <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn btn-primary">Done</a>
+                </div>
+            </section>
         </div>
     </div>
     {% endif %}

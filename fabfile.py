@@ -124,3 +124,8 @@ def init():
     with cd(www_root()):
         p = os.path.join(www_root(), 'misc', 'deploy', 'requirements.txt')
         sudo('pip install --requirement {0}'.format(p))
+
+
+def css():
+    with lcd('notifico/static'):
+        local('lessc less/bootstrap.less css/bootstrap.css')

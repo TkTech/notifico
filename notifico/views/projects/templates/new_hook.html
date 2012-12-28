@@ -11,52 +11,59 @@
 <script type="text/javascript" src="/js/prettify.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-    prettyPrint();
+  prettyPrint();
 })
 </script>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid page-content">
-    <div class="row-fluid">
-        <div class="span12">
-            <div class="row-fluid">
-                <div class="span4">
-                    <ul class="nav nav-list">
-                        <li class="nav-header">Available Services</li>
-                        {% for s in services.values() %}
-                        <li {% if s.SERVICE_ID == service.SERVICE_ID %}class="active"{% endif %}>
-                            <a href="{{ url_for('.new_hook', u=g.user.username, p=project.name, sid=s.SERVICE_ID) }}">
-                                {{ s.SERVICE_NAME }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div class="span8">
-                    <h2>{{ service.SERVICE_NAME }}</h2>
-                    {{ service.service_description()|safe }}
-                    <div class="row-fluid" style="margin-top: 20px;">
-                        <div class="span12">
-                            <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-                                {% if form %}
-                                {{ form.hidden_tag() }}
-                                {% for field in form %}
-                                    {% if field.id != 'csrf_token' %}
-                                        {{ forms.render_field(field) }}
-                                    {% endif %}
-                                {% endfor %}
-                                {% endif %}
-                                <div class="form-actions">
-                                    <button type="submit" class="btn btn-primary">Create Hook</button>
-                                    <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+  <div class="row-fluid">
+    <div class="span12">
+      <section>
+        <header>
+          <h2>New Hook</h2>
+        </header>
+        <div class="content">
+          <div class="row-fluid">
+            <div class="span4">
+              <ul class="nav nav-list">
+                <li class="nav-header">Available Services</li>
+                {% for s in services.values() %}
+                <li {% if s.SERVICE_ID == service.SERVICE_ID %}class="active"{% endif %}>
+                  <a href="{{ url_for('.new_hook', u=g.user.username, p=project.name, sid=s.SERVICE_ID) }}">
+                    {{ s.SERVICE_NAME }}
+                  </a>
+                </li>
+                {% endfor %}
+              </ul>
             </div>
+            <div class="span8">
+              <h2>{{ service.SERVICE_NAME }}</h2>
+              {{ service.service_description()|safe }}
+              <div class="row-fluid" style="margin-top: 20px;">
+                <div class="span12">
+                  <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+                    {% if form %}
+                    {{ form.hidden_tag() }}
+                    {% for field in form %}
+                      {% if field.id != 'csrf_token' %}
+                        {{ forms.render_field(field) }}
+                      {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <div class="form-actions">
+                      <button type="submit" class="btn btn-primary">Create Hook</button>
+                      <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
     </div>
+  </div>
 </div>
 {% endblock %}

@@ -1,74 +1,88 @@
 {% extends "base/body.html" %}
 {% block content %}
-<div class="container-fluid page-content">
-    {% if not g.user %}
-    {# 
-        No logged-in user, so lets show a little blurb.
-    #}
-    <div class="hero-unit">
-        <h1>{{ site_title }}</h1>
-        <p>{{ site_label }} is an open-source (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a>) replacement for the now-defunct <a href="http://cia.vc">cia.vc</a> service. Notifico recieves messages from services and scripts and delivers them to IRC channels.</p>
-        <p><a class="btn btn-primary btn-large" href="{{ url_for('account.register') }}">Sign Up</a></p>
+<div class="container-fluid">
+  {% if not g.user %}
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="hero-unit homepage-unit">
+        <h1>Notifico</h1>
+        <p>Notifico is an open-source (<a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a>) replacement for the now-defunct <a href="http://cia.vc">cia.vc</a> service. Notifico recieves messages (such as commits and issues) from services and scripts and delivers them to IRC channels.</p>
+      <p><a class="btn btn-primary btn-large" href="{{ url_for('account.register') }}">Sign Up</a></p>
+      <p><small class="muted">Already have an account? <a href="{{ url_for('account.login') }}">Login</a></small></p>
+      </div>
     </div>
-    {% endif %}
+  </div>
+  {% endif %}
 
-    {% if Project.query.count() %}
-    <div class="row-fluid">
-        <div class="span6">
-            <h2>Newest Projects</h2>
-            {% for project in Project.public_q().order_by(False).order_by(Project.created.desc()).limit(10) %}
-            <div>
-                <a href="{{ url_for('projects.details', u=project.owner.username, p=project.name) }}">{{ project.full_name }}</a><br/>
-                <small>
-                    Created on {{ project.created.strftime("%Y-%m-%d") }} by <a href="{{ url_for('projects.overview', u=project.owner.username) }}">{{ project.owner.username }}</a>
-                    {% if project.website %}
-                    | {{ project.website|fixlink|urlize(40, True) }}
-                    {% endif %}
-                </small>
-            </div>
-            {% endfor %}
+  {% if Project.query.count() %}
+  <div class="row-fluid">
+    <div class="span8">
+      <section>
+        <header>
+          <h2>Newest Projects</h2>
+        </header>
+        <div class="content">
+          {% for project in new_projects %}
+          <div>
+            <a href="{{ url_for('projects.details', u=project.owner.username, p=project.name) }}">{{ project.full_name }}</a><br/>
+            <small>
+              Created on {{ project.created.strftime("%Y-%m-%d") }} by <a href="{{ url_for('projects.overview', u=project.owner.username) }}">{{ project.owner.username }}</a>
+              {% if project.website %}
+              | {{ project.website|fixlink|urlize(40, True) }}
+              {% endif %}
+            </small>
+          </div>
+          {% endfor %}
         </div>
-        <div class="span6">
-            <h2>Stats</h2>
-            <table class="table table-square">
-                <tbody>
-                    <tr>
-                        <td>Projects:</td>
-                        <td style="text-align: center;">{{ Project.query.count() }}</td>
-                    </tr>
-                    <tr>
-                        <td>Users:</td>
-                        <td style="text-align: center;"><a href="{{ url_for('.users') }}">{{ User.query.count() }}</a></td>
-                    </tr>
-                    <tr>
-                        <td>Channels:</td>
-                        <td style="text-align: center;">{{ Channel.query.count() }}</td>
-                    </tr>
-                    <tr>
-                        <td>Hooks:</td>
-                        <td style="text-align: center;">{{ Hook.query.count() }}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <table class="table table-square">
-                <thead>
-                    <tr>
-                        <th>Network</th>
-                        <th style="text-align: center;">Channels</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for network, channel_count in Channel.channel_count_by_network() %}
-                    <tr>
-                        <td>{{ network }}</td>
-                        <td style="text-align: center;"><a href="{{ url_for('.channels', network=network) }}">{{ channel_count }}</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+      </section>
     </div>
-    {% endif %}
+    <div class="span4">
+      <section>
+        <header>
+          <h2>Stats</h2>
+        </header>
+        <div class="content">
+          <table class="table table-square">
+            <tbody>
+              <tr>
+                <td>Projects:</td>
+                <td style="text-align: center;">{{ Project.query.count() }}</td>
+              </tr>
+              <tr>
+                <td>Users:</td>
+                <td style="text-align: center;"><a href="{{ url_for('.users') }}">{{ User.query.count() }}</a></td>
+              </tr>
+              <tr>
+                <td>Channels:</td>
+                <td style="text-align: center;">{{ Channel.query.count() }}</td>
+              </tr>
+              <tr>
+                <td>Hooks:</td>
+                <td style="text-align: center;">{{ Hook.query.count() }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="table table-square">
+            <thead>
+              <tr>
+                <th>Network</th>
+                <th style="text-align: center;">Channels</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for network, channel_count in Channel.channel_count_by_network() %}
+              <tr>
+                <td>{{ network }}</td>
+                <td style="text-align: center;"><a href="{{ url_for('.channels', network=network) }}">{{ channel_count }}</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+  {% endif %}
 
 </div>
 {% endblock %}
