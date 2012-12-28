@@ -94,7 +94,10 @@ class HookService(object):
                     ssl=channel.ssl
                 )
                 # ... and send it on its way.
-                r.publish(message['type'], json.dumps(message))
+                r.rpush(
+                    'queue_{type_}'.format(type_=message['type']),
+                    json.dumps(message)
+                )
 
     @classmethod
     def form(cls):
