@@ -1,6 +1,15 @@
+# Cached python bytecode
 *.pyc
+
+# VirtualEnv
 ENV/
+
+# OS X Cache Cruft
 .DS_Store
-local_config
-remote_config
+
+# Testing SQLite Database
 testing.db
+
+# Testing configuration
+local_config/
+local_config.py
