@@ -118,7 +118,6 @@
                 <th>Host</th>
                 <th>Port</th>
                 <th>SSL</th>
-                <th>Status</th>
                 {% if is_owner %}
                 <th style="text-align: center;">Public</th>
                 <th></th>
@@ -132,19 +131,6 @@
                 <td>{{ channel.host }}</td>
                 <td>{{ channel.port }}</td>
                 <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-                <td>
-                  {% if channel_status(channel) == 'ok' %}
-                  <span class="text-success">
-                  {% elif channel_status(channel) == 'fatal' %}
-                  <span class="text-error">
-                  {% elif channel_status(channel) == 'warning' %}
-                  <span class="text-warning">
-                  {% else %}
-                  <span>
-                  {% endif %}
-                    {{ channel_status(channel) }}
-                  </span>
-                </td>
                 {% if is_owner %}
                 <td style="text-align: center;">
                   <i class="icon-{% if project.public %}ok{% else %}lock{% endif %}"></i>
@@ -168,19 +154,6 @@
                 <td>{{ channel.host }}</td>
                 <td>{{ channel.port }}</td>
                 <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-                <td>
-                  {% if channel_status(channel) == 'ok' %}
-                  <span class="text-success">
-                  {% elif channel_status(channel) == 'fatal' %}
-                  <span class="text-error">
-                  {% elif channel_status(channel) == 'warning' %}
-                  <span class="text-warning">
-                  {% else %}
-                  <span>
-                  {% endif %}
-                    {{ channel_status(channel) }}
-                  </span>
-                </td>
                 <td style="text-align: center;">
                   <i class="icon-{% if channel.public %}ok{% else %}lock{% endif %}"></i>
                 </td>
