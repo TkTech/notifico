@@ -21,7 +21,7 @@ class User(db.Model):
     email = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     salt = db.Column(db.String(8), nullable=False)
-    joined = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+    joined = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
 
     # ---
     # Public Profile Fields

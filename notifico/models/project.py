@@ -11,7 +11,7 @@ from notifico.models import CaseInsensitiveComparator
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
     public = db.Column(db.Boolean, default=True)
     website = db.Column(db.String(1024))
 

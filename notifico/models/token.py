@@ -10,7 +10,7 @@ class AuthToken(db.Model):
     Service authentication tokens, such as those used for Github's OAuth.
     """
     id = db.Column(db.Integer, primary_key=True)
-    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
     name = db.Column(db.String(50), nullable=False)
     token = db.Column(db.String(512), nullable=False)
 

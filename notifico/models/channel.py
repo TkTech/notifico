@@ -10,7 +10,7 @@ from notifico.models.bot import BotEvent
 
 class Channel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
 
     channel = db.Column(db.String(80), nullable=False)
     host = db.Column(db.String(255), nullable=False)

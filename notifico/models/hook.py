@@ -10,7 +10,7 @@ from notifico.services.hooks import HookService
 
 class Hook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow())
+    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
     key = db.Column(db.String(255), nullable=False)
     service_id = db.Column(db.Integer)
     config = db.Column(db.PickleType)
