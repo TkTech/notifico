@@ -57,7 +57,8 @@ def deploy():
             '*.pyc',
             '.git',
             '*.egg-info',
-            'testing.db'
+            'testing.db',
+            'local_config.py'
         ]
     )
     with virtualenv():
