@@ -47,7 +47,7 @@ def github():
         }, headers={
             'Accept': 'application/json'
         })
-        result = r.json
+        result = r.json()
         token = AuthToken.new(result['access_token'], 'github')
         g.db.session.add(token)
         g.user.tokens.append(token)
