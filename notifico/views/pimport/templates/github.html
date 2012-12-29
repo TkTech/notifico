@@ -1,14 +1,14 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
 
-{% block js %}
+{% block script %}
     {{ super() }}
     <script type="text/javascript">
     $(document).ready(function(){
-        $('#uncheck-all').click(function(e){
+        $('.uncheck-all').click(function(e){
             $('.check-toggle').attr('checked', false);
         });
-        $('#check-all').click(function(e){
+        $('.check-all').click(function(e){
             $('.check-toggle').attr('checked', true);
         });
     });
@@ -27,8 +27,9 @@
                 </header>
                 <div class="content">
                     {{ options_form.hidden_tag() }}
-                    {{ forms.render_field(options_form.projects, disabled=True) }}
+                    {{ forms.render_field(options_form.update_projects) }}
                     {{ forms.render_field(options_form.set_hooks) }}
+                    {{ forms.render_field(options_form.set_commits ) }}
                 </div>
             </section>
         </div>
@@ -37,7 +38,7 @@
         <div class="span12">
             <section>
                 <header>
-                    <h2>Repos</h2>
+                    <h2>Your Repos</h2>
                 </header>
                 <div class="content">
                     <table class="table table-vertical table-hover">
@@ -45,22 +46,22 @@
                             <tr>
                                 <th>Repo Name</th>
                                 <th>Owner</th>
-                                <th>Fork?</th>
+                                <th style="text-align: center;">Fork?</th>
                                 <th style="text-align: center;">Import</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td colspan="4" style="text-align: right;">
-                                    <button class="btn btn-mini" id="check-all" type="button">Check All</button>
-                                    <button class="btn btn-mini" id="uncheck-all" type="button">Uncheck All</button>
+                                    <button class="btn btn-mini check-all" type="button">Check All</button>
+                                    <button class="btn btn-mini uncheck-all" type="button">Uncheck All</button>
                                 </td>
                             </tr>
                             {% for repo in user_repos %}
                             <tr>
                                 <td>{% if repo.private %}<i class="icon-lock"></i> {% endif %}{{ repo.full_name }}</td>
                                 <td><a href="https://github.com/{{ repo.owner.login }}">{{ repo.owner.login }}</a></td>
-                                <td><i class="icon-{% if repo.fork %}ok{% else %}remove{% endif %}"></i></td>
+                                <td style="text-align: center;"><i class="icon-{% if repo.fork %}ok{% else %}remove{% endif %}"></i></td>
                                 <td style="text-align: center;">
                                     <input id="{{ repo.id }}" name="{{ repo.id }}" type="checkbox" value="y" checked class="check-toggle">
                                 </td>
@@ -68,8 +69,8 @@
                             {% endfor %}
                             <tr>
                                 <td colspan="4" style="text-align: right;">
-                                    <button class="btn btn-mini" id="check-all" type="button">Check All</button>
-                                    <button class="btn btn-mini" id="uncheck-all" type="button">Uncheck All</button>
+                                    <button class="btn btn-mini check-all" type="button">Check All</button>
+                                    <button class="btn btn-mini uncheck-all" type="button">Uncheck All</button>
                                 </td>
                             </tr>
                         </tbody>
