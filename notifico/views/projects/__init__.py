@@ -134,9 +134,22 @@ def new():
                 website=form.website.data
             )
             p.full_name = '{0}/{1}'.format(g.user.username, p.name)
-            g.db.session.add(p)
             g.user.projects.append(p)
+            g.db.session.add(p)
+
+            if p.public:
+                # New public projects get added to #commits by default.
+                c = Channel.new(
+                    '#commits',
+                    'irc.freenode.net',
+                    6667,
+                    ssl=False,
+                    public=True
+                )
+                p.channels.append(c)
+
             g.db.session.commit()
+
             flash('Your project has been created.', 'success')
             return redirect(url_for('.overview', u=g.user.username))
 
