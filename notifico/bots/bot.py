@@ -12,6 +12,10 @@ class BotificoBot(Client):
         self._messages = deque()
         self._ready = False
 
+    @property
+    def manager(self):
+        return self._manager
+
     @client_queue
     def send_message(self, channel, message):
         yield (self._send_message, channel, message)
@@ -23,6 +27,9 @@ class BotificoBot(Client):
 
     def message_not_handled(self, client, message):
         print(message)
+
+    def next_nickname(self):
+        return self.manager.free_nick()
 
     def event_ready(self, client):
         self._ready = True
