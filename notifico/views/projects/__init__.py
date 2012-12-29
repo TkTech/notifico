@@ -151,7 +151,7 @@ def new():
             g.db.session.commit()
 
             flash('Your project has been created.', 'success')
-            return redirect(url_for('.overview', u=g.user.username))
+            return redirect(url_for('.details', u=g.user.username, p=p.name))
 
     return render_template('new_project.html', form=form)
 
