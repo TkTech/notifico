@@ -32,6 +32,8 @@ REDIS_DB = 0
 SERVICE_GITHUB_CLIENT_ID = None
 SERVICE_GITHUB_CLIENT_SECRET = None
 
+GOOGLE = None
+
 # ---
 # Misc. Settings
 # ---
@@ -41,7 +43,7 @@ HANDLE_STATIC = True
 # Usually-static variables injected into each template. Useful
 # for branding for internal use.
 TEMP_VARS = {
-    'site_title': 'Notifico!',
+    'site_title': 'Notifico',
     'site_label': 'Notifico'
 }
 
