@@ -46,19 +46,23 @@
             <tbody>
               <tr>
                 <td>Projects:</td>
-                <td style="text-align: center;">{{ Project.query.count() }}</td>
+                <td style="text-align: right;">{{ Project.query.count() }}</td>
               </tr>
               <tr>
                 <td>Users:</td>
-                <td style="text-align: center;"><a href="{{ url_for('.users') }}">{{ User.query.count() }}</a></td>
+                <td style="text-align: right;"><a href="{{ url_for('.users') }}">{{ User.query.count() }}</a></td>
               </tr>
               <tr>
                 <td>Channels:</td>
-                <td style="text-align: center;">{{ Channel.query.count() }}</td>
+                <td style="text-align: right;">{{ Channel.query.count() }}</td>
               </tr>
               <tr>
                 <td>Hooks:</td>
-                <td style="text-align: center;">{{ Hook.query.count() }}</td>
+                <td style="text-align: right;">{{ Hook.query.count() }}</td>
+              </tr>
+              <tr>
+                <td>Messages:</td>
+                <td style="text-align: right;">{{ message_count }}</td>
               </tr>
             </tbody>
           </table>
@@ -66,14 +70,14 @@
             <thead>
               <tr>
                 <th>Network</th>
-                <th style="text-align: center;">Channels</th>
+                <th style="text-align: right;">Channels</th>
               </tr>
             </thead>
             <tbody>
               {% for network, channel_count in Channel.channel_count_by_network() %}
               <tr>
                 <td>{{ network }}</td>
-                <td style="text-align: center;"><a href="{{ url_for('.channels', network=network) }}">{{ channel_count }}</a></td>
+                <td style="text-align: right;"><a href="{{ url_for('.channels', network=network) }}">{{ channel_count }}</a></td>
               </tr>
               {% endfor %}
             </tbody>

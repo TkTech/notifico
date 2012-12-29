@@ -2,6 +2,7 @@
 import re
 from functools import wraps
 
+import redis
 from flask import (
     Flask,
     g,
@@ -57,6 +58,11 @@ def installation_variables():
 @app.before_request
 def set_db():
     g.db = db
+    g.redis = redis.StrictRedis(
+        host=app.config['REDIS_HOST'],
+        port=app.config['REDIS_PORT'],
+        db=app.config['REDIS_DB']
+    )
 
 
 @app.template_filter('fixlink')

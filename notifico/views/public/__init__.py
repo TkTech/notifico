@@ -1,8 +1,11 @@
 from flask import (
     Blueprint,
     render_template,
-    abort
+    abort,
+    g
 )
+from sqlalchemy import func
+
 from notifico.models import Project, User, Channel, Hook, BotEvent
 
 public = Blueprint('public', __name__, template_folder='templates')
@@ -22,12 +25,22 @@ def landing():
         .limit(10)
     )
 
+    # Get the total number of messages recieved and cache it in redis
+    # for 2 minutes.
+    message_count = g.redis.get('cache_message_count')
+    if message_count is None:
+        message_count = g.db.session.query(
+            func.sum(Project.message_count)
+        ).scalar()
+        g.redis.setex('cache_message_count', 120, message_count)
+
     return render_template('landing.html',
         Project=Project,
         User=User,
         Channel=Channel,
         Hook=Hook,
-        new_projects=new_projects
+        new_projects=new_projects,
+        message_count=message_count
     )
 
 
