@@ -36,7 +36,13 @@ def deploy():
     # Update the source files.
     rsync_project(
         remote_dir=www_root(),
-        local_dir=os.path.abspath('./notifico')
+        local_dir=os.path.abspath('./notifico'),
+        exclude=[
+            'ENV',
+            '*.pyc',
+            '.git',
+            '*.egg-info'
+        ]
     )
 
     with cd(www_root()):
