@@ -28,12 +28,16 @@ if __name__ == '__main__':
             'Flask',
             'Flask-WTF',
             'Flask-Gravatar',
+            'Flask-SQLAlchemy',
             'fabric',
             'sqlalchemy',
             'UtopiaIRC',
             'gevent',
             'oauth2',
-            'redis'
+            'redis',
+            'gunicorn',
+            'requests',
+            'pygithub'
         ],
         dependency_links=[
             'https://github.com/TkTech/utopia/tarball/master#egg=UtopiaIRC'
