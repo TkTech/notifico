@@ -108,6 +108,17 @@ def deploy_bots():
                 run('supervisord -c supervisord.conf')
 
 
+def upgrade_utopia():
+    require('directory', provided_by=('production',))
+    with virtualenv():
+        with cd(env.directory):
+            run(
+                'pip install'
+                ' https://github.com/TkTech/utopia/tarball/'
+                'master#egg=UtopiaIRC --upgrade'
+            )
+
+
 def css():
     with lcd('notifico/static'):
         local('lessc less/custom.less css/custom.css')
