@@ -28,7 +28,7 @@
             <small>
               Created on {{ project.created.strftime("%Y-%m-%d") }} by <a href="{{ url_for('projects.overview', u=project.owner.username) }}">{{ project.owner.username }}</a>
               {% if project.website %}
-              | {{ project.website|fixlink|urlize(40, True) }}
+              | Website: {{ project.website|fixlink|urlize(40, True) }}
               {% endif %}
             </small>
           </div>
@@ -74,7 +74,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for network, channel_count in Channel.channel_count_by_network() %}
+              {% for network, channel_count in channel_count_by_network %}
               <tr>
                 <td>{{ network }}</td>
                 <td style="text-align: right;"><a href="{{ url_for('.channels', network=network) }}">{{ channel_count }}</a></td>

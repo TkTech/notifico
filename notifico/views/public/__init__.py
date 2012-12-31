@@ -1,12 +1,11 @@
 from flask import (
     Blueprint,
     render_template,
-    abort,
     g
 )
 from sqlalchemy import func
 
-from notifico.models import Project, User, Channel, Hook, BotEvent
+from notifico.models import Project, User, Channel, Hook
 
 public = Blueprint('public', __name__, template_folder='templates')
 
@@ -34,10 +33,13 @@ def landing():
         ).scalar()
         g.redis.setex('cache_message_count', 120, message_count)
 
+    channel_count_by_network = Channel.channel_count_by_network()
+
     return render_template('landing.html',
         Project=Project,
         User=User,
         Channel=Channel,
+        channel_count_by_network=channel_count_by_network,
         Hook=Hook,
         new_projects=new_projects,
         message_count=message_count
@@ -61,25 +63,4 @@ def users(page=1):
 
     return render_template('users.html',
         users=q
-    )
-
-
-def events(network, channel):
-    q = Channel.query.filter_by(
-        public=True,
-        channel=channel,
-        host=network
-    ).first()
-    if q is None:
-        # If there isn't at least one public channel listing
-        # for this channel, we display nothing.
-        return abort(404)
-
-    q = BotEvent.query.filter_by(
-        host=network,
-        channel=channel
-    ).order_by(BotEvent.created.desc())
-
-    return render_template('events.html',
-        events=q
     )
