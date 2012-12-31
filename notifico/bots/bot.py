@@ -45,3 +45,7 @@ class BotificoBot(Client):
             return False
 
         return True
+
+    def message_privmsg(self, client, message):
+        # Stop PRIVMSG from going to message_not_handled
+        pass
