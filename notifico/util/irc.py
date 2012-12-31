@@ -41,3 +41,45 @@ def strip_mirc_colors(msg):
     Strips mIRC color codes from `msg`, returning the new string.
     """
     return _STRIP_R.sub('', msg)
+
+
+def to_html(message):
+    from jinja2 import Markup, escape
+
+    c_to_c = {
+        0: 'white',
+        1: '#DADADA',
+        2: '#7FA5EB',
+        3: 'green',
+        4: '#DB5858',
+        5: 'brown',
+        6: 'purple',
+        7: 'orange',
+        8: 'yellow',
+        9: 'lightgreen',
+        10: 'teal',
+        11: '#25B8C2',
+        12: 'lightblue',
+        13: '#E36FB8'
+    }
+
+    def _mirc_to_span(m):
+        return Markup(
+            '<span style="color: {fore};">{text}</span>'.format(
+                text=m.group(3),
+                fore=c_to_c.get(int(m.group(1)), 'black"')
+        ))
+
+    m = []
+    for line in message.split('\n'):
+        m.append(
+            re.sub(
+                #r'\x03(\d{1,2}),?(\d{1,2})(.*?)\x03',
+                #r'\x03([0-9]{1,2}),?([0-9]{1,2})(.*?)\x03',
+                r'\x03(\d{1,2})(,[0-9]{1,2})?(.*?)\x03',
+                _mirc_to_span,
+                escape(line),
+            )
+        )
+
+    return Markup('<br/>'.join(m))

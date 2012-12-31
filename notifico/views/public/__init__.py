@@ -3,46 +3,31 @@ from flask import (
     render_template,
     g
 )
-from sqlalchemy import func
 
-from notifico.models import Project, User, Channel, Hook
+from notifico.models import User, Channel, Project
+from notifico.util import irc
+from notifico.services.messages import MessageService
 
 public = Blueprint('public', __name__, template_folder='templates')
 
 
 @public.route('/')
 def landing():
-    """
-    Public landing page visible to everyone with summary statistics
-    and an intro blurb for unregistered users.
-    """
-    # Find the 10 most recently created projects.
-    new_projects = (
-        Project.query.filter_by(public=True)
-        .order_by(False)
-        .order_by(Project.created.desc())
-        .limit(10)
-    )
+    ms = MessageService(g.redis)
 
-    # Get the total number of messages recieved and cache it in redis
-    # for 2 minutes.
-    message_count = g.redis.get('cache_message_count')
-    if message_count is None:
-        message_count = g.db.session.query(
-            func.sum(Project.message_count)
-        ).scalar()
-        g.redis.setex('cache_message_count', 120, message_count)
+    # Find the 25 most recent messages.
+    recent_messages = ms.recent_messages(0, 25)
+    for message in recent_messages:
+        project = Project.query.get(message['project_id'])
+        if project is None or project.owner.id != message['owner_id']:
+            # Skip messages whose associated project has been deleted.
+            continue
 
-    channel_count_by_network = Channel.channel_count_by_network()
+        message['project'] = project
+        message['msg'] = irc.to_html(message['msg'])
 
     return render_template('landing.html',
-        Project=Project,
-        User=User,
-        Channel=Channel,
-        channel_count_by_network=channel_count_by_network,
-        Hook=Hook,
-        new_projects=new_projects,
-        message_count=message_count
+        recent_messages=recent_messages
     )
 
 

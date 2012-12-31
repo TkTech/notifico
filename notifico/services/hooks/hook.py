@@ -8,6 +8,7 @@ from jinja2 import Environment, PackageLoader
 from notifico import app
 from notifico.util import irc
 from notifico.services import Service
+from notifico.services.messages import MessageService
 
 
 class HookService(object):
@@ -54,20 +55,8 @@ class HookService(object):
         return irc.strip_mirc_colors(msg)
 
     @classmethod
-    def message(cls, message, type_='commit', strip=True):
-        """
-        Build and return the message template.
-        """
-        if strip:
-            message = cls.strip_colors(message)
-
-        return dict(
-            type='message',
-            payload=dict(
-                msg=message,
-                type=type_
-            )
-        )
+    def message(cls, message, strip=True):
+        return cls.strip_colors(message) if strip else message
 
     @classmethod
     def _redis(cls):
@@ -82,22 +71,16 @@ class HookService(object):
 
     @classmethod
     def _request(cls, user, request, hook):
-        r = cls._redis()
+        combined = []
+
+        ms = MessageService(redis=cls._redis())
         for message in cls.handle_request(user, request, hook):
-            # Add the destination information to each message before
-            # sending...
+            combined.append(message)
             for channel in hook.project.channels:
-                message['channel'] = dict(
-                    channel=channel.channel,
-                    host=channel.host,
-                    port=channel.port,
-                    ssl=channel.ssl
-                )
-                # ... and send it on its way.
-                r.rpush(
-                    'queue_{type_}'.format(type_=message['type']),
-                    json.dumps(message)
-                )
+                ms.send_message(message, channel)
+
+        if hook.project.public:
+            ms.log_message('\n'.join(combined), hook.project)
 
     @classmethod
     def form(cls):
