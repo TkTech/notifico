@@ -7,6 +7,21 @@
 </a>
 {% endmacro %}
 
+{% block style %}
+  {{ super() }}
+  <style>
+  .metric {
+    text-align: center;
+  }
+  .metric strong {
+    display: block;
+    font-size: 32px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  </style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
   {% if not g.user %}
@@ -21,6 +36,33 @@
     </div>
   </div>
   {% endif %}
+
+  <div class="row-fluid hidden-phone">
+    <div class="span3 metric">
+      <section>
+        <strong>{{ total_messages }}</strong>
+        Messages
+      </section>
+    </div>
+    <div class="span3 metric">
+      <section>
+        <strong>{{ total_projects }}</strong>
+        Projects
+      </section>
+    </div>
+    <div class="span3 metric">
+      <section>
+        <strong>{{ total_users }}</strong>
+        Users
+      </section>
+    </div>
+    <div class="span3 metric">
+      <section>
+        <strong>{{ total_channels }}</strong>
+        Channels
+      </section>
+    </div>
+  </div>
 
   <div class="row-fluid">
     <div class="span12">

@@ -4,6 +4,8 @@ from flask import (
     g
 )
 
+from sqlalchemy import func
+
 from notifico.models import User, Channel, Project
 from notifico.util import irc
 from notifico.services.messages import MessageService
@@ -26,8 +28,20 @@ def landing():
         message['project'] = project
         message['msg'] = irc.to_html(message['msg'])
 
+    # Sum the total number of messages across all projects
+    total_messages = g.redis.get('cache_message_count')
+    if total_messages is None:
+        total_messages = g.db.session.query(
+            func.sum(Project.message_count)
+        ).scalar()
+        g.redis.setex('cache_message_count', 120, total_messages)
+
     return render_template('landing.html',
-        recent_messages=recent_messages
+        recent_messages=recent_messages,
+        total_projects=Project.query.count(),
+        total_users=User.query.count(),
+        total_messages=total_messages,
+        total_channels=Channel.query.count()
     )
 
 
