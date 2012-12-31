@@ -22,4 +22,4 @@ class PlainTextHook(HookService):
             p = request.args.get('payload', None)
             if not p:
                 return
-        yield cls.message(p[:512], type_='raw')
+        yield cls.message(p[:512])
