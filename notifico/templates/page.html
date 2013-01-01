@@ -1,0 +1,15 @@
+{% macro render_pagination(pg, endpoint) %}
+  <div class="pagination">
+    <ul>
+      {% for page in pg.iter_pages() %}
+        {% if page %}
+          <li {% if page == pg.page %}class="active"{% endif %}>
+            <a href="{{ url_for(endpoint, page=page, **kwargs) }}">{{ page }}</a>
+          </li>
+        {% else %}
+          <li class="disabled"><span>...</span></li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
