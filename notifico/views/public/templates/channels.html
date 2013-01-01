@@ -30,8 +30,8 @@
               {% for channel in pagination.items %}
               <tr>
                 <td nowrap>{{ channel.created|pretty }}</td>
-                <td>{{ channel.channel }}</td>
-                <td>{{ channel.host }}</td>
+                <td nowrap>{{ channel.channel }}</td>
+                <td nowrap>{{ channel.host }}</td>
                 <td>{{ channel.port }}</td>
                 <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
                 <td style="width: 100%;">
