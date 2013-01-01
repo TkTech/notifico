@@ -16,7 +16,7 @@
             <a href="{{ url_for(endpoint, page=page, **kwargs) }}">{{ page }}</a>
           </li>
         {% else %}
-          <li class="disabled">...</li>
+          <li class="disabled"><span>...</span></li>
         {% endif %}
       {% endfor %}
     </ul>
