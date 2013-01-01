@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 __all__ = ('HookService',)
-import json
+import re
 
 import redis
 from jinja2 import Environment, PackageLoader
@@ -56,7 +56,11 @@ class HookService(object):
 
     @classmethod
     def message(cls, message, strip=True):
-        return cls.strip_colors(message) if strip else message
+        # Optionally strip mIRC color codes.
+        message = cls.strip_colors(message) if strip else message
+        # Strip newlines and other whitespace.
+        message = re.sub(r'\s+', ' ', message)
+        return message
 
     @classmethod
     def _redis(cls):
