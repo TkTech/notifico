@@ -109,9 +109,7 @@
             <tbody>
               {% for network, count in popular_networks %}
               <tr>
-                <td style="width: 100%;">
-                    {{ network }}
-                </td>
+                <td style="width: 100%;">{{ network }}</td>
                 <td  style="text-align: center;">
                   <a href="{{ url_for('.channels', network=network) }}">
                     {{ count }}

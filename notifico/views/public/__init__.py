@@ -1,7 +1,8 @@
 from flask import (
     Blueprint,
     render_template,
-    g
+    g,
+    abort
 )
 
 from sqlalchemy import func
@@ -76,6 +77,8 @@ def landing():
 @public.route('/s/channels/<network>')
 def channels(network):
     q = Channel.query.filter_by(host=network, public=True)
+    if not q.count():
+        return abort(404)
 
     return render_template('channels.html',
         channels=q,
