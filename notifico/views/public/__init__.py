@@ -16,20 +16,12 @@ public = Blueprint('public', __name__, template_folder='templates')
 
 @public.route('/')
 def landing():
-    ms = MessageService(g.redis)
-
-    # Find the 25 most recent messages.
-    recent_messages = ms.recent_messages(0, 25)
-    for message in recent_messages:
-        project = Project.query.get(message['project_id'])
-        if project is None or project.owner.id != message['owner_id']:
-            # Skip messages whose associated project has been deleted.
-            continue
-
-        message['project'] = project
-        message['msg'] = irc.to_html(message['msg'])
-
-    # Sum the total number of messages across all projects
+    """
+    Show a landing page giving a short intro blurb to unregistered users
+    and very basic metrics such as total users.
+    """
+    # Sum the total number of messages across all projects, caching
+    # it for the next two minutes.
     total_messages = g.redis.get('cache_message_count')
     if total_messages is None:
         total_messages = g.db.session.query(
@@ -37,6 +29,7 @@ def landing():
         ).scalar()
         g.redis.setex('cache_message_count', 120, total_messages)
 
+    # Find the 10 latest public projects.
     public_projects = (
         Project.query
         .filter_by(public=True)
@@ -45,13 +38,7 @@ def landing():
         .limit(10)
     )
 
-    new_users = (
-        User.query
-        .order_by(False)
-        .order_by(User.joined.desc())
-        .limit(10)
-    )
-
+    # Find the 10 most popular networks.
     popular_networks = (
         g.db.session.query(
             Channel.host, func.count(Channel.channel).label('count')
@@ -63,13 +50,11 @@ def landing():
     )
 
     return render_template('landing.html',
-        recent_messages=recent_messages,
         total_projects=Project.query.count(),
         total_users=User.query.count(),
         total_messages=total_messages,
         total_channels=Channel.query.count(),
         public_projects=public_projects,
-        new_users=new_users,
         popular_networks=popular_networks
     )
 
