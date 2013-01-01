@@ -75,13 +75,15 @@ def channels(network):
 @public.route('/s/projects/<int:page>')
 def projects(page=1):
     per_page = min(int(request.args.get('l', 25)), 100)
+    sort_by = request.args.get('s', 'created')
 
-    pagination = (
-        Project.query
-        .filter_by(public=True)
-        .order_by(False)
-        .order_by(Project.created.desc())
-    ).paginate(page, per_page, False)
+    q = Project.query.filter_by(public=True).order_by(False)
+    q = q.order_by({
+        'created': Project.created.desc(),
+        'messages': Project.message_count.desc()
+    }.get(sort_by, Project.created.desc()))
+
+    pagination = q.paginate(page, per_page, False)
 
     return render_template('projects.html',
         pagination=pagination,
