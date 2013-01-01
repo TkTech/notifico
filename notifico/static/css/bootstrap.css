@@ -5866,6 +5866,7 @@ section > p:last-child {
   background-image: linear-gradient(to bottom, #282828, #282828);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff282828', endColorstr='#ff282828', GradientType=0);
+  border: none;
 }
 #site-navbar .navbar-inner .nav li > a {
   text-shadow: none;
@@ -5880,7 +5881,7 @@ section > p:last-child {
 #site-navbar .navbar-inner .nav > .active > a,
 #site-navbar .navbar-inner .navbar .nav > .active > a:hover,
 #site-navbar .navbar-inner .navbar .nav > .active > a:focus {
-  background-color: #282828;
+  background-color: #72B626;
   color: white;
 }
 #site-navbar .navbar-inner .nav li.dropdown.open > .dropdown-toggle,

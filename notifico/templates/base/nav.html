@@ -12,18 +12,18 @@
       </a>
       <div class="nav-collapse collapse">
         <ul class="nav">
-          <li class="{{ active('public.landing') }} upper">
+          <li class="{{ active('public.') }}">
             <a href="{{ url_for('public.landing') }}">Home</a>
           </li>
           {% if not g.user %}
-          <li class="{{ active('account.login') }} upper">
+          <li class="{{ active('account.login') }}">
             <a href="{{ url_for('account.login') }}">Login</a>
           </li>
-          <li class="{{ active('account.register') }} upper">
+          <li class="{{ active('account.register') }}">
             <a href="{{ url_for('account.register') }}">Register</a>
           </li>
           {% else %}
-          <li class="{{ active('projects.') }} upper">
+          <li class="{{ active('projects.') }}">
             <a href="{{ url_for('projects.overview', u=g.user.username) }}">Projects</a>
           </li>
           {% endif %}
