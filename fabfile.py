@@ -121,4 +121,4 @@ def upgrade_utopia():
 
 def css():
     with lcd('notifico/static'):
-        local('lessc less/custom.less css/custom.css')
+        local('lessc less/bootstrap.less css/bootstrap.css')
