@@ -2,14 +2,14 @@ from flask import (
     Blueprint,
     render_template,
     g,
-    abort
+    abort,
+    request,
+    url_for
 )
 
 from sqlalchemy import func
 
 from notifico.models import User, Channel, Project
-from notifico.util import irc
-from notifico.services.messages import MessageService
 
 public = Blueprint('public', __name__, template_folder='templates')
 
@@ -68,6 +68,24 @@ def channels(network):
     return render_template('channels.html',
         channels=q,
         network=network
+    )
+
+
+@public.route('/s/projects', defaults={'page': 1})
+@public.route('/s/projects/<int:page>')
+def projects(page=1):
+    per_page = min(int(request.args.get('l', 25)), 100)
+
+    pagination = (
+        Project.query
+        .filter_by(public=True)
+        .order_by(False)
+        .order_by(Project.created.desc())
+    ).paginate(page, per_page, False)
+
+    return render_template('projects.html',
+        pagination=pagination,
+        per_page=per_page
     )
 
 
