@@ -5870,10 +5870,12 @@ section > p:last-child {
 #site-navbar .navbar-inner .nav li > a {
   text-shadow: none;
   color: #999;
-  text-transform: uppercase;
 }
 #site-navbar .navbar-inner .nav li > a:hover {
   color: white;
+}
+#site-navbar .navbar-inner .upper {
+  text-transform: uppercase;
 }
 #site-navbar .navbar-inner .nav > .active > a,
 #site-navbar .navbar-inner .navbar .nav > .active > a:hover,
