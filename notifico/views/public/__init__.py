@@ -71,7 +71,7 @@ def channels(network, page=1):
         Channel.host == network,
         Channel.public == True,
         Project.public == True
-    )
+    ).order_by(False).order_by(Channel.created.desc())
 
     pagination = q.paginate(page, per_page, False)
 

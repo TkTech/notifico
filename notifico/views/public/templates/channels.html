@@ -1,5 +1,5 @@
 {% extends "base/body.html" %}
-{% from "page.html" import render_pagination %}
+{% from "page.html" import render_pagination, link_p %}
 
 {% block content %}
 <div class="container-fluid page-content">
@@ -18,6 +18,7 @@
           <table class="table table-vertical table-striped">
             <thead>
               <tr>
+                <th>Created</th>
                 <th>Channel</th>
                 <th>Network</th>
                 <th>Port</th>
@@ -28,16 +29,13 @@
             <tbody>
               {% for channel in pagination.items %}
               <tr>
+                <td nowrap>{{ channel.created|pretty }}</td>
                 <td>{{ channel.channel }}</td>
                 <td>{{ channel.host }}</td>
                 <td>{{ channel.port }}</td>
                 <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-                <td>
-                  {% if channel.project.public %}
-                  <a href="{{ url_for('projects.details', u=channel.project.owner.username, p=channel.project.name) }}">{{ channel.project.full_name }}</a>
-                  {% else %}
-                  <i class="icon-lock"></i>
-                  {% endif %}
+                <td style="width: 100%;">
+                  {{ link_p(channel.project) }}
                 </td>
               </tr>
               {% endfor %}

@@ -1,13 +1,5 @@
 {% extends "base/body.html" %}
-{% from 'page.html' import render_pagination %}
-
-{% macro link_p(project) %}
-<a href="{{ url_for('projects.overview', u=project.owner.username) }}">
-  {{ project.owner.username }}
-</a> / <a href="{{ url_for('projects.details', u=project.owner.username, p=project.name) }}">
-  {{ project.name }}
-</a>
-{% endmacro %}
+{% from 'page.html' import render_pagination, link_p %}
 
 {% block content %}
 <div class="container-fluid">
