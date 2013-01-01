@@ -36,12 +36,40 @@ def landing():
         ).scalar()
         g.redis.setex('cache_message_count', 120, total_messages)
 
+    public_projects = (
+        Project.query
+        .filter_by(public=True)
+        .order_by(False)
+        .order_by(Project.created.desc())
+        .limit(10)
+    )
+
+    new_users = (
+        User.query
+        .order_by(False)
+        .order_by(User.joined.desc())
+        .limit(10)
+    )
+
+    popular_networks = (
+        g.db.session.query(
+            Channel.host, func.count(Channel.channel).label('count')
+        )
+        .filter_by(public=True)
+        .group_by(Channel.host)
+        .order_by('-count')
+        .limit(10)
+    )
+
     return render_template('landing.html',
         recent_messages=recent_messages,
         total_projects=Project.query.count(),
         total_users=User.query.count(),
         total_messages=total_messages,
-        total_channels=Channel.query.count()
+        total_channels=Channel.query.count(),
+        public_projects=public_projects,
+        new_users=new_users,
+        popular_networks=popular_networks
     )
 
 
