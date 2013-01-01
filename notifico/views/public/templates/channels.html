@@ -1,4 +1,6 @@
 {% extends "base/body.html" %}
+{% from "page.html" import render_pagination %}
+
 {% block content %}
 <div class="container-fluid page-content">
   <div class="row-fluid">
@@ -8,7 +10,7 @@
           <h2>Channels</h2>
         </header>
         <div class="content">
-          {% if channels.count() == 0 %}
+          {% if False %}
           <div class="alert alert-info">
             There are no public channels for the network {{ network }}.
           </div>
@@ -24,7 +26,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for channel in channels %}
+              {% for channel in pagination.items %}
               <tr>
                 <td>{{ channel.channel }}</td>
                 <td>{{ channel.host }}</td>
@@ -41,6 +43,7 @@
               {% endfor %}
             </tbody>
           </table>
+          {{ render_pagination(pagination, '.channels', network=network, **request.args) }}
           {% endif %}
         </div>
       </section>

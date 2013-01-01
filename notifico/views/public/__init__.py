@@ -59,15 +59,26 @@ def landing():
     )
 
 
-@public.route('/s/channels/<network>')
-def channels(network):
-    q = Channel.query.filter_by(host=network, public=True)
-    if not q.count():
-        return abort(404)
+@public.route('/s/channels/<network>', defaults={'page': 1})
+@public.route('/s/channels/<network>/<int:page>')
+def channels(network, page=1):
+    """
+    Show all the channels on the given network.
+    """
+    per_page = min(int(request.args.get('l', 25)), 100)
+
+    q = Channel.query.join(Project).filter(
+        Channel.host == network,
+        Channel.public == True,
+        Project.public == True
+    )
+
+    pagination = q.paginate(page, per_page, False)
 
     return render_template('channels.html',
-        channels=q,
-        network=network
+        per_page=per_page,
+        network=network,
+        pagination=pagination
     )
 
 
