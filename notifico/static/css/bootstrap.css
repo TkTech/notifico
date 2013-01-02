@@ -5893,6 +5893,16 @@ section > p:last-child {
 .table-square {
   border: 1px solid #ddd;
 }
+.metric section {
+  background-color: #f4f4f4;
+  background-image: -moz-linear-gradient(top, #f9f9f9, #ededed);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f9f9f9), to(#ededed));
+  background-image: -webkit-linear-gradient(top, #f9f9f9, #ededed);
+  background-image: -o-linear-gradient(top, #f9f9f9, #ededed);
+  background-image: linear-gradient(to bottom, #f9f9f9, #ededed);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff9f9f9', endColorstr='#ffededed', GradientType=0);
+}
 .pull-right {
   float: right;
 }
