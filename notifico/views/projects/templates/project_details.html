@@ -29,7 +29,7 @@
           <div style="clear: both;"></div>
         </header>
         <div class="content">
-          <p><em>Hooks</em> are endpoints for 3rd party services (and scripts) capable of making a HTTP POST request. Hooks recieve messages, which are then formatted and forwarded to <a href="#channels">IRC channels</a>.</p>
+          <p><em>Hooks</em> are endpoints for 3rd party services (and scripts) capable of making a HTTP POST request. Hooks receive messages, which are then formatted and forwarded to <a href="#channels">IRC channels</a>.</p>
           {% if not project.hooks.count() %}
           <div class="alert alert-info">
             You haven't created any hooks yet for this project.
@@ -54,7 +54,7 @@
                   </a>
                 </td>
                 <td>
-                  <a href="{{ url_for('.hook_recieve', pid=project.id, key=hook.key) }}">
+                  <a href="{{ url_for('.hook_receive', pid=project.id, key=hook.key) }}">
                     Link
                   </a>
                 </td>
@@ -103,7 +103,7 @@
           <div style="clear: both;"></div>
         </header>
         <div class="content">
-          <p>Any messages recieved by this project will be forwarded to any of the IRC channels that have been added to them. An operator of the channel may blacklist the project, or ban the bot from entering their channel to prevent abuse.</p>
+          <p>Any messages received by this project will be forwarded to any of the IRC channels that have been added to them. An operator of the channel may blacklist the project, or ban the bot from entering their channel to prevent abuse.</p>
           {% if not project.channels.count() %}
           <div class="alert alert-info">
             No channels have been added to this project.

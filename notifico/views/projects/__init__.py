@@ -332,7 +332,7 @@ def edit_hook(u, p, hid):
 
 
 @projects.route('/h/<int:pid>/<key>', methods=['GET', 'POST'])
-def hook_recieve(pid, key):
+def hook_receive(pid, key):
     h = Hook.query.filter_by(key=key, project_id=pid).first()
     if not h:
         return abort(404)

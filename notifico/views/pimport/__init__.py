@@ -163,7 +163,7 @@ def github():
 
                     repo.create_hook('web', {
                         'url': url_for(
-                            'projects.hook_recieve',
+                            'projects.hook_receive',
                             pid=p.id,
                             key=h.key,
                             _external=True
