@@ -102,11 +102,20 @@ def projects(page=1):
     )
 
 
-@public.route('/s/users/')
+@public.route('/s/users', defaults={'page': 1})
 @public.route('/s/users/<int:page>')
 def users(page=1):
-    q = User.query.order_by(False).order_by(User.joined.desc())
+    per_page = min(int(request.args.get('l', 25)), 100)
+    sort_by = request.args.get('s', 'created')
+
+    q = User.query.order_by(False)
+    q = q.order_by({
+        'created': User.joined.desc()
+    }.get(sort_by, User.joined.desc()))
+
+    pagination = q.paginate(page, per_page, False)
 
     return render_template('users.html',
-        users=q
+        pagination=pagination,
+        per_page=per_page
     )
