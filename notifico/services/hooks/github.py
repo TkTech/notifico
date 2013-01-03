@@ -108,7 +108,6 @@ class GithubHook(HookService):
         if not original['commits']:
             # TODO: No commits, nothing to do. We should add an option for
             # showing tag activity.
-            print('wurt')
             return
 
         if branches:
