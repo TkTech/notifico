@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-wget -O- --post-file $1 $2
+wget -O- --header 'Content-Type: application/json' --post-file $1 $2
