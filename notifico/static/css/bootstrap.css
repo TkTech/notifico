@@ -5866,14 +5866,14 @@ section > p:last-child {
   margin-bottom: 0;
 }
 #site-navbar .navbar-inner {
-  background-color: #282828;
-  background-image: -moz-linear-gradient(top, #282828, #282828);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#282828), to(#282828));
-  background-image: -webkit-linear-gradient(top, #282828, #282828);
-  background-image: -o-linear-gradient(top, #282828, #282828);
-  background-image: linear-gradient(to bottom, #282828, #282828);
+  background-color: #23242a;
+  background-image: -moz-linear-gradient(top, #23242a, #23242a);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#23242a), to(#23242a));
+  background-image: -webkit-linear-gradient(top, #23242a, #23242a);
+  background-image: -o-linear-gradient(top, #23242a, #23242a);
+  background-image: linear-gradient(to bottom, #23242a, #23242a);
   background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff282828', endColorstr='#ff282828', GradientType=0);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff23242a', endColorstr='#ff23242a', GradientType=0);
   border: none;
 }
 #site-navbar .navbar-inner .nav li > a {
@@ -5895,8 +5895,20 @@ section > p:last-child {
 #site-navbar .navbar-inner .nav li.dropdown.open > .dropdown-toggle,
 #site-navbar .navbar-inner .navbar .nav li.dropdown.active > .dropdown-toggle,
 #site-navbar .navbar-inner .navbar .nav li.dropdown.open.active > .dropdown-toggle {
-  background-color: #282828;
+  background-color: #23242a;
+  background-image: -moz-linear-gradient(top, #23242a, #23242a);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#23242a), to(#23242a));
+  background-image: -webkit-linear-gradient(top, #23242a, #23242a);
+  background-image: -o-linear-gradient(top, #23242a, #23242a);
+  background-image: linear-gradient(to bottom, #23242a, #23242a);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff23242a', endColorstr='#ff23242a', GradientType=0);
   color: white;
+}
+#site-navbar .navbar-inner .dropdown-menu {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
 }
 .table-square {
   border: 1px solid #ddd;

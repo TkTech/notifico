@@ -89,10 +89,11 @@ section {
 }
 
 #site-navbar {
+    //-webkit-linear-gradient(top, #23242A, #23242A)
     @backgroundColor: #282828;
 
     .navbar-inner {
-        #gradient > .vertical(@backgroundColor, @backgroundColor);
+        #gradient > .vertical(#23242A, #23242A);
         border: none;
 
         .nav {
@@ -116,8 +117,12 @@ section {
         }
 
         .nav li.dropdown.open > .dropdown-toggle, .navbar .nav li.dropdown.active > .dropdown-toggle, .navbar .nav li.dropdown.open.active > .dropdown-toggle {
-            background-color: @backgroundColor;
+            #gradient > .vertical(#23242A, #23242A);
             color: white;
+        }
+
+        .dropdown-menu {
+            .border-radius(0);
         }
     }
 }
