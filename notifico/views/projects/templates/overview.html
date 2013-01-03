@@ -3,7 +3,7 @@
 
 {% macro row(project) %}
   <tr>
-    <td>
+    <td style="width: 100%;">
       {% if not project.public %}
         <i class="icon-lock"></i>
       {% else %}
@@ -21,7 +21,7 @@
     </td>
     <td style="text-align: center;">{{ project.hooks.count() }}</td>
     {% if is_owner %}
-    <td>
+    <td nowrap>
       <div class="pull-right">
         <a href="{{ url_for('.edit_project', u=user.username, p=project.name) }}" class="btn btn-mini">
           Edit Project
