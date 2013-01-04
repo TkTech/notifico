@@ -74,11 +74,12 @@ class HookService(object):
         )
 
     @classmethod
-    def _request(cls, user, request, hook):
+    def _request(cls, user, request, hook, *args, **kwargs):
         combined = []
 
         ms = MessageService(redis=cls._redis())
-        for message in cls.handle_request(user, request, hook):
+        handler = cls.handle_request(user, request, hook, *args, **kwargs)
+        for message in handler:
             combined.append(message)
             for channel in hook.project.channels:
                 ms.send_message(message, channel)
@@ -124,3 +125,11 @@ class HookService(object):
                 f.data = config[f.id]
 
         return form
+
+    @classmethod
+    def absolute_url(cls, hook):
+        """
+        Returns an absolute URL used as this hooks endpoint if it does
+        not use the standard hook-recieve endpoint.
+        """
+        raise NotImplementedError()

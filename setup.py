@@ -38,7 +38,8 @@ if __name__ == '__main__':
             'redis',
             'gunicorn',
             'requests',
-            'pygithub'
+            'pygithub',
+            'xmltodict'
         ],
         dependency_links=[
             'https://github.com/TkTech/utopia/tarball/master#egg=UtopiaIRC'

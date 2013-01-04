@@ -54,7 +54,11 @@
                   </a>
                 </td>
                 <td>
+                  {% if hook.absolute_url() %}
+                  <a href="{{ hook.absolute_url() }}">
+                  {% else %}
                   <a href="{{ url_for('.hook_receive', pid=project.id, key=hook.key) }}">
+                  {% endif %}
                     Link
                   </a>
                 </td>

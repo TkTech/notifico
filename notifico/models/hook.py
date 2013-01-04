@@ -44,3 +44,11 @@ class Hook(db.Model):
     @property
     def hook(self):
         return HookService.services[self.service_id]
+
+    def absolute_url(self):
+        hook = self.hook
+        try:
+            hook_url = hook.absolute_url(self)
+            return hook_url
+        except NotImplementedError:
+            return None

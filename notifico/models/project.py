@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 __all__ = ('Project',)
+import hashlib
 import datetime
 
 from sqlalchemy.ext.hybrid import hybrid_property
