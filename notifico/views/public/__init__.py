@@ -45,7 +45,7 @@ def landing():
         )
         .filter_by(public=True)
         .group_by(Channel.host)
-        .order_by('-count')
+        .order_by('count desc')
         .limit(10)
     )
 
