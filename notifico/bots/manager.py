@@ -65,7 +65,7 @@ class BotManager(object):
         """
         Returns all of the bots active on `network`.
         """
-        return self._active_bots[network]
+        return self._active_bots[network._replace(ssl=False)]
 
     def _create_bot(self, network):
         """
@@ -78,7 +78,7 @@ class BotManager(object):
             network
         )
         bot.connect()
-        self._active_bots[network].add(bot)
+        self._active_bots[network._replace(ssl=False)].add(bot)
         return bot
 
     def free_nick(self):
