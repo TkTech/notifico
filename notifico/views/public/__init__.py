@@ -10,6 +10,7 @@ from flask import (
 from sqlalchemy import func
 
 from notifico.models import User, Channel, Project
+from notifico.services.hooks import HookService
 
 public = Blueprint('public', __name__, template_folder='templates')
 
@@ -118,4 +119,12 @@ def users(page=1):
     return render_template('users.html',
         pagination=pagination,
         per_page=per_page
+    )
+
+
+@public.route('/s/services')
+def services():
+    services = HookService.services
+    return render_template('services.html',
+        services=services
     )

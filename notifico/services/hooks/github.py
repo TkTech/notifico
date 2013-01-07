@@ -178,6 +178,7 @@ class GithubHook(HookService):
 
         for commit in original['commits']:
             committer = commit.get('committer', {})
+            author = commit.get('author', {})
 
             line = []
 
@@ -189,10 +190,15 @@ class GithubHook(HookService):
 
             # Show the committer.
             attribute_to = None
-            if prefer_username and 'username' in committer:
-                attribute_to = committer['username']
-            elif 'name' in committer:
-                attribute_to = committer['name']
+            if prefer_username:
+                attribute_to = author.get('username')
+                if attribute_to is None:
+                    attribute_to = author.get('username')
+
+            if attribute_to is None:
+                attribute_to = author.get('name')
+                if attribute_to is None:
+                    attribute_to = committer.get('name')
 
             if attribute_to:
                 line.append('{LIGHT_CYAN}{attribute_to}{RESET}'.format(
