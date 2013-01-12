@@ -1,5 +1,21 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
+
+{% block style %}
+  {{ super() }}
+  <style>
+  .metric {
+    text-align: center;
+  }
+  .metric strong {
+    display: block;
+    font-size: 32px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    color: #72B626;
+  }
+  </style>
+{% endblock %}
   
 {% block content %}
 <div class="container-fluid page-content">
@@ -8,6 +24,20 @@
       <h2>
         <a href="{{ url_for('.overview', u=project.owner.username) }}">{{ project.owner.username }}</a>/{{ project.name }}
       </h2>
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div class="span6 metric">
+      <section>
+        <strong>{{ project.message_count }}</strong>
+        <small class="muted"># of Messages</small>
+      </section>
+    </div>
+    <div class="span6 metric">
+      <section>
+        <strong>{{ project.channels.count() }}</strong>
+        <small class="muted"># of Channels</small>
+      </section>
     </div>
   </div>
   {% if is_owner %}
