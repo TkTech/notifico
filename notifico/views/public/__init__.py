@@ -28,6 +28,9 @@ def landing():
         total_messages = g.db.session.query(
             func.sum(Project.message_count)
         ).scalar()
+        if total_messages is None:
+            total_messages = 0
+
         g.redis.setex('cache_message_count', 120, total_messages)
 
     # Find the 10 latest public projects.
