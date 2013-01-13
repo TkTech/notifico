@@ -24,7 +24,7 @@
           </li>
           {% else %}
             {% if g.user.projects.count() %}
-            <li class="dropdown">
+            <li class="dropdown {{ active('projects.') }}">
               <a href="{{ url_for('projects.overview', u=g.user.username) }}"  class="dropdown-toggle" data-toggle="dropdown">
                 Projects
                 <b class="caret"></b>
