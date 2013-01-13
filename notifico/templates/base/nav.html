@@ -23,9 +23,44 @@
             <a href="{{ url_for('account.register') }}">Register</a>
           </li>
           {% else %}
-          <li class="{{ active('projects.') }}">
-            <a href="{{ url_for('projects.overview', u=g.user.username) }}">Projects</a>
-          </li>
+            {% if g.user.projects.count() %}
+            <li class="dropdown">
+              <a href="{{ url_for('projects.overview', u=g.user.username) }}"  class="dropdown-toggle" data-toggle="dropdown">
+                Projects
+                <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                  {% for project in g.user.active_projects(5) %}
+                  <li>
+                    <a href="{{ url_for('projects.details', u=g.user.username, p=project.name) }}">
+                      <div class="pull-left">
+                        {{ project.name }}
+                      </div>
+                      <div class="pull-right">
+                        <span class="badge">{{ project.message_count }}</span>
+                      </div>
+                      <div style="clear: both;"></div>
+                    </a>
+                  </li>
+                  {% endfor %}
+                  <li class="divider"></li>
+                  <li>
+                    <a href="{{ url_for('projects.overview', u=g.user.username) }}">
+                      All Projects
+                    </a>
+                    <a href="{{ url_for('projects.new') }}">
+                      New Project
+                    </a>
+                  </li>
+              </ul>
+            </li>
+            {% else %}
+            <li class="{{ active('projects.') }}">
+              <a href="{{ url_for('projects.overview', u=g.user.username) }}">
+                  Projects
+              </a>
+            </li>
+            {% endif %}
           {% endif %}
         </ul>
         {% if g.user %}

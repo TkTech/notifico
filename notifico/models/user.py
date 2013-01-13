@@ -95,3 +95,8 @@ class User(db.Model):
     @username_i.comparator
     def username_i(cls):
         return CaseInsensitiveComparator(cls.username)
+
+    def active_projects(self, limit=5):
+        q = self.projects.order_by(False).order_by('-message_count')
+        q = q.limit(limit)
+        return q
