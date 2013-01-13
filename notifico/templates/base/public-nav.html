@@ -1,0 +1,15 @@
+{% macro active(end) %}
+{% if request.endpoint.startswith(end) %}active{% endif %}
+{% endmacro %}
+
+<ul class="nav pull-right">
+  <li class="{{ active('public.landing') }}">
+    <a href="{{ url_for('public.landing') }}">Home</a>
+  </li>
+  <li class="{{ active('account.login') }}">
+    <a href="{{ url_for('account.login') }}">Login</a>
+  </li>
+  <li class="{{ active('account.register') }}">
+    <a href="{{ url_for('account.register') }}">Register</a>
+  </li>
+</ul>

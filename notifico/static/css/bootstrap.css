@@ -5866,44 +5866,54 @@ section > p:last-child {
   margin-bottom: 0;
 }
 #site-navbar .navbar-inner {
-  background-color: #23242a;
-  background-image: -moz-linear-gradient(top, #23242a, #23242a);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#23242a), to(#23242a));
-  background-image: -webkit-linear-gradient(top, #23242a, #23242a);
-  background-image: -o-linear-gradient(top, #23242a, #23242a);
-  background-image: linear-gradient(to bottom, #23242a, #23242a);
+  background-color: #f6f6f6;
+  background-image: -moz-linear-gradient(top, #fafafa, #efefef);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fafafa), to(#efefef));
+  background-image: -webkit-linear-gradient(top, #fafafa, #efefef);
+  background-image: -o-linear-gradient(top, #fafafa, #efefef);
+  background-image: linear-gradient(to bottom, #fafafa, #efefef);
   background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff23242a', endColorstr='#ff23242a', GradientType=0);
-  border: none;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffafafa', endColorstr='#ffefefef', GradientType=0);
+  border-bottom: 1px solid #DDD;
 }
 #site-navbar .navbar-inner .nav li > a {
   text-shadow: none;
-  color: #999;
+  color: #666666;
 }
 #site-navbar .navbar-inner .nav li > a:hover {
-  color: white;
+  color: #999999;
 }
-#site-navbar .navbar-inner .upper {
-  text-transform: uppercase;
+#site-navbar .navbar-inner .brand {
+  text-shadow: none;
+}
+#site-navbar .navbar-inner .brand:hover {
+  color: #666666;
 }
 #site-navbar .navbar-inner .nav > .active > a,
 #site-navbar .navbar-inner .navbar .nav > .active > a:hover,
 #site-navbar .navbar-inner .navbar .nav > .active > a:focus {
-  background-color: #72B626;
-  color: white;
+  background-color: #f6f6f6;
+  background-image: -moz-linear-gradient(top, #fafafa, #efefef);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fafafa), to(#efefef));
+  background-image: -webkit-linear-gradient(top, #fafafa, #efefef);
+  background-image: -o-linear-gradient(top, #fafafa, #efefef);
+  background-image: linear-gradient(to bottom, #fafafa, #efefef);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffafafa', endColorstr='#ffefefef', GradientType=0);
+  color: #999999;
 }
 #site-navbar .navbar-inner .nav li.dropdown.open > .dropdown-toggle,
 #site-navbar .navbar-inner .navbar .nav li.dropdown.active > .dropdown-toggle,
 #site-navbar .navbar-inner .navbar .nav li.dropdown.open.active > .dropdown-toggle {
-  background-color: #23242a;
-  background-image: -moz-linear-gradient(top, #23242a, #23242a);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#23242a), to(#23242a));
-  background-image: -webkit-linear-gradient(top, #23242a, #23242a);
-  background-image: -o-linear-gradient(top, #23242a, #23242a);
-  background-image: linear-gradient(to bottom, #23242a, #23242a);
+  background-color: #f6f6f6;
+  background-image: -moz-linear-gradient(top, #fafafa, #efefef);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fafafa), to(#efefef));
+  background-image: -webkit-linear-gradient(top, #fafafa, #efefef);
+  background-image: -o-linear-gradient(top, #fafafa, #efefef);
+  background-image: linear-gradient(to bottom, #fafafa, #efefef);
   background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff23242a', endColorstr='#ff23242a', GradientType=0);
-  color: white;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffafafa', endColorstr='#ffefefef', GradientType=0);
+  color: #999999;
 }
 #site-navbar .navbar-inner .dropdown-menu {
   -webkit-border-radius: 0;
@@ -5922,6 +5932,9 @@ section > p:last-child {
   background-image: linear-gradient(to bottom, #f9f9f9, #ededed);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff9f9f9', endColorstr='#ffededed', GradientType=0);
+}
+[class^="icon-"] {
+  margin-top: 3px;
 }
 .pull-right {
   float: right;

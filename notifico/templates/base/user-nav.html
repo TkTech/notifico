@@ -1,0 +1,44 @@
+{% macro active(end) %}
+{% if request.endpoint.startswith(end) %}active{% endif %}
+{% endmacro %}
+
+<ul class="nav pull-right">
+  
+  <li class="{{ active('public.landing') }}">
+    <a href="{{ url_for('public.landing') }}">
+      <i class="icon-home"></i> Home
+    </a>
+  </li>
+
+  <li class="{{ active('projects.') }}">
+    <a href="{{ url_for('projects.overview', u=g.user.username) }}">
+      <i class="icon-th"></i> Projects
+    </a>
+  </li>
+
+  <!-- User settings and actions  -->
+  <li class="dropdown {{ active('account.') }}">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <i class="icon-user"></i>
+        {{ g.user.username }}
+    </a>
+    <ul class="dropdown-menu">
+        <li>
+          <a href="{{ url_for('account.settings') }}">
+            Settings
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('account.tokens') }}">
+            OAuth Tokens
+          </a>
+        </li>
+        <li class="divider"></li>
+        <li>
+            <a href="{{ url_for('account.logout') }}">
+                Logout
+            </a>
+        </li>
+    </ul>
+  </li>
+</ul>

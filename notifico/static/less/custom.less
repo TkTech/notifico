@@ -89,36 +89,44 @@ section {
 }
 
 #site-navbar {
-    //-webkit-linear-gradient(top, #23242A, #23242A)
-    @backgroundColor: #282828;
+    @textColor: #666;
+    @textHoverColor: #999;
+    @backgroundColor: #FAFAFA;
 
     .navbar-inner {
-        #gradient > .vertical(#23242A, #23242A);
-        border: none;
+        #gradient > .vertical(#FAFAFA, #EFEFEF);
+        border-bottom: 1px solid #DDD;
 
         .nav {
             li > a {
                 text-shadow: none;
-                color: #999;
+                color: @textColor;
 
                 &:hover {
-                    color: white;
+                    color: @textHoverColor;
                 }
             }
         }
 
-        .upper {
-            text-transform: uppercase;
+        .brand {
+            text-shadow: none;
+            &:hover {
+                color: @textColor;
+            }
         }
 
-        .nav > .active > a, .navbar .nav > .active > a:hover, .navbar .nav > .active > a:focus {
-            background-color: #72B626;
-            color: white;
+        .nav > .active > a,
+        .navbar .nav > .active > a:hover,
+        .navbar .nav > .active > a:focus {
+            #gradient > .vertical(#FAFAFA, #EFEFEF);
+            color: @textHoverColor;
         }
 
-        .nav li.dropdown.open > .dropdown-toggle, .navbar .nav li.dropdown.active > .dropdown-toggle, .navbar .nav li.dropdown.open.active > .dropdown-toggle {
-            #gradient > .vertical(#23242A, #23242A);
-            color: white;
+        .nav li.dropdown.open > .dropdown-toggle,
+        .navbar .nav li.dropdown.active > .dropdown-toggle,
+        .navbar .nav li.dropdown.open.active > .dropdown-toggle {
+            #gradient > .vertical(#FAFAFA, #EFEFEF);
+            color: @textHoverColor;
         }
 
         .dropdown-menu {
@@ -135,4 +143,8 @@ section {
     section {
         #gradient > .vertical(#F9F9F9, #EDEDED);
     }
+}
+
+[class^="icon-"] {
+    margin-top: 3px;
 }
