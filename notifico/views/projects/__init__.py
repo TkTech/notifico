@@ -232,10 +232,15 @@ def details(u, p):
 
     is_owner = (g.user and g.user.id == p.owner_id)
 
+    visible_channels = p.channels
+    if not is_owner:
+        visible_channels = visible_channels.filter_by(public=True)
+
     return render_template('project_details.html',
         project=p,
         is_owner=is_owner,
-        user=u
+        user=u,
+        visible_channels=visible_channels
     )
 
 
