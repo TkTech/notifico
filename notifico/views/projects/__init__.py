@@ -124,7 +124,10 @@ def overview(u):
     return render_template('overview.html',
         user=u,
         is_owner=is_owner,
-        projects=projects
+        projects=projects,
+        page_title='Notifico! - {u.username}\'s Projects'.format(
+            u=u
+        )
     )
 
 
