@@ -53,6 +53,15 @@
           <div style="clear: both;"></div>
         </header>
         <div class="content">
+          {% if not projects.count() %}
+          <div class="alert alert-info">
+            {% if is_owner %}
+            You have not created any projects yet.
+            {% else %}
+            This user does not have any public projects.
+            {% endif %}
+          </div>
+          {% else %}
           <table class="table table-striped table-vertical">
             <thead>
               <tr>
@@ -71,6 +80,7 @@
               {% endfor %}
             </tbody>
           </table>
+          {% endif %}
         </div>
       </section>
     </div>
