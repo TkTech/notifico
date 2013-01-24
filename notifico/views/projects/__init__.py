@@ -255,7 +255,11 @@ def details(u, p):
         project=p,
         is_owner=is_owner,
         user=u,
-        visible_channels=visible_channels
+        visible_channels=visible_channels,
+        page_title='Notifico! - {u.username}/{p.name}'.format(
+            u=u,
+            p=p
+        )
     )
 
 
