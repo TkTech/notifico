@@ -1,6 +1,5 @@
 # -*- coding: utf8 -*-
 __all__ = ('Project',)
-import hashlib
 import datetime
 
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -49,11 +48,3 @@ class Project(db.Model):
         q = cls.query.filter(cls.owner_id == owner.id)
         q = q.filter(cls.name_i == name)
         return q.first()
-
-    @classmethod
-    def public_q(cls):
-        return cls.query.filter_by(public=True)
-
-    @classmethod
-    def private_q(cls):
-        return cls.query.filter_by(public=False)

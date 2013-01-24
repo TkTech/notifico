@@ -66,14 +66,9 @@
               </tr>
             </thead>
             <tbody>
-              {% for project in user.public_projects %}
+              {% for project in projects %}
               {{ row(project) }}
               {% endfor %}
-              {% if is_owner %}
-                {% for project in user.private_projects %}
-                {{ row(project) }}
-                {% endfor %}
-              {% endif %}
             </tbody>
           </table>
         </div>

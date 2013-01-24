@@ -110,9 +110,21 @@ def overview(u):
 
     is_owner = (g.user and g.user.id == u.id)
 
+    # Get all projects by decending creation date.
+    projects = (
+        u.projects
+        .order_by(False)
+        .order_by(Project.created.desc())
+    )
+    if not is_owner:
+        # If this isn't the users own page, only
+        # display public projects.
+        projects = projects.filter_by(public=True)
+
     return render_template('overview.html',
         user=u,
-        is_owner=is_owner
+        is_owner=is_owner,
+        projects=projects
     )
 
 

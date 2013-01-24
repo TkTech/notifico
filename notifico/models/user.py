@@ -80,14 +80,6 @@ class User(db.Model):
             return u
         return None
 
-    @property
-    def public_projects(self):
-        return self.projects.filter_by(public=True)
-
-    @property
-    def private_projects(self):
-        return self.projects.filter_by(public=False)
-
     @hybrid_property
     def username_i(self):
         return self.username.lower()
