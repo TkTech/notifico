@@ -5768,11 +5768,30 @@ html,
 body {
   background-color: #E8E8E8;
   background-image: url('/img/groovepaper.png');
+  height: 100%;
 }
 html,
 body,
 p {
   font-family: 'Open Sans', sans-serif;
+}
+.wrapper {
+  min-height: 100%;
+  position: relative;
+}
+.padfix {
+  overflow: auto;
+  padding-bottom: 40px;
+}
+.footer {
+  position: relative;
+  margin-top: -40px;
+  clear: both;
+  border-top: 1px solid #AAA;
+  background-color: white;
+  padding-top: 10px;
+  padding-bottom: 8px;
+  font-size: 75%;
 }
 /* Death to the rounds! */
 .btn,

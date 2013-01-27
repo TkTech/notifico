@@ -10,11 +10,6 @@
     <link href="/css/bootstrap.css?v=1" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     {% block style %}
-    <style>
-    body {
-      padding-top: 60px;
-    }
-    </style>
     {% endblock style %}
     <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
 
@@ -39,10 +34,23 @@
   </head>
 
   <body>
-    {% include "base/nav.html" %}
-
-    {% block content %}
-    {% endblock content %}
+    <div class="wrapper">
+      {% include "base/nav.html" %}
+      <div class="padfix">
+      {% block content %}
+      {% endblock content %}
+      </div>
+    </div>
+    <div class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="span12" style="text-align: right;">
+            Copyright &copy; <span class="current_year">2013</span> Tyler Kennedy
+            | <a href="https://github.com/TkTech/notifico">Get The Source</a>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="/js/jquery-1.8.3.min.js"><\/script>')</script>
@@ -55,6 +63,8 @@
         if($(document.activeElement).is('body')) {
             $('.focus').focus();
         }
+
+        $('.current_year').text(new Date().getFullYear());
     });
     </script>
     {% endblock %}
