@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 import urllib
 import requests
+from itertools import chain
 
 from flask import (
     Blueprint,
@@ -103,14 +104,19 @@ def github():
                 g.db.session.commit()
             return redirect(request.path)
 
-    user_repos = git.get_user().get_repos(type='all')
+    user = git.get_user()
+    # Get all of the users own repositories
+    user_repos = user.get_repos(type='all')
+    # ... and get all of the repos in the users organizations ...
+    all_repos = chain(user_repos, *[o.get_repos() for o in user.get_orgs()])
+    admin_repos = (r for r in all_repos if r.permissions.admin)
 
     summary = None
     options_form = GithubForm()
     if options_form.validate_on_submit():
         summary = []
 
-        for repo in user_repos:
+        for repo in admin_repos:
             # User didn't check the box, don't import this project.
             # A hack-ish solution to wtform's BooleanField limitation,
             # or I would be using wtf.FieldList(wtf.BooleanField(...)).
@@ -196,5 +202,5 @@ def github():
     return render_template('github.html',
         options_form=options_form,
         summary=summary,
-        user_repos=user_repos
+        user_repos=admin_repos
     )
