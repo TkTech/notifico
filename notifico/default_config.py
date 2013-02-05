@@ -45,6 +45,9 @@ GOOGLE = None
 # Misc. Settings
 # ---
 # Should Notifico route static assets (/css/, /js/, etc...)?
+# This is really only useful for debugging and for small deployments.
+# Larger deploys should set this to False and have their proxy/server
+# handle the /static directory.
 HANDLE_STATIC = True
 
 # Usually-static variables injected into each template. Useful
