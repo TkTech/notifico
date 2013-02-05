@@ -36,6 +36,9 @@ REDIS_DB = 0
 SERVICE_GITHUB_CLIENT_ID = None
 SERVICE_GITHUB_CLIENT_SECRET = None
 
+# Your Google Analytics ID (ID-XXXXXXX) as a string.
+# If left blank, the analytics snippet will not be included in the
+# base template.
 GOOGLE = None
 
 # ---
