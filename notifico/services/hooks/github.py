@@ -146,7 +146,7 @@ class GithubHook(HookService):
             ))
 
         # The number of commits included in this push.
-        line.append('{RED}{count}{RESET} {commits}'.format(
+        line.append('{GREEN}{count}{RESET} {commits}'.format(
             count=len(original['commits']),
             commits='commit' if len(original['commits']) == 1 else 'commits',
             **HookService.colors
