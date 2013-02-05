@@ -348,7 +348,10 @@ def edit_hook(u, p, hid):
 @projects.route('/h/<int:pid>/<key>', methods=['GET', 'POST'])
 def hook_receive(pid, key):
     h = Hook.query.filter_by(key=key, project_id=pid).first()
-    if not h:
+    if not h or not h.project:
+        # The hook being pushed to doesn't exist, has been deleted,
+        # or is a leftover from a project cull (which destroyed the project
+        # but not the hooks associated with it).
         return abort(404)
 
     # Increment the hooks message_count....
