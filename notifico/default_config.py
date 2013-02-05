@@ -6,6 +6,8 @@ import os
 # ---
 # Flask Misc.
 # ---
+# This key MUST be changed before you make a site public, as it is used
+# to sign the secure cookies used for sessions.
 SECRET_KEY = 'YouReallyShouldChangeThisYouKnow'
 
 # ---
@@ -17,6 +19,8 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(db_path)
 # ---
 # Flask-WTF
 # ---
+# Automatic CSRF support on forms to protect from attacks. It is
+# always recommended to leave this on.
 CSRF_ENABLED = True
 
 # ---
