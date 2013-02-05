@@ -139,7 +139,7 @@ class GithubHook(HookService):
 
         # The user doing the push, if available.
         if j['pusher']:
-            line.append('{LIGHT_CYAN}{pusher}{RESET} pushed'.format(
+            line.append('{ORANGE}{pusher}{RESET} pushed'.format(
                 pusher=j['pusher'],
                 **HookService.colors
             ))
@@ -201,18 +201,18 @@ class GithubHook(HookService):
                     attribute_to = committer.get('name')
 
             if attribute_to:
-                line.append('{LIGHT_CYAN}{attribute_to}{RESET}'.format(
+                line.append('{ORANGE}{attribute_to}{RESET}'.format(
                     attribute_to=attribute_to,
                     **HookService.colors
                 ))
 
-            line.append('{PINK}{sha}{RESET}'.format(
+            line.append('{GREEN}{sha}{RESET}'.format(
                 sha=commit['id'][:7],
                 **HookService.colors
             ))
 
             if show_branch and j['branch']:
-                line.append('/ {PINK}{branch}{RESET}'.format(
+                line.append('/ {GREEN}{branch}{RESET}'.format(
                     branch=j['branch'],
                     **HookService.colors
                 ))
