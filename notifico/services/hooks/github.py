@@ -127,6 +127,7 @@ class GithubHook(HookService):
         Create and return a one-line summary of the push in `j`.
         """
         original = j['original']
+        show_branch = config.get('show_branch', True)
 
         # Build the push summary.
         line = []
@@ -151,6 +152,12 @@ class GithubHook(HookService):
             **HookService.colors
         ))
 
+        if show_branch and j['branch']:
+            line.append('to {GREEN}{branch}{RESET}'.format(
+                branch=j['branch'],
+                **HookService.colors
+            ))
+
         # File movement summary.
         line.append(u'[+{added}/-{removed}/\u00B1{modified}]'.format(
             added=len(j['files']['added']),
@@ -171,7 +178,6 @@ class GithubHook(HookService):
         """
         Create and yield a one-line summary of each commit in `j`.
         """
-        show_branch = config.get('show_branch', True)
         prefer_username = config.get('prefer_username', True)
 
         original = j['original']
@@ -210,12 +216,6 @@ class GithubHook(HookService):
                 sha=commit['id'][:7],
                 **HookService.colors
             ))
-
-            if show_branch and j['branch']:
-                line.append('/ {GREEN}{branch}{RESET}'.format(
-                    branch=j['branch'],
-                    **HookService.colors
-                ))
 
             line.append('-')
             line.append(commit['message'])
