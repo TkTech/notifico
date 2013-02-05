@@ -78,11 +78,7 @@
             <tbody>
               {% for hook in project.hooks %}
               <tr>
-                <td>
-                  <a href="{{ url_for('.edit_hook', p=project.name, u=user.username, hid=hook.id) }}">
-                    {{ hook.hook.SERVICE_NAME }}
-                  </a>
-                </td>
+                <td>{{ hook.hook.SERVICE_NAME }}</td>
                 <td>
                   {% if hook.absolute_url() %}
                   <a href="{{ hook.absolute_url() }}">
@@ -100,6 +96,9 @@
                 </td>
                 <td>
                   <div class="pull-right">
+                    <a href="{{ url_for('.edit_hook', p=project.name, u=user.username, hid=hook.id) }}" class="btn btn-mini">
+                      <i class="icon-pencil"></i> Edit Hook
+                    </a>
                     <a href="{{ url_for('.delete_hook', p=project.name, u=user.username, hid=hook.id) }}" class="btn btn-mini btn-danger">
                       <i class="icon-trash icon-white"></i> Delete
                     </a>

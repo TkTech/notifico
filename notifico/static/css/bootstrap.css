@@ -5955,6 +5955,9 @@ section > p:last-child {
 [class^="icon-"] {
   margin-top: 3px;
 }
+.btn-mini [class^="icon-"] {
+  margin-top: 1px;
+}
 .pull-right {
   float: right;
 }
