@@ -48,6 +48,8 @@
             {% if is_owner %}
             <a href="{{ url_for('.new') }}" class="btn btn-success">New Project</a>
             {% if config.SERVICE_GITHUB_CLIENT_ID and config.SERVICE_GITHUB_CLIENT_SECRET %}
+            {# Importing from github is only enabled if you've added the OAuth tokens required for
+               the API #}
             <a href="{{ url_for('pimport.github') }}" class="btn btn-info">Import From Github</a>
             {% endif %}
             {% endif %}

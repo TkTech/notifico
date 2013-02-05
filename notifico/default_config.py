@@ -29,6 +29,10 @@ REDIS_DB = 0
 # ---
 # Service integration configuration.
 # ---
+# Your Github OAuth CLIENT_ID and CLIENT_SECRET tokens, as given
+# to you when you create an application on github. If one or both of
+# these are left blank, the "Import From Github" button will not appear
+# on the projects page.
 SERVICE_GITHUB_CLIENT_ID = None
 SERVICE_GITHUB_CLIENT_SECRET = None
 
