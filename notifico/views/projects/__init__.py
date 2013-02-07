@@ -219,17 +219,13 @@ def delete_project(u, p):
         # (403 Forbidden)
         return abort(403)
 
-    form = PasswordConfirmForm()
-    if form.validate_on_submit():
+    if request.method == 'POST' and request.form.get('do') == 'd':
         g.db.session.delete(p)
         g.db.session.commit()
         flash('Your project has been deleted.', 'success')
         return redirect(url_for('.overview', u=u.username))
 
-    return render_template('delete_project.html',
-        project=p,
-        form=form
-    )
+    return render_template('delete_project.html', project=p)
 
 
 @projects.route('/<u>/<p>')
