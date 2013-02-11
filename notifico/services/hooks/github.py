@@ -133,27 +133,27 @@ class GithubHook(HookService):
         line = []
 
         # The name of the repository.
-        line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
+        line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
             name=original['repository']['name'],
             **HookService.colors
         ))
 
         # The user doing the push, if available.
         if j['pusher']:
-            line.append('{ORANGE}{pusher}{RESET} pushed'.format(
+            line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
                 pusher=j['pusher'],
                 **HookService.colors
             ))
 
         # The number of commits included in this push.
-        line.append('{GREEN}{count}{RESET} {commits}'.format(
+        line.append(u'{GREEN}{count}{RESET} {commits}'.format(
             count=len(original['commits']),
             commits='commit' if len(original['commits']) == 1 else 'commits',
             **HookService.colors
         ))
 
         if show_branch and j['branch']:
-            line.append('to {GREEN}{branch}{RESET}'.format(
+            line.append(u'to {GREEN}{branch}{RESET}'.format(
                 branch=j['branch'],
                 **HookService.colors
             ))
@@ -166,12 +166,12 @@ class GithubHook(HookService):
         ))
 
         # The shortened URL linking to the compare page.
-        line.append('{PINK}{compare_link}{RESET}'.format(
+        line.append(u'{PINK}{compare_link}{RESET}'.format(
             compare_link=GithubHook.shorten(original['compare']),
             **HookService.colors
         ))
 
-        return ' '.join(line)
+        return u' '.join(line)
 
     @classmethod
     def _create_commit_summary(cls, j, config):
@@ -189,7 +189,7 @@ class GithubHook(HookService):
             line = []
 
             # The name of the repository.
-            line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
+            line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
                 name=original['repository']['name'],
                 **HookService.colors
             ))
@@ -207,20 +207,20 @@ class GithubHook(HookService):
                     attribute_to = committer.get('name')
 
             if attribute_to:
-                line.append('{ORANGE}{attribute_to}{RESET}'.format(
+                line.append(u'{ORANGE}{attribute_to}{RESET}'.format(
                     attribute_to=attribute_to,
                     **HookService.colors
                 ))
 
-            line.append('{GREEN}{sha}{RESET}'.format(
+            line.append(u'{GREEN}{sha}{RESET}'.format(
                 sha=commit['id'][:7],
                 **HookService.colors
             ))
 
-            line.append('-')
+            line.append(u'-')
             line.append(commit['message'])
 
-            yield ' '.join(line)
+            yield u' '.join(line)
 
     @classmethod
     def shorten(cls, url):
