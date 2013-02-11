@@ -9,7 +9,7 @@ from flask import (
 
 from sqlalchemy import func
 
-from notifico.models import User, Channel, Project
+from notifico.models import User, Channel, Project, Hook
 from notifico.services.hooks import HookService
 
 public = Blueprint('public', __name__, template_folder='templates')
@@ -53,13 +53,24 @@ def landing():
         .limit(10)
     )
 
+    popular_services = (
+        g.db.session.query(
+            Hook.service_id, func.count(Hook.service_id).label('count')
+        )
+        .group_by(Hook.service_id)
+        .order_by('count desc')
+        .limit(10)
+    )
+
     return render_template('landing.html',
         total_projects=Project.query.count(),
         total_users=User.query.count(),
         total_messages=total_messages,
         total_channels=Channel.query.count(),
         public_projects=public_projects,
-        popular_networks=popular_networks
+        popular_networks=popular_networks,
+        popular_services=popular_services,
+        services=HookService.services
     )
 
 

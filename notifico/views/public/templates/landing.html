@@ -70,7 +70,7 @@
       {# Show recently sent messages from public channels. #}
       <section>
         <header>
-          <h2>New Projects</h2>
+          <h2>Newest Projects</h2>
         </header>
         <div class="content">
           <table class="table table-striped">
@@ -98,7 +98,7 @@
     <div class="span6">
       <section>
         <header>
-          <h2>Networks</h2>
+          <h2>Top Networks</h2>
         </header>
         <div class="content">
           <table class="table table-striped">
@@ -116,6 +116,36 @@
                   <a href="{{ url_for('.channels', network=network) }}">
                     {{ count }}
                   </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span6">
+      <section>
+        <header>
+          <h2>Popular Services</h2>
+        </header>
+        <div class="content">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for service_id, count in popular_services %}
+              <tr>
+                <td style="width: 100%;">{{ services[service_id].SERVICE_NAME }}</td>
+                <td  style="text-align: center;">
+                  {{ count }}
                 </td>
               </tr>
               {% endfor %}
