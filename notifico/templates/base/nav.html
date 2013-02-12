@@ -1,6 +1,6 @@
-<div id="site-navbar" class="navbar">
+<div id="site-navbar" class="navbar navbar-fixed-top">
   <div class="navbar-inner">
-    <div class="container-fluid">
+    <div class="container">
 
       <!-- Toggle for button -->
       <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -11,6 +11,8 @@
 
       <!-- Branding -->
       <a class="brand" href="{{ url_for('public.landing') }}">Notifico</a>
+      {% block nav_header %}
+      {% endblock %}
 
       <div class="nav-collapse collapse">
         {% if g.user %}

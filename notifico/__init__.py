@@ -19,8 +19,7 @@ gravatar = Gravatar(
     app,
     size=100,
     rating='g',
-    default='retro',
-    force_default=False,
+    default='mm',
     force_lower=False
 )
 

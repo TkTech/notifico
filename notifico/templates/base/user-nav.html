@@ -6,7 +6,7 @@
   
   <li class="{{ active('public.landing') }}">
     <a href="{{ url_for('public.landing') }}">
-      <i class="icon-home"></i> Home
+      <i class="icon-home"></i>
     </a>
   </li>
 
@@ -19,8 +19,7 @@
   <!-- User settings and actions  -->
   <li class="dropdown {{ active('account.') }}">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-        <i class="icon-user"></i>
-        {{ g.user.username }}
+        <i class="icon-user"></i> Settings
     </a>
     <ul class="dropdown-menu">
         <li>
