@@ -14,3 +14,7 @@ testing.db
 # Testing configuration
 local_config/
 local_config.py
+
+# Alembic migrations
+alembic/
+alembic.ini
