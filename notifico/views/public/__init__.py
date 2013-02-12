@@ -10,7 +10,7 @@ from flask import (
     url_for
 )
 
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, or_
 
 from notifico.models import User, Channel, Project, Hook
 from notifico.services.hooks import HookService
@@ -37,9 +37,8 @@ def landing():
         g.redis.setex('cache_message_count', 120, total_messages)
 
     # Find the 10 latest public projects.
-    public_projects = (
-        Project.query
-        .filter_by(public=True)
+    new_projects = (
+        Project.visible(Project.query, user=g.user)
         .order_by(False)
         .order_by(Project.created.desc())
         .limit(10)
@@ -84,7 +83,7 @@ def landing():
         total_users=User.query.count(),
         total_messages=total_messages,
         total_channels=Channel.query.count(),
-        public_projects=public_projects,
+        new_projects=new_projects,
         popular_networks=popular_networks,
         popular_services=popular_services,
         services=HookService.services,
@@ -121,7 +120,7 @@ def projects(page=1):
     per_page = min(int(request.args.get('l', 25)), 100)
     sort_by = request.args.get('s', 'created')
 
-    q = Project.query.filter_by(public=True).order_by(False)
+    q = Project.visible(Project.query, user=g.user).order_by(False)
     q = q.order_by({
         'created': Project.created.desc(),
         'messages': Project.message_count.desc()

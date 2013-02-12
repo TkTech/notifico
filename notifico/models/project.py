@@ -2,6 +2,7 @@
 __all__ = ('Project',)
 import datetime
 
+from sqlalchemy import or_
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from notifico import db
@@ -48,3 +49,19 @@ class Project(db.Model):
         q = cls.query.filter(cls.owner_id == owner.id)
         q = q.filter(cls.name_i == name)
         return q.first()
+
+    @classmethod
+    def visible(cls, q, user=None):
+        if user and user.in_group('admin'):
+            # We don't do any filtering for admins,
+            # who should have full visibility.
+            pass
+        elif user:
+            q = q.filter(or_(
+                Project.owner_id == user.id,
+                Project.public == True
+            ))
+        else:
+            q = q.filter(Project.public == True)
+
+        return q

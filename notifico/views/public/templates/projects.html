@@ -22,7 +22,10 @@
               {% for project in pagination.items %}
               <tr>
                 <td nowrap>{{ project.created|pretty }}</td>
-                <td style="width: 100%;">{{ link_p(project) }}</td>
+                <td style="width: 100%;">
+                  {% if not project.public %}<i class="icon-lock"></i>{% endif %}
+                  {{ link_p(project) }}
+                </td>
                 <td style="text-align: center;">{{ project.message_count }}</td>
               </tr>
               {% endfor %}
