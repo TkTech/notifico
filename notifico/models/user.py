@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-__all__ = ('User',)
+__all__ = ('User', 'Group')
 import os
 import base64
 import hashlib
@@ -75,6 +75,10 @@ class User(db.Model):
 
     @classmethod
     def login(cls, username, password):
+        """
+        Returns a `User` object for which `username` and `password` are
+        correct, otherwise ``None``.
+        """
         u = cls.by_username(username)
         if u and u.password == cls._hash_password(password, u.salt):
             return u
@@ -89,6 +93,54 @@ class User(db.Model):
         return CaseInsensitiveComparator(cls.username)
 
     def active_projects(self, limit=5):
+        """
+        Return this users most active projets (by descending message count).
+        """
         q = self.projects.order_by(False).order_by('-message_count')
         q = q.limit(limit)
         return q
+
+    def in_group(self, name):
+        """
+        Returns ``True`` if this user is in the group `name`, otherwise
+        ``False``.
+        """
+        return any(g.name == name.lower() for g in self.groups)
+
+    def add_group(self, name):
+        """
+        Adds this user to the group `name` if not already in it. The group
+        will be created if needed.
+        """
+        if self.in_group(name):
+            # We're already in this group.
+            return
+
+        self.groups.append(Group.get_or_create(name=name))
+
+
+class Group(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    name = db.Column(db.String(255), unique=True, nullable=False)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    owner = db.relationship('User', backref=db.backref(
+        'groups', order_by=id, lazy='joined'
+    ))
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return '<Group({name!r})>'.format(name=self.name)
+
+    @classmethod
+    def get_or_create(cls, name):
+        name = name.lower()
+
+        g = cls.query.filter_by(name=name).first()
+        if not g:
+            g = Group(name=name)
+
+        return g
