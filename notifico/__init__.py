@@ -36,6 +36,19 @@ def user_required(f):
         return f(*args, **kwargs)
     return _wrapped
 
+
+def group_required(f, name):
+    """
+    A decorator for views which required a user to be member
+    to a particular group.
+    """
+    @wraps(f)
+    def _wrapped(*args, **kwargs):
+        if g.user is None or not g.user.in_group(name):
+            return redirect(url_for('account.login'))
+        return f(*args, **kwargs)
+    return _wrapped
+
 from notifico.views.account import account
 from notifico.views.public import public
 from notifico.views.projects import projects
