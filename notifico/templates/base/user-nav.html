@@ -33,6 +33,14 @@
             OAuth Tokens
           </a>
         </li>
+        {% if g.user.in_group('admin') %}
+        <li class="divider"></li>
+        <li>
+          <a href="{{ url_for('admin.admin_projects') }}">
+            Admin - Projects
+          </a>
+        </li>
+        {% endif %}
         <li class="divider"></li>
         <li>
             <a href="{{ url_for('account.logout') }}">
