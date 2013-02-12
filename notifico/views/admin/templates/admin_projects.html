@@ -1,0 +1,41 @@
+{% extends "base/body.html" %}
+{% from 'page.html' import render_pagination, link_p %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row-fluid">
+    <div class="span12">
+      <section>
+        <header>
+          <h2>All Projects</h2>
+        </header>
+        <div class="content">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Created</th>
+                <th>Name</th>
+                <th>Messages</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for project in pagination.items %}
+              <tr>
+                <td>
+                  <i class="icon-{{ 'unlock' if project.public else 'lock' }}"></i>
+                </td>
+                <td nowrap>{{ project.created|pretty }}</td>
+                <td style="width: 100%;">{{ link_p(project) }}</td>
+                <td style="text-align: center;">{{ project.message_count }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {{ render_pagination(pagination, '.admin_projects', **request.args) }}
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
