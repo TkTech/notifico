@@ -1,3 +1,6 @@
+import time
+import datetime
+
 from flask import (
     Blueprint,
     render_template,
@@ -7,7 +10,7 @@ from flask import (
     url_for
 )
 
-from sqlalchemy import func
+from sqlalchemy import func, extract
 
 from notifico.models import User, Channel, Project, Hook
 from notifico.services.hooks import HookService
@@ -62,6 +65,20 @@ def landing():
         .limit(10)
     )
 
+    # Create a list of total project counts in the form
+    # [(day, count), ...].
+    projects_graph_data = []
+    now = datetime.datetime.utcnow()
+    for day_ago in range(30):
+        limit = now - datetime.timedelta(days=day_ago)
+
+        projects_graph_data.append(
+            (
+                time.mktime(limit.timetuple()) * 1000,
+                Project.query.filter(Project.created <= limit).count()
+            )
+        )
+
     return render_template('landing.html',
         total_projects=Project.query.count(),
         total_users=User.query.count(),
@@ -70,7 +87,8 @@ def landing():
         public_projects=public_projects,
         popular_networks=popular_networks,
         popular_services=popular_services,
-        services=HookService.services
+        services=HookService.services,
+        projects_graph_data=projects_graph_data
     )
 
 
