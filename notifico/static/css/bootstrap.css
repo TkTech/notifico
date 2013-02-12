@@ -5767,7 +5767,7 @@ a.badge:hover {
 html,
 body {
   background-color: #E8E8E8;
-  background-image: url('/img/groovepaper.png');
+  background-image: url('/img/pw_maze_white.png');
   height: 100%;
 }
 html,
@@ -5942,10 +5942,6 @@ section > p:last-child {
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
-}
-#site-navbar .navbar-header li span {
-  padding: 10px 15px 10px;
-  display: block;
 }
 .table-square {
   border: 1px solid #ddd;
