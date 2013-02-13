@@ -236,12 +236,17 @@ def details(u, p):
     """
     # Check to see if this project should be visible to
     # the current user.
-    if not p.public and not g.user:
-        return abort(403)
-    elif not p.is_owner(g.user) and not g.user.in_group('admin'):
-        return abort(403)
+    if not p.public:
+        if not g.user:
+            # This isn't a public project and there is no user to
+            # check against.
+            return abort(403)
+        elif not p.is_owner(g.user) and not g.user.in_group('admin'):
+            # This isn't a public project, this isn't the owner, and
+            # isn't an admin user.
+            return abort(403)
 
-    is_owner = (g.user and g.user.id == p.owner_id)
+    is_owner = p.is_owner(g.user)
 
     visible_channels = p.channels
     if not is_owner:
