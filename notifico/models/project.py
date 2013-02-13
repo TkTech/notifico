@@ -52,11 +52,17 @@ class Project(db.Model):
 
     @classmethod
     def visible(cls, q, user=None):
+        """
+        Modifies the sqlalchemy query `q` to only show projects accessible
+        to `user`. If `user` is ``None``, only shows public projects.
+        """
         if user and user.in_group('admin'):
             # We don't do any filtering for admins,
             # who should have full visibility.
             pass
         elif user:
+            # We only show the projects that are either public,
+            # or are owned by `user`.
             q = q.filter(or_(
                 Project.owner_id == user.id,
                 Project.public == True
@@ -65,3 +71,9 @@ class Project(db.Model):
             q = q.filter(Project.public == True)
 
         return q
+
+    def is_owner(self, user):
+        """
+        Returns ``True`` if `user` is the owner of this project.
+        """
+        return user and user.id == self.owner.id

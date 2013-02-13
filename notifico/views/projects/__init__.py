@@ -234,11 +234,11 @@ def details(u, p):
     """
     Show an existing project's details.
     """
+    # Check to see if this project should be visible to
+    # the current user.
     if not p.public and not g.user:
-        # Not public and no logged in user. (Forbidden)
         return abort(403)
-    elif not p.public and p.owner.id != g.user.id:
-        # Not public and not owner. (Forbidden)
+    elif not p.is_owner(g.user) and not g.user.in_group('admin'):
         return abort(403)
 
     is_owner = (g.user and g.user.id == p.owner_id)
