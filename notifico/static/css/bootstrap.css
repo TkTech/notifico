@@ -5784,6 +5784,11 @@ p {
   padding-top: 60px;
   padding-bottom: 40px;
 }
+@media (max-width: 979px) {
+  .padfix {
+    padding-top: 0px;
+  }
+}
 .footer {
   position: relative;
   margin-top: -40px;
