@@ -5794,6 +5794,7 @@ p {
 }
 /* Death to the rounds! */
 .btn,
+.alert,
 .square {
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
