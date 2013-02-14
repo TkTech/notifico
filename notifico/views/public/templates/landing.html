@@ -1,11 +1,4 @@
 {% extends "base/body.html" %}
-{% macro link_p(project) %}
-<a href="{{ url_for('projects.overview', u=project.owner.username) }}">
-  {{ project.owner.username }}
-</a> / <a href="{{ url_for('projects.details', u=project.owner.username, p=project.name) }}">
-  {{ project.name }}
-</a>
-{% endmacro %}
 
 {% block script %}
   {{ super() }}
@@ -103,8 +96,7 @@
               <tr>
                 <td nowrap>{{ project.created|pretty }}</td>
                 <td style="width: 100%;">
-                  {% if not project.public %}<i class="icon-lock"></i>{% endif %}
-                  {{ link_p(project) }}
+                  {{ repo_link(project) }}
                 </td>
                 <td style="text-align: center;">{{ project.message_count }}</td>
               </tr>

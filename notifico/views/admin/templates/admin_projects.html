@@ -1,5 +1,5 @@
 {% extends "base/body.html" %}
-{% from 'page.html' import render_pagination, link_p %}
+{% from 'page.html' import render_pagination %}
 
 {% block content %}
 <div class="container">
@@ -13,7 +13,6 @@
           <table class="table table-striped">
             <thead>
               <tr>
-                <th></th>
                 <th>Created</th>
                 <th>Name</th>
                 <th>Messages</th>
@@ -23,11 +22,8 @@
             <tbody>
               {% for project in pagination.items %}
               <tr>
-                <td>
-                  <i class="icon-{{ 'unlock' if project.public else 'lock' }}"></i>
-                </td>
                 <td nowrap>{{ project.created|pretty }}</td>
-                <td style="width: 100%;">{{ link_p(project) }}</td>
+                <td style="width: 100%;">{{ repo_link(project) }}</td>
                 <td style="text-align: center;">{{ project.message_count }}</td>
                 <td nowrap>
                   <div class="pull-right">

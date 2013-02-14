@@ -4,12 +4,7 @@
 {% macro row(project) %}
   <tr>
     <td style="width: 100%;">
-      {% if not project.public %}
-        <i class="icon-lock"></i>
-      {% else %}
-        <i class="icon-unlock"></i>    
-      {% endif %}
-      <a href="{{ url_for('.details', p=project.name, u=user.username) }}">{{ project.full_name }}</a>
+      {{ repo_link(project) }}
     </td>
     <td style="text-align: center;">{{ project.message_count }}</td>
     <td style="text-align: center;">
