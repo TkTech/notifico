@@ -5,12 +5,10 @@ from flask import (
     Blueprint,
     render_template,
     g,
-    abort,
-    request,
-    url_for
+    request
 )
 
-from sqlalchemy import func, extract, or_
+from sqlalchemy import func
 
 from notifico.models import User, Channel, Project, Hook
 from notifico.services.hooks import HookService
