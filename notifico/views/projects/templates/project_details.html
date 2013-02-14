@@ -1,22 +1,6 @@
 {% extends "base/body.html" %}
 {% import "forms.html" as forms %}
 
-{% block style %}
-  {{ super() }}
-  <style>
-  .metric {
-    text-align: center;
-  }
-  .metric strong {
-    display: block;
-    font-size: 32px;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    color: #72B626;
-  }
-  </style>
-{% endblock %}
-
 {% block content %}
 <div class="container page-content">
   <div class="row-fluid">
@@ -30,13 +14,13 @@
     <div class="span6 metric">
       <section>
         <strong>{{ project.message_count }}</strong>
-        <small class="muted"># of Messages</small>
+        <small class="muted">Messages</small>
       </section>
     </div>
     <div class="span6 metric">
       <section>
         <strong>{{ project.channels.count() }}</strong>
-        <small class="muted"># of Channels</small>
+        <small class="muted">Channels</small>
       </section>
     </div>
   </div>

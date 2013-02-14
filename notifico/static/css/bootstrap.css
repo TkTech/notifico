@@ -5797,17 +5797,12 @@ p {
   padding-bottom: 8px;
   font-size: 75%;
 }
-/* Death to the rounds! */
-.btn,
-.alert,
-.square {
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
-}
 .table-vertical td {
   vertical-align: middle;
 }
+.btn,
+.alert,
+.square,
 select,
 textarea,
 input[type="text"],
@@ -5829,18 +5824,18 @@ input[type="color"],
   -moz-border-radius: 0px;
   border-radius: 0px;
 }
-.form-actions {
+form .form-actions {
   background: transparent;
 }
-.required {
+form .required {
   color: red;
 }
 .homepage-unit {
   background-color: white;
   border: 1px solid #AAA;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
   -webkit-box-shadow: 0 1px 5px rgba(0,0,0,0.1), inset 0 1px 0 white;
   -moz-box-shadow: 0 1px 5px rgba(0,0,0,0.1), inset 0 1px 0 white;
   box-shadow: 0 1px 5px rgba(0,0,0,0.1), inset 0 1px 0 white;
@@ -5882,6 +5877,11 @@ section > header h2 {
   font-size: 24px;
   margin: 0;
   line-height: 30px;
+}
+section > header h3 {
+  font-size: 14px;
+  margin: 0;
+  line-height: 20px;
 }
 section > p:first-child {
   margin-top: 0;
@@ -5950,6 +5950,9 @@ section > p:last-child {
 .table-square {
   border: 1px solid #ddd;
 }
+.metric {
+  text-align: center;
+}
 .metric section {
   background-color: #f4f4f4;
   background-image: -moz-linear-gradient(top, #f9f9f9, #ededed);
@@ -5959,6 +5962,13 @@ section > p:last-child {
   background-image: linear-gradient(to bottom, #f9f9f9, #ededed);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff9f9f9', endColorstr='#ffededed', GradientType=0);
+}
+.metric strong {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  font-size: 32px;
+  font-weight: 200;
 }
 [class^="icon-"] {
   margin-top: 3px;
