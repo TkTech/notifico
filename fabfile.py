@@ -97,7 +97,6 @@ def deploy_bots():
             run('pip install supervisor')
             # Update the supervisord configuration.
             put('misc/deploy/supervisord.conf', 'supervisord.conf')
-            put('misc/deploy/run_bots.sh', 'run_bots.sh')
 
             if exists('/tmp/supervisord.pid'):
                 # Supervisord is already running, so ask it to restart
