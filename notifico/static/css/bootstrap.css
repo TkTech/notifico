@@ -2158,10 +2158,7 @@ table {
 }
 .table th,
 .table td {
-  padding-left: 8px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-right: 0px;
+  padding: 8px 0px 8px 8px;
   line-height: 20px;
   text-align: left;
   vertical-align: top;
