@@ -74,7 +74,11 @@ class BotManager(object):
         nickname = self.free_nick()
         bot = self._bot_class(
             self,
-            Account.new(nickname=nickname, username=u"notific", realname=u"Notifico! - http://n.tkte.ch/"),
+            Account.new(
+                nickname=nickname,
+                username=u"notifico",
+                realname=u"Notifico! - http://n.tkte.ch/"
+            ),
             network
         )
         bot.connect()
