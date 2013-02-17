@@ -49,3 +49,11 @@ class BotificoBot(Client):
     def message_privmsg(self, client, message):
         # Stop PRIVMSG from going to message_not_handled
         pass
+
+    def event_disconnected(self):
+        """
+        The client has been disconnected, for any reason. Usually occurs
+        on a network error.
+        """
+        self.manager.give_up_nick(self.account.nickname)
+        self.manager.remove_bot(self)

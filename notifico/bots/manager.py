@@ -101,3 +101,11 @@ class BotManager(object):
         A retiring bot is giving its nick up.
         """
         self._nick_stack.append(nickname)
+
+    def remove_bot(self, client):
+        network = client.network._replace(ssl=False)
+
+        if network not in self._active_bots:
+            return
+
+        self._active_bots[network].discard(client)
