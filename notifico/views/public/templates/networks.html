@@ -1,0 +1,45 @@
+{% extends "base/body.html" %}
+{% from 'page.html' import render_pagination %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="span12">
+      <section>
+        <header>
+          <h3>Networks</h3>
+        </header>
+        <div class="content">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Host</th>
+                <th style="text-align: center;">Channels (Unique)</th>
+                <th style="text-align: center;">Channels (Total)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for network, di_count, count in pagination.items %}
+              <tr>
+                <td style="width: 100%;">{{ network }}</td>
+                <td nowrap style="text-align: center;">
+                  <a href="{{ url_for('.channels', network=network) }}">
+                    {{ di_count }}
+                  </a>
+                </td>
+                <td nowrap style="text-align: center;">
+                  <a href="{{ url_for('.channels', network=network) }}">
+                    {{ count }}
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {{ render_pagination(pagination, '.networks', **request.args) }}
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

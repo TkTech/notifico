@@ -61,7 +61,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for network, count in popular_networks %}
+              {% for network, count in top_networks %}
               <tr>
                 <td style="width: 100%;">{{ network }}</td>
                 <td  nowrap style="text-align: center;">
@@ -73,6 +73,7 @@
               {% endfor %}
             </tbody>
           </table>
+          <a class="btn btn-info" href="{{ url_for('.networks') }}">See All {{ total_networks }} Networks</a>
         </div>
       </section>
     </div>

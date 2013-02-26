@@ -2,7 +2,7 @@
 __all__ = ('Channel',)
 import datetime
 
-from sqlalchemy import func
+from sqlalchemy import func, or_, and_
 
 from notifico import db
 from notifico.models.bot import BotEvent
@@ -56,3 +56,19 @@ class Channel(db.Model):
             ssl=self.ssl,
             channel=self.channel
         ).order_by(BotEvent.created.desc()).first()
+
+    @classmethod
+    def visible(cls, q, user=None):
+        """
+        Modifies the sqlalchemy query `q` to only show channels accessible
+        to `user`. If `user` is ``None``, only shows public channels in
+        public projects.
+        """
+        if user and user.in_group('admin'):
+            # We don't do any filtering for admins,
+            # who should have full visibility.
+            pass
+        else:
+            q = q.filter(Channel.public == True)
+
+        return q
