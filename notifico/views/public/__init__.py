@@ -22,17 +22,17 @@ def landing():
     Show a landing page giving a short intro blurb to unregistered users
     and very basic metrics such as total users.
     """
-    # Sum the total number of messages across all projects, caching
-    # it for the next two minutes.
-    total_messages = g.redis.get('cache_message_count')
-    if total_messages is None:
-        total_messages = g.db.session.query(
-            func.sum(Project.message_count)
-        ).scalar()
-        if total_messages is None:
-            total_messages = 0
+    # # Sum the total number of messages across all projects, caching
+    # # it for the next two minutes.
+    # total_messages = g.redis.get('cache_message_count')
+    # if total_messages is None:
+    #     total_messages = g.db.session.query(
+    #         func.sum(Project.message_count)
+    #     ).scalar()
+    #     if total_messages is None:
+    #         total_messages = 0
 
-        g.redis.setex('cache_message_count', 120, total_messages)
+    #     g.redis.setex('cache_message_count', 120, total_messages)
 
     # Find the 10 latest public projects.
     new_projects = (
@@ -45,7 +45,8 @@ def landing():
     # Find the 10 most popular networks.
     popular_networks = (
         g.db.session.query(
-            Channel.host, func.count(Channel.channel).label('count')
+            Channel.host,
+            func.count(func.distinct(Channel.channel)).label('count')
         )
         .filter_by(public=True)
         .group_by(Channel.host)
@@ -77,10 +78,6 @@ def landing():
     #     )
 
     return render_template('landing.html',
-        total_projects=Project.query.count(),
-        total_users=User.query.count(),
-        total_messages=total_messages,
-        total_channels=Channel.query.count(),
         new_projects=new_projects,
         popular_networks=popular_networks
     )
