@@ -9,7 +9,7 @@ from flask import (
 )
 
 from notifico import user_required, group_required
-from notifico.models import Group, Project
+from notifico.models import Group, Project, Channel, Hook
 
 admin = Blueprint('admin', __name__, template_folder='templates')
 
@@ -63,3 +63,24 @@ def delete_project(pid):
     g.db.session.commit()
 
     return redirect(url_for('.admin_projects'))
+
+
+@admin.route('/orphan')
+@group_required('admin')
+def admin_orphans():
+    """
+    Murders all orphans.
+    """
+    # Clean up orphaned channels.
+    g.db.session.query(Channel).\
+        filter(~Channel.project.has()).\
+        delete(synchronize_session=False)
+
+    # Clean up orphaned hooks.
+    g.db.session.query(Hook).\
+        filter(~Hook.project.has()).\
+        delete(synchronize_session=False)
+
+    g.db.session.commit()
+
+    return 'Orphans cleaned.'
