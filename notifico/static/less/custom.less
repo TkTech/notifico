@@ -2,7 +2,7 @@
 
 html, body {
   background-color: #E8E8E8;
-  background-image: url('/img/pw_maze_white.png');
+  background-image: url('/img/subtle_grunge.png');
   height: 100%;
 }
 
@@ -13,18 +13,7 @@ html, body, p {
 .wrapper {
   min-height: 100%;
   position: relative;
-}
-
-.padfix {
   overflow: auto;
-  padding-top: 60px;
-  padding-bottom: 40px;
-}
-
-@media (max-width: 979px) {
-  .padfix {
-    padding-top: 0px;
-  }
 }
 
 .footer {
@@ -39,6 +28,7 @@ html, body, p {
 
 .table-vertical td {
   vertical-align: middle;
+  border-top: none;
 }
 
 .btn,
@@ -82,92 +72,6 @@ form {
   #gradient > .vertical(#F9F9F9, #EDEDED);
 }
 
-/* Nixed from Genghis */
-section {
-  background-color: white;
-  margin:  20px 0;
-  padding: 20px;
-  border: 1px solid #AAA;
-  .border-radius(0);
-  .box-shadow(~"0 1px 5px rgba(0,0,0,0.1), inset 0 1px 0 white");
-
-  > header {
-    .border-radius(4px 4px 0 0);
-    margin: -20px -20px 20px;
-    padding: 9px 20px;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #ddd;
-    .box-shadow(inset 0 1px 0 white);
-
-    h2 {
-      font-size:   24px;
-      margin:      0;
-      line-height: 30px;
-    }
-    h3 {
-      font-size:   14px;
-      margin:      0;
-      line-height: 20px;
-    }
-  }
-
-  > p:first-child {
-    margin-top: 0;
-  }
-
-  > p:last-child {
-    margin-bottom: 0;
-  }
-}
-
-#site-navbar {
-  @textColor: #666;
-  @textHoverColor: #999;
-  @backgroundColor: #FAFAFA;
-
-  .navbar-inner {
-    #gradient > .vertical(#F1F1F1, #F1F1F1);
-    border-bottom: 1px solid #DDD;
-    .border-radius(0);
-
-    .nav {
-      li > a {
-        text-shadow: none;
-        color: @textColor;
-
-        &:hover {
-          color: @textHoverColor;
-        }
-      }
-    }
-
-    .brand {
-      text-shadow: none;
-      &:hover {
-        color: @textColor;
-      }
-    }
-
-    .nav > .active > a,
-    .navbar .nav > .active > a:hover,
-    .navbar .nav > .active > a:focus {
-      #gradient > .vertical(#FAFAFA, #EFEFEF);
-      color: @textHoverColor;
-    }
-
-    .nav li.dropdown.open > .dropdown-toggle,
-    .navbar .nav li.dropdown.active > .dropdown-toggle,
-    .navbar .nav li.dropdown.open.active > .dropdown-toggle {
-      #gradient > .vertical(#FAFAFA, #EFEFEF);
-      color: @textHoverColor;
-    }
-
-    .dropdown-menu {
-      .border-radius(0);
-    }
-  }
-}
-
 .table-square {
   border: 1px solid #ddd;
 }
@@ -196,4 +100,55 @@ section {
   [class^="icon-"] {
     margin-top: 1px;
   }
+}
+
+.nav-top {
+  padding-top: 20px;
+}
+
+.navbar-inner {
+  .border-radius(0);
+}
+
+/* Nixed from Genghis */
+section {
+  background-color: white;
+  margin:  20px 0;
+  padding: 20px;
+  border: 1px solid #d4d4d4;
+  .border-radius(0);
+  .box-shadow(~"0 1px 5px rgba(0,0,0,0.1), inset 0 1px 0 white");
+
+  > header {
+    .border-radius(4px 4px 0 0);
+    margin: -20px -20px 20px;
+    padding: 9px 20px;
+    background-color: #f5f5f5;
+    #gradient > .vertical(#FFFFFF, #F2F2F2);
+    border-bottom: 1px solid #ddd;
+    .box-shadow(inset 0 1px 0 white);
+
+    h2 {
+      font-size:   24px;
+      margin:      0;
+      line-height: 30px;
+    }
+    h3 {
+      font-size:   14px;
+      margin:      0;
+      line-height: 20px;
+    }
+  }
+
+  > p:first-child {
+    margin-top: 0;
+  }
+
+  > p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.content {
+  padding-bottom: 20px;
 }

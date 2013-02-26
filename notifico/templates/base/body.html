@@ -8,6 +8,9 @@
   {{ project.name }}
 </a>
 {% endmacro %}
+{% macro active(end) %}
+{% if request.endpoint.startswith(end) %}active{% endif %}
+{% endmacro %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -44,12 +47,62 @@
   </head>
 
   <body>
-    <div class="wrapper">
-      {% include "base/nav.html" %}
-      <div class="padfix">
-      {% block content %}
-      {% endblock content %}
+    <div class="wrapper container">
+
+      <div class="navbar nav-top">
+        <div class="navbar-inner">
+          <a class="brand" href="/">Notifico</a>
+          <ul class="nav pull-right">
+            <li class="{{ active('public.landing') }}">
+              <a href="/"><i class="icon-home"></i> Home</a>
+            </li>
+            {% if g.user %}
+            <li class="{{ active('projects.') }}">
+              <a href="{{ url_for('projects.overview', u=g.user.username) }}">
+                <i class="icon-th"></i> Projects
+              </a>
+            </li>
+            <!-- User settings and actions  -->
+            <li class="dropdown {{ active('account.') }}">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <i class="icon-user"></i> Settings
+              </a>
+              <ul class="dropdown-menu">
+                  <li>
+                    <a href="{{ url_for('account.settings') }}">
+                      Settings
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{{ url_for('account.tokens') }}">
+                      OAuth Tokens
+                    </a>
+                  </li>
+                  <li class="divider"></li>
+                  <li>
+                      <a href="{{ url_for('account.logout') }}">
+                          Logout
+                      </a>
+                  </li>
+              </ul>
+            </li>
+            {% else %}
+            <li>
+              <a href="{{ url_for('account.login') }}">Login</a>
+            </li>
+            <li>
+              <a href="{{ url_for('account.register') }}">Register</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
       </div>
+
+      <div class="container content">
+        {% block content %}
+        {% endblock content %}
+      </div>
+
     </div>
     <div class="footer">
       <div class="container">
@@ -67,15 +120,15 @@
     <script src="/js/bootstrap.js"></script>
     {% block script %}
     <script>
-    $(function(){
-        // Focus on the username box, but only if
-        // the user hasn't already focused on something else.
-        if($(document.activeElement).is('body')) {
-            $('.focus').focus();
-        }
+      $(function(){
+          // Focus on the username box, but only if
+          // the user hasn't already focused on something else.
+          if($(document.activeElement).is('body')) {
+              $('.focus').focus();
+          }
 
-        $('.current_year').text(new Date().getFullYear());
-    });
+          $('.current_year').text(new Date().getFullYear());
+      });
     </script>
     {% endblock %}
   </body>
