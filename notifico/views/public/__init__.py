@@ -39,8 +39,7 @@ def landing():
         Project.visible(Project.query, user=g.user)
         .order_by(False)
         .order_by(Project.created.desc())
-        .limit(10)
-    )
+    ).paginate(1, 10, False)
 
     # Find the 10 most popular networks.
     popular_networks = (
