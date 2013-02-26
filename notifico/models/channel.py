@@ -2,7 +2,7 @@
 __all__ = ('Channel',)
 import datetime
 
-from sqlalchemy import func, or_, and_
+from sqlalchemy import func
 
 from notifico import db
 from notifico.models.bot import BotEvent
@@ -20,7 +20,7 @@ class Channel(db.Model):
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     project = db.relationship('Project', backref=db.backref(
-        'channels', order_by=id, lazy='dynamic'
+        'channels', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
     ))
 
     @classmethod
@@ -64,11 +64,16 @@ class Channel(db.Model):
         to `user`. If `user` is ``None``, only shows public channels in
         public projects.
         """
+        from notifico.models import Project
+
         if user and user.in_group('admin'):
             # We don't do any filtering for admins,
             # who should have full visibility.
             pass
         else:
-            q = q.filter(Channel.public == True)
+            q = q.join(Channel.project).filter(
+                Project.public == True,
+                Channel.public == True
+            )
 
         return q

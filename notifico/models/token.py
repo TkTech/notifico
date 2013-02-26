@@ -16,7 +16,7 @@ class AuthToken(db.Model):
 
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     owner = db.relationship('User', backref=db.backref(
-        'tokens', order_by=id, lazy='dynamic'
+        'tokens', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
     ))
 
     @classmethod

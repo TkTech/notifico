@@ -7,7 +7,7 @@
     <div class="span12">
       <section>
         <header>
-          <h2>Channels</h2>
+          <h3>Channels on {{ network }}</h3>
         </header>
         <div class="content">
           {% if False %}
@@ -35,13 +35,13 @@
                 <td>{{ channel.port }}</td>
                 <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
                 <td style="width: 100%;">
-                  {{ link_p(channel.project) }}
+                  {% if channel.project %}{{ repo_link(channel.project) }}{% endif %}
                 </td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
-          {{ render_pagination(pagination, '.channels', network=network, **request.args) }}
+          {{ render_pagination(pagination, '.network', network=network) }}
           {% endif %}
         </div>
       </section>

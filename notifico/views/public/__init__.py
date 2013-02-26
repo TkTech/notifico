@@ -46,33 +46,10 @@ def landing():
     )
 
 
-@public.route('/s/channels/<network>', defaults={'page': 1})
-@public.route('/s/channels/<network>/<int:page>')
-def channels(network, page=1):
-    """
-    Show all the channels on the given network.
-    """
+@public.route('/s/networks/')
+def networks():
     per_page = min(int(request.args.get('l', 25)), 100)
-
-    q = Channel.query.join(Project).filter(
-        Channel.host == network,
-        Channel.public == True,
-        Project.public == True
-    ).order_by(False).order_by(Channel.created.desc())
-
-    pagination = q.paginate(page, per_page, False)
-
-    return render_template('channels.html',
-        per_page=per_page,
-        network=network,
-        pagination=pagination
-    )
-
-
-@public.route('/s/networks', defaults={'page': 1})
-@public.route('/s/networks/<int:page>')
-def networks(page=1):
-    per_page = min(int(request.args.get('l', 25)), 100)
+    page = max(int(request.args.get('page', 1)), 1)
 
     q = (
         Channel.visible(g.db.session.query(
@@ -90,6 +67,25 @@ def networks(page=1):
     return render_template('networks.html',
         pagination=pagination,
         per_page=per_page
+    )
+
+
+@public.route('/s/networks/<network>/')
+def network(network):
+    per_page = min(int(request.args.get('l', 25)), 100)
+    page = max(int(request.args.get('page', 1)), 1)
+
+    q = Channel.visible(
+        Channel.query.filter(Channel.host == network),
+        user=g.user
+    ).order_by(Channel.created.desc())
+
+    pagination = q.paginate(page, per_page, False)
+
+    return render_template('channels.html',
+        per_page=per_page,
+        network=network,
+        pagination=pagination
     )
 
 

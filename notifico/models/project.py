@@ -18,7 +18,7 @@ class Project(db.Model):
 
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     owner = db.relationship('User', backref=db.backref(
-        'projects', order_by=id, lazy='dynamic'
+        'projects', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
     ))
 
     full_name = db.Column(db.String(101), nullable=False, unique=True)

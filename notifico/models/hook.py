@@ -17,7 +17,7 @@ class Hook(db.Model):
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     project = db.relationship('Project', backref=db.backref(
-        'hooks', order_by=id, lazy='dynamic'
+        'hooks', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
     ))
 
     message_count = db.Column(db.Integer, default=0)
