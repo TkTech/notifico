@@ -53,28 +53,28 @@ def landing():
         .limit(10)
     )
 
-    popular_services = (
-        g.db.session.query(
-            Hook.service_id, func.count(Hook.service_id).label('count')
-        )
-        .group_by(Hook.service_id)
-        .order_by('count desc')
-        .limit(10)
-    )
+    # popular_services = (
+    #     g.db.session.query(
+    #         Hook.service_id, func.count(Hook.service_id).label('count')
+    #     )
+    #     .group_by(Hook.service_id)
+    #     .order_by('count desc')
+    #     .limit(10)
+    # )
 
-    # Create a list of total project counts in the form
-    # [(day, count), ...].
-    projects_graph_data = []
-    now = datetime.datetime.utcnow()
-    for day_ago in range(30):
-        limit = now - datetime.timedelta(days=day_ago)
+    # # Create a list of total project counts in the form
+    # # [(day, count), ...].
+    # projects_graph_data = []
+    # now = datetime.datetime.utcnow()
+    # for day_ago in range(30):
+    #     limit = now - datetime.timedelta(days=day_ago)
 
-        projects_graph_data.append(
-            (
-                time.mktime(limit.timetuple()) * 1000,
-                Project.query.filter(Project.created <= limit).count()
-            )
-        )
+    #     projects_graph_data.append(
+    #         (
+    #             time.mktime(limit.timetuple()) * 1000,
+    #             Project.query.filter(Project.created <= limit).count()
+    #         )
+    #     )
 
     return render_template('landing.html',
         total_projects=Project.query.count(),
@@ -82,10 +82,7 @@ def landing():
         total_messages=total_messages,
         total_channels=Channel.query.count(),
         new_projects=new_projects,
-        popular_networks=popular_networks,
-        popular_services=popular_services,
-        services=HookService.services,
-        projects_graph_data=projects_graph_data
+        popular_networks=popular_networks
     )
 
 
