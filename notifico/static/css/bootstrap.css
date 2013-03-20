@@ -6517,6 +6517,15 @@ section > p:last-child {
 .content {
   padding-bottom: 20px;
 }
+.project {
+  margin-bottom: 12px;
+  border-bottom: 1px dashed #f9f9f9;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.project .name {
+  font-size: 16px;
+}
 .pull-right {
   float: right;
 }
