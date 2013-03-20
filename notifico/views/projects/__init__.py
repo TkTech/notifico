@@ -5,7 +5,6 @@ from flask import (
     render_template,
     g,
     redirect,
-    flash,
     url_for,
     abort,
     request
@@ -167,7 +166,6 @@ def new():
 
             g.db.session.commit()
 
-            flash('Your project has been created.', 'success')
             return redirect(url_for('.details', u=g.user.username, p=p.name))
 
     return render_template('new_project.html', form=form)
@@ -198,7 +196,6 @@ def edit_project(u, p):
             p.public = form.public.data
             p.full_name = '{0}/{1}'.format(g.user.username, p.name)
             g.db.session.commit()
-            flash('Your changes have been saved.', 'success')
             return redirect(url_for('.overview', u=u.username))
 
     return render_template('edit_project.html',
@@ -222,7 +219,6 @@ def delete_project(u, p):
     if request.method == 'POST' and request.form.get('do') == 'd':
         g.db.session.delete(p)
         g.db.session.commit()
-        flash('Your project has been deleted.', 'success')
         return redirect(url_for('.overview', u=u.username))
 
     return render_template('delete_project.html', project=p)
@@ -285,14 +281,12 @@ def new_hook(u, p, sid):
         p.hooks.append(h)
         g.db.session.add(h)
         g.db.session.commit()
-        flash('Your hook has been created.', 'success')
         return redirect(url_for('.details', p=p.name, u=u.username))
     elif form is None and request.method == 'POST':
         h = Hook.new(sid)
         p.hooks.append(h)
         g.db.session.add(h)
         g.db.session.commit()
-        flash('Your hook has been created.', 'success')
         return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('new_hook.html',
@@ -328,12 +322,10 @@ def edit_hook(u, p, hid):
         h.config = hook_service.pack_form(form)
         g.db.session.add(h)
         g.db.session.commit()
-        flash('Your hook has been saved.', 'success')
         return redirect(url_for('.details', p=p.name, u=u.username))
     elif form is None and request.method == 'POST':
         g.db.session.add(h)
         g.db.session.commit()
-        flash('Your hook has been saved.', 'success')
         return redirect(url_for('.details', p=p.name, u=u.username))
     elif form:
         hook_service.load_form(form, h.config)
@@ -396,7 +388,6 @@ def delete_hook(u, p, hid):
         p.hooks.remove(h)
         g.db.session.delete(h)
         g.db.session.commit()
-        flash('The hook has been deleted.', 'success')
         return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('delete_hook.html',
@@ -436,7 +427,6 @@ def new_channel(u, p):
             p.channels.append(c)
             g.db.session.add(c)
             g.db.session.commit()
-            flash('Your channel has been created.', 'success')
             return redirect(url_for('.details', p=p.name, u=u.username))
         else:
             form.channel.errors = [wtf.ValidationError(
@@ -474,7 +464,6 @@ def delete_channel(u, p, cid):
         c.project.channels.remove(c)
         g.db.session.delete(c)
         g.db.session.commit()
-        flash('The channel has been removed.', 'success')
         return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('delete_channel.html',

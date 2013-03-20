@@ -4,8 +4,7 @@ from flask import (
     url_for,
     redirect,
     request,
-    render_template,
-    flash
+    render_template
 )
 
 from notifico import user_required, group_required
@@ -56,7 +55,6 @@ def admin_projects(page=1):
 def delete_project(pid):
     p = Project.query.get(pid)
     if not p:
-        flash('That project does not exist.', 'error')
         return redirect(url_for('.admin_projects'))
 
     g.db.session.delete(p)

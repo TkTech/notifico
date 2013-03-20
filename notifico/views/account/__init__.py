@@ -4,7 +4,6 @@ from flask import (
     g,
     redirect,
     current_app,
-    flash,
     url_for,
     session,
     abort
@@ -107,7 +106,6 @@ def login():
     Standard login form.
     """
     if g.user:
-        flash('You must logout before logging in.', 'error')
         return redirect(url_for('public.landing'))
 
     form = UserLoginForm()
@@ -115,8 +113,7 @@ def login():
         u = User.by_username(form.username.data)
         session['_u'] = u.id
         session['_uu'] = u.username
-        flash('Welcome back!', 'success')
-        return redirect(url_for('public.landing'))
+        return redirect(url_for(''))
 
     return render_template('login.html', form=form)
 
@@ -145,7 +142,6 @@ def register():
 
     # Make sure this instance is allowing new users.
     if not current_app.config.get('PUBLIC_NEW_USERS', True):
-        flash('New registrations are currently disabled.', 'error')
         return redirect(url_for('public.landing'))
 
     form = UserRegisterForm()
@@ -155,7 +151,6 @@ def register():
         g.db.session.add(u)
         g.db.session.commit()
         # ... and send them back to the login screen.
-        flash('Your account has been created!', 'success')
         return redirect(url_for('.login'))
 
     return render_template('register.html', form=form)
@@ -174,7 +169,6 @@ def settings(do=None):
     if do == 'p' and password_form.validate_on_submit():
         # Change the users password.
         g.user.set_password(password_form.password.data)
-        flash('Your password has been changed.', 'success')
         g.db.session.commit()
         return redirect(url_for('.settings'))
     elif do == 'd' and delete_form.validate_on_submit():
@@ -189,7 +183,6 @@ def settings(do=None):
         g.db.session.delete(g.user)
         g.db.session.commit()
 
-        flash('Your account has been deleted.', 'success')
         return redirect(url_for('.login'))
 
     return render_template('settings.html',
@@ -219,7 +212,6 @@ def tokens(tid=None):
         g.db.session.delete(t)
         g.db.session.commit()
 
-        flash('That token has been deleted.', 'success')
         return redirect(url_for('.tokens'))
 
     return render_template('tokens.html')
