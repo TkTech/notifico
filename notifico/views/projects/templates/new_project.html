@@ -15,7 +15,7 @@
           {{ forms.render_field(form.public) }}
           <div class="form-actions">
             <button type="submit" class="btn btn-primary">Create Project</button>
-            <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn">Cancel</a>
+            <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn">Cancel</a>
           </div>
         </form>
       </div>

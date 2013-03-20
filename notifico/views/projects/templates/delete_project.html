@@ -12,7 +12,7 @@
           <p>Are you sure you want to delete the project <strong>{{ project.name }}</strong>?</p>
           <div class="form-actions">
             <button type="submit" class="btn btn-danger" value="d" name="do">Delete Project</button>
-            <a href="{{ url_for('.overview', u=g.user.username) }}" class="btn btn-success">Cancel</a>
+            <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-success">Cancel</a>
           </div>
         </form>
       </div>

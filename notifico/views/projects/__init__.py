@@ -97,7 +97,7 @@ def project_action(f):
 
 
 @projects.route('/<u>/')
-def overview(u):
+def dashboard(u):
     """
     Display an overview of all the user's projects with summary
     statistics.
@@ -120,7 +120,7 @@ def overview(u):
         # display public projects.
         projects = projects.filter_by(public=True)
 
-    return render_template('overview.html',
+    return render_template('dashboard.html',
         user=u,
         is_owner=is_owner,
         projects=projects,
@@ -196,7 +196,7 @@ def edit_project(u, p):
             p.public = form.public.data
             p.full_name = '{0}/{1}'.format(g.user.username, p.name)
             g.db.session.commit()
-            return redirect(url_for('.overview', u=u.username))
+            return redirect(url_for('.dashboard', u=u.username))
 
     return render_template('edit_project.html',
         project=p,
@@ -219,7 +219,7 @@ def delete_project(u, p):
     if request.method == 'POST' and request.form.get('do') == 'd':
         g.db.session.delete(p)
         g.db.session.commit()
-        return redirect(url_for('.overview', u=u.username))
+        return redirect(url_for('.dashboard', u=u.username))
 
     return render_template('delete_project.html', project=p)
 

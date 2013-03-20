@@ -78,7 +78,7 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Import!</button>
-                    <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn">Cancel</a>
+                    <a href="{{ url_for('projects.dashboard', u=g.user.username) }}" class="btn">Cancel</a>
                 </div>
             </section>
         </div>
@@ -114,7 +114,7 @@
                         </tbody>
                     </table>
                     {% endif %}
-                    <a href="{{ url_for('projects.overview', u=g.user.username) }}" class="btn btn-primary">Done</a>
+                    <a href="{{ url_for('projects.dashboard', u=g.user.username) }}" class="btn btn-primary">Done</a>
                 </div>
             </section>
         </div>
