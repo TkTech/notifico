@@ -76,6 +76,12 @@ class GithubConfigForm(wtf.Form):
         'If checked, show github usernames instead of commiter name when'
         ' possible.'
     ))
+    full_project_name = wtf.BooleanField('Full Project Name', validators=[
+        wtf.Optional()
+    ], default=False, description=(
+        'If checked, show the full github project name (ex: tktech/notifico)'
+        ' instead of the Notifico project name (ex: notifico)'
+    ))
 
 
 class GithubHook(HookService):
@@ -128,13 +134,23 @@ class GithubHook(HookService):
         """
         original = j['original']
         show_branch = config.get('show_branch', True)
+        full_project_name = config.get('full_project_name', False)
 
         # Build the push summary.
         line = []
 
         # The name of the repository.
+        project_Name = original['repository']['name']
+        if full_project_name:
+            # The use wants the <username>/<project name> form from
+            # github, not the Notifico name.
+            project_name = '{username}/{project_Name}'.format(
+                username=original['repository']['owner']['name'],
+                project_Name=project_Name
+            )
+
         line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
-            name=original['repository']['name'],
+            name=project_name,
             **HookService.colors
         ))
 
