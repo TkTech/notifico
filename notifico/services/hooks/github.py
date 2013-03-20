@@ -140,13 +140,13 @@ class GithubHook(HookService):
         line = []
 
         # The name of the repository.
-        project_Name = original['repository']['name']
+        project_name = original['repository']['name']
         if full_project_name:
             # The use wants the <username>/<project name> form from
             # github, not the Notifico name.
             project_name = '{username}/{project_Name}'.format(
                 username=original['repository']['owner']['name'],
-                project_Name=project_Name
+                project_Name=project_name
             )
 
         line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
@@ -206,13 +206,13 @@ class GithubHook(HookService):
             line = []
 
             # The name of the repository.
-            project_Name = original['repository']['name']
+            project_name = original['repository']['name']
             if full_project_name:
                 # The use wants the <username>/<project name> form from
                 # github, not the Notifico name.
                 project_name = '{username}/{project_Name}'.format(
                     username=original['repository']['owner']['name'],
-                    project_Name=project_Name
+                    project_Name=project_name
                 )
 
             line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
