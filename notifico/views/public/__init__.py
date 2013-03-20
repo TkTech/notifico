@@ -27,6 +27,21 @@ def landing():
         .order_by(Project.created.desc())
     ).paginate(1, 10, False)
 
+    # Sum the total number of messages across all projects, caching
+    # it for the next two minutes.
+    total_messages = g.redis.get('cache_message_count')
+    if total_messages is None:
+        total_messages = g.db.session.query(
+            func.sum(Project.message_count)
+        ).scalar()
+        if total_messages is None:
+            total_messages = 0
+
+        g.redis.setex('cache_message_count', 120, total_messages)
+
+    # Total # of users.
+    total_users = User.query.count()
+
     # Find the 10 most popular networks.
     top_networks = (
         Channel.visible(g.db.session.query(
@@ -42,7 +57,9 @@ def landing():
     return render_template('landing.html',
         new_projects=new_projects,
         top_networks=top_networks,
-        total_networks=total_networks
+        total_networks=total_networks,
+        total_messages=total_messages,
+        total_users=total_users
     )
 
 
