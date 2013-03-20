@@ -195,6 +195,7 @@ class GithubHook(HookService):
         Create and yield a one-line summary of each commit in `j`.
         """
         prefer_username = config.get('prefer_username', True)
+        full_project_name = config.get('full_project_name', False)
 
         original = j['original']
 
@@ -205,8 +206,17 @@ class GithubHook(HookService):
             line = []
 
             # The name of the repository.
+            project_Name = original['repository']['name']
+            if full_project_name:
+                # The use wants the <username>/<project name> form from
+                # github, not the Notifico name.
+                project_name = '{username}/{project_Name}'.format(
+                    username=original['repository']['owner']['name'],
+                    project_Name=project_Name
+                )
+
             line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
-                name=original['repository']['name'],
+                name=project_name,
                 **HookService.colors
             ))
 
