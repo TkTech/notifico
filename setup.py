@@ -40,7 +40,9 @@ if __name__ == '__main__':
             'requests',
             'pygithub',
             'xmltodict',
-            'unidecode'
+            'unidecode',
+            'raven',
+            'blinker'
         ],
         dependency_links=[
             'https://github.com/TkTech/utopia/tarball/master#egg=UtopiaIRC'
