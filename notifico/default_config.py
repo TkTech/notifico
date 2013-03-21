@@ -45,6 +45,9 @@ SERVICE_GITHUB_CLIENT_SECRET = None
 # base template.
 GOOGLE = None
 
+# Your Sentry (http://getsentry.com) DSN key.
+SENTRY_DSN = None
+
 # ---
 # Misc. Settings
 # ---

@@ -12,9 +12,12 @@ from flask import (
 )
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.gravatar import Gravatar
+from raven.contrib.flask import Sentry
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
+sentry = Sentry()
+
 gravatar = Gravatar(
     app,
     size=100,
@@ -162,6 +165,10 @@ def start(debug=False):
         file_handler = logging.FileHandler('notifico.log')
         file_handler.setLevel(logging.WARNING)
         app.logger.addHandler(file_handler)
+
+    if app.config.get('SENTRY_DSN'):
+        sentry.dsn = app.config.get('SENTRY_DSN')
+        sentry.init_app(app)
 
     # Let SQLAlchemy create any missing tables.
     db.create_all()
