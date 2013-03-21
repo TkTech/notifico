@@ -1,0 +1,12 @@
+{% extends "body.html" %}
+
+{% block content %}
+<div class="row-fluid content_main">
+  <div class="span12 content_page">
+    <div class="contents">
+    {% block content_page %}
+    {% endblock content_page %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

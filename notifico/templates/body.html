@@ -47,54 +47,57 @@
   </head>
 
   <body>
-    <div class="wrapper container">
-
-      <div class="navbar nav-top">
-        <div class="navbar-inner">
-          <a class="brand" href="/">Notifico</a>
-          <ul class="nav pull-right">
-            <li class="{{ active('public.landing') }}">
-              <a href="/"><i class="icon-home"></i> Home</a>
-            </li>
-            {% if g.user %}
-            <li class="{{ active('projects.') }}">
-              <a href="{{ url_for('projects.dashboard', u=g.user.username) }}">
-                <i class="icon-th"></i> Projects
-              </a>
-            </li>
-            <!-- User settings and actions  -->
-            <li class="dropdown {{ active('account.') }}">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="icon-user"></i> Settings
-              </a>
-              <ul class="dropdown-menu">
-                  <li>
-                    <a href="{{ url_for('account.settings') }}">
-                      Settings
-                    </a>
-                  </li>
-                  <li>
-                    <a href="{{ url_for('account.tokens') }}">
-                      OAuth Tokens
-                    </a>
-                  </li>
-                  <li class="divider"></li>
-                  <li>
-                      <a href="{{ url_for('account.logout') }}">
-                          Logout
-                      </a>
-                  </li>
+    <div class="wrapper">
+      <div class="nav-container">
+        <div class="container">
+          <div class="navbar nav-top">
+            <div class="navbar-inner">
+              <a class="brand" href="/">Notifico</a>
+              <ul class="nav pull-right">
+                <li class="{{ active('public.landing') }}">
+                  <a href="/"><i class="icon-home"></i> Home</a>
+                </li>
+                {% if g.user %}
+                <li class="{{ active('projects.') }}">
+                  <a href="{{ url_for('projects.dashboard', u=g.user.username) }}">
+                    <i class="icon-th"></i> Projects
+                  </a>
+                </li>
+                <!-- User settings and actions  -->
+                <li class="dropdown {{ active('account.') }}">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                      <i class="icon-user"></i> Settings
+                  </a>
+                  <ul class="dropdown-menu">
+                      <li>
+                        <a href="{{ url_for('account.settings') }}">
+                          Settings
+                        </a>
+                      </li>
+                      <li>
+                        <a href="{{ url_for('account.tokens') }}">
+                          OAuth Tokens
+                        </a>
+                      </li>
+                      <li class="divider"></li>
+                      <li>
+                          <a href="{{ url_for('account.logout') }}">
+                              Logout
+                          </a>
+                      </li>
+                  </ul>
+                </li>
+                {% else %}
+                <li>
+                  <a href="{{ url_for('account.login') }}">Login</a>
+                </li>
+                <li>
+                  <a href="{{ url_for('account.register') }}">Register</a>
+                </li>
+                {% endif %}
               </ul>
-            </li>
-            {% else %}
-            <li>
-              <a href="{{ url_for('account.login') }}">Login</a>
-            </li>
-            <li>
-              <a href="{{ url_for('account.register') }}">Register</a>
-            </li>
-            {% endif %}
-          </ul>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -1,28 +1,19 @@
-{% extends "body.html" %}
+{% extends "no_sidebar.html" %}
 {% import "ui/forms.html" as forms %}
-{% block content %}
-<div class="container page-content">
-  <div class="row-fluid">
-    <div class="span12">
-      <section>
-        <header>
-          <h2>Register</h2>
-        </header>
-        <div class="section-content">
-          <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-            {{ form.hidden_tag() }}
-            {{ forms.render_field(form.username) }}
-            {{ forms.render_field(form.email) }}
-            {{ forms.render_field(form.password) }}
-            {{ forms.render_field(form.confirm) }}
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Create Account</button>
-              <a href="{{ url_for('public.landing') }}" class="btn">Cancel</a>
-            </div>
-          </form>
-        </div>
-      </section>
-    </div>
+
+{% block content_page %}
+  <h2>Register</h2>
+  <div class="section-content">
+    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+      {{ form.hidden_tag() }}
+      {{ forms.render_field(form.username) }}
+      {{ forms.render_field(form.email) }}
+      {{ forms.render_field(form.password) }}
+      {{ forms.render_field(form.confirm) }}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Create Account</button>
+        <a href="{{ url_for('public.landing') }}" class="btn">Cancel</a>
+      </div>
+    </form>
   </div>
-</div>
 {% endblock %}

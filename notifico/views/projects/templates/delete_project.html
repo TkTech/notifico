@@ -1,22 +1,15 @@
-{% extends "body.html" %}
+{% extends "no_sidebar.html" %}
 {% import "ui/forms.html" as forms %}
-{% block content %}
-<div class="container page-content">
-  <div class="row-fluid">
-    <section>
-      <header>
-        <h2>Delete Project</h2>
-      </header>
-      <div class="section-content">
-        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-          <p>Are you sure you want to delete the project <strong>{{ project.name }}</strong>?</p>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-danger" value="d" name="do">Delete Project</button>
-            <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-success">Cancel</a>
-          </div>
-        </form>
+
+{% block content_page %}
+  <h2>Delete Project</h2>
+  <div class="section-content">
+    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+      <p>Are you sure you want to delete the project <strong>{{ project.name }}</strong>?</p>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-danger" value="d" name="do">Delete Project</button>
+        <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-success">Cancel</a>
       </div>
-    </section>
+    </form>
   </div>
-</div>
 {% endblock %}

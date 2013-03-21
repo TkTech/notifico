@@ -1,48 +1,39 @@
-{% extends "body.html" %}
+{% extends "no_sidebar.html" %}
 {% import "ui/forms.html" as forms %}
-{% block content %}
-<div class="container page-content">
-  <div class="row-fluid">
-    <div class="span12">
-      <section>
-        <header>
-          <h2>OAuth Tokens</h2>
-        </header>
-        <div class="section-content">
-          <p>OAuth tokens are used by {{ site_label }} to authenticate with 3rd party services on
-            your behalf. You may delete these at any time to erase them from {{ site_label }}.
-            They can simply be re-added later if you require them again.</p>
-          {% if g.user.tokens.count() == 0 %}
-          <div class="alert alert-info">
-            You do not have any services authenticated with {{ site_label }}.
-          </div>
-          {% else %}
-          <table class="table table-vertical table-striped">
-            <thead>
-              <tr>
-                <th>Service Name</th>
-                <th>Created</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for token in g.user.tokens %}
-              <tr>
-                <td>{{ token.name }}</td>
-                <td>{{ token.created }}</td>
-                <td>
-                  <div class="pull-right">
-                    <a href="{{ url_for('.tokens', tid=token.id) }}" class="btn btn-danger btn-mini">Delete</a>
-                  </div>
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-          {% endif %}
-        </div>
-      </section>
+
+{% block content_page %}
+  <h2>OAuth Tokens</h2>
+  <div class="section-content">
+    <p>OAuth tokens are used by {{ site_label }} to authenticate with 3rd party services on
+      your behalf. You may delete these at any time to erase them from {{ site_label }}.
+      They can simply be re-added later if you require them again.</p>
+    {% if g.user.tokens.count() == 0 %}
+    <div class="alert alert-info">
+      You do not have any services authenticated with {{ site_label }}.
     </div>
+    {% else %}
+    <table class="table table-vertical table-striped">
+      <thead>
+        <tr>
+          <th>Service Name</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for token in g.user.tokens %}
+        <tr>
+          <td>{{ token.name }}</td>
+          <td>{{ token.created }}</td>
+          <td>
+            <div class="pull-right">
+              <a href="{{ url_for('.tokens', tid=token.id) }}" class="btn btn-danger btn-mini">Delete</a>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
   </div>
-</div>
 {% endblock %}

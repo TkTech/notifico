@@ -1,39 +1,29 @@
-{% extends "body.html" %}
+{% extends "no_sidebar.html" %}
 {% from 'ui/page.html' import render_pagination %}
 
-{% block content %}
-<div class="container">
-  <div class="row">
-    <div class="span12">
-      <section>
-        <header>
-          <h3>All Projects</h3>
-        </header>
-        <div class="section-content">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Created</th>
-                <th>Name</th>
-                <th>Messages</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for project in pagination.items %}
-              <tr>
-                <td nowrap>{{ project.created|pretty }}</td>
-                <td style="width: 100%;">
-                  {{ repo_link(project) }}
-                </td>
-                <td style="text-align: center;">{{ project.message_count }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          {{ render_pagination(pagination, '.projects', **request.args) }}
-        </div>
-      </section>
-    </div>
+{% block content_page %}
+  <h3>All Projects</h3>
+  <div class="section-content">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Created</th>
+          <th>Name</th>
+          <th>Messages</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in pagination.items %}
+        <tr>
+          <td nowrap>{{ project.created|pretty }}</td>
+          <td style="width: 100%;">
+            {{ repo_link(project) }}
+          </td>
+          <td style="text-align: center;">{{ project.message_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ render_pagination(pagination, '.projects', **request.args) }}
   </div>
-</div>
 {% endblock %}

@@ -1,29 +1,13 @@
 @import "mixins.less";
 
 html, body {
-  background-color: #E8E8E8;
-  background-image: url('/img/subtle_grunge.png');
+  //background-color: #f6f6f6;
+  background-color: white;
   height: 100%;
 }
 
 html, body, p {
   font-family: 'Open Sans', sans-serif;
-}
-
-.wrapper {
-  min-height: 100%;
-  position: relative;
-  overflow: auto;
-}
-
-.footer {
-  position: relative;
-  margin-top: -40px;
-  clear: both;
-
-  padding-top: 10px;
-  padding-bottom: 8px;
-  font-size: 75%;
 }
 
 .table-vertical td {
@@ -64,32 +48,8 @@ form {
   }
 }
 
-.homepage-unit {
-  background-color: white;
-  border: 1px solid #d4d4d4;
-  .border-radius(0px);
-  .box-shadow(~"0 1px 5px rgba(0,0,0,0.1), inset 0 1px 0 white");
-  #gradient > .vertical(#F9F9F9, #EDEDED);
-}
-
 .table-square {
   border: 1px solid #ddd;
-}
-
-.metric {
-  text-align: center;
-
-  section {
-    #gradient > .vertical(#F9F9F9, #EDEDED);
-  }
-  
-  strong {
-    display: block;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    font-size: 32px;
-    font-weight: 200;
-  }
 }
 
 [class^="icon-"] {
@@ -101,58 +61,6 @@ form {
     margin-top: 1px;
   }
 }
-
-.nav-top {
-  padding-top: 20px;
-}
-
-.navbar-inner {
-  .border-radius(0);
-}
-
-/* Nixed from Genghis */
-section {
-  background-color: white;
-  margin:  20px 0;
-  padding: 20px;
-  border: 1px solid #d4d4d4;
-  .border-radius(0);
-  .box-shadow(~"0 1px 5px rgba(0,0,0,0.1), inset 0 1px 0 white");
-
-  > header {
-    .border-radius(4px 4px 0 0);
-    margin: -20px -20px 20px;
-    padding: 9px 20px;
-    background-color: #f5f5f5;
-    #gradient > .vertical(#FFFFFF, #F2F2F2);
-    border-bottom: 1px solid #ddd;
-    .box-shadow(inset 0 1px 0 white);
-
-    h2 {
-      font-size:   24px;
-      margin:      0;
-      line-height: 30px;
-    }
-    h3 {
-      font-size:   14px;
-      margin:      0;
-      line-height: 20px;
-    }
-  }
-
-  > p:first-child {
-    margin-top: 0;
-  }
-
-  > p:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.content {
-  padding-bottom: 20px;
-}
-
 
 // Overview page elements
 .project {
@@ -182,4 +90,88 @@ ol.inline > li {
   *display: inline;
   padding-right: 5px;
   *zoom: 1;
+}
+
+
+// Core page layout
+
+.wrapper {
+  min-height: 100%;
+  position: relative;
+  overflow: auto;
+}
+
+.nav-container {
+  #gradient > .vertical(white, white);
+  border-bottom: 2px solid #ccc;
+
+  .nav-top {
+    margin-bottom: 0;
+
+    .navbar-inner {
+      .border-radius(0);
+      border: none;
+      #gradient > .vertical(white, white);
+      .box-shadow(none);
+
+      .brand {
+        text-shadow: none;
+      }
+
+      .nav {
+        li {
+          a {
+            text-shadow: none;
+          }
+
+          .dropdown-menu {
+            .border-radius(0);
+          }
+        }
+      }
+    }
+  }
+}
+
+.content {
+  @sidebar_background: white;
+  @content_background: white;
+
+  padding-bottom: 20px;
+  padding-top: 20px;
+
+  .content_main {
+    background-color: @sidebar_background;
+
+    .content_sidebar {
+
+    }
+
+    .content_page {
+      background-color: @content_background;
+
+      // Fix the padding
+      .contents {
+        padding: 0 20px 12px 20px;
+      }
+
+      h1, h2, h3, h4, h5 {
+        text-transform: uppercase;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #EEE;
+      }
+
+    }
+  }
+}
+
+.footer {
+  position: relative;
+  margin-top: -40px;
+  clear: both;
+
+  padding-top: 10px;
+  padding-bottom: 8px;
+  font-size: 75%;
 }

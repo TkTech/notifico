@@ -1,22 +1,15 @@
-{% extends "body.html" %}
+{% extends "no_sidebar.html" %}
 {% import "ui/forms.html" as forms %}
-{% block content %}
-<div class="container page-content">
-  <div class="row-fluid">
-    <section>
-      <header>
-        <h2>Delete Channel</h2>
-      </header>
-      <div class="section-content">
-        <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-          <p>Are you sure you want to remove this channel? If you change your mind, you can always re-add it later.</p>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-danger" value='d' name='do'>Remove Channel</button>
-            <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn btn-success">Cancel</a>
-          </div>
-        </form>
+
+{% block content_page %}
+  <h2>Delete Channel</h2>
+  <div class="section-content">
+    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+      <p>Are you sure you want to remove this channel? If you change your mind, you can always re-add it later.</p>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-danger" value='d' name='do'>Remove Channel</button>
+        <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn btn-success">Cancel</a>
       </div>
-    </section>
+    </form>
   </div>
-</div>
 {% endblock %}

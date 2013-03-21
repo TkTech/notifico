@@ -1,51 +1,41 @@
-{% extends "body.html" %}
+{% extends "no_sidebar.html" %}
 {% from "ui/page.html" import render_pagination, link_p %}
 
-{% block content %}
-<div class="container page-content">
-  <div class="row-fluid">
-    <div class="span12">
-      <section>
-        <header>
-          <h3>Channels on {{ network }}</h3>
-        </header>
-        <div class="section-content">
-          {% if False %}
-          <div class="alert alert-info">
-            There are no public channels for the network {{ network }}.
-          </div>
-          {% else %}
-          <table class="table table-vertical table-striped">
-            <thead>
-              <tr>
-                <th>Created</th>
-                <th>Channel</th>
-                <th>Network</th>
-                <th>Port</th>
-                <th>SSL</th>
-                <th>Project</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for channel in pagination.items %}
-              <tr>
-                <td nowrap>{{ channel.created|pretty }}</td>
-                <td nowrap>{% if not channel.public %}<i class="icon-lock"></i> {% endif %}{{ channel.channel }}</td>
-                <td nowrap>{{ channel.host }}</td>
-                <td>{{ channel.port }}</td>
-                <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-                <td style="width: 100%;">
-                  {% if channel.project %}{{ repo_link(channel.project) }}{% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          {{ render_pagination(pagination, '.network', network=network) }}
-          {% endif %}
-        </div>
-      </section>
+{% block content_page %}
+  <h3>Channels on {{ network }}</h3>
+  <div class="section-content">
+    {% if False %}
+    <div class="alert alert-info">
+      There are no public channels for the network {{ network }}.
     </div>
+    {% else %}
+    <table class="table table-vertical table-striped">
+      <thead>
+        <tr>
+          <th>Created</th>
+          <th>Channel</th>
+          <th>Network</th>
+          <th>Port</th>
+          <th>SSL</th>
+          <th>Project</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for channel in pagination.items %}
+        <tr>
+          <td nowrap>{{ channel.created|pretty }}</td>
+          <td nowrap>{% if not channel.public %}<i class="icon-lock"></i> {% endif %}{{ channel.channel }}</td>
+          <td nowrap>{{ channel.host }}</td>
+          <td>{{ channel.port }}</td>
+          <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
+          <td style="width: 100%;">
+            {% if channel.project %}{{ repo_link(channel.project) }}{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ render_pagination(pagination, '.network', network=network) }}
+    {% endif %}
   </div>
-</div>
 {% endblock %}
