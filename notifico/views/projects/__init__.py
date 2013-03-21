@@ -249,8 +249,8 @@ def details(u, p):
         visible_channels = visible_channels.filter_by(public=True)
 
     return render_template('project_details.html',
-        project=p,
         is_owner=is_owner,
+        project=p,
         user=u,
         visible_channels=visible_channels,
         page_title='Notifico! - {u.username}/{p.name}'.format(
@@ -260,8 +260,8 @@ def details(u, p):
     )
 
 
-@projects.route('/<u>/<p>/hook/new',
-    defaults={'sid': 10}, methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/hook/new', defaults={'sid': 10}, methods=[
+    'GET', 'POST'])
 @projects.route('/<u>/<p>/hook/new/<int:sid>', methods=['GET', 'POST'])
 @user_required
 @project_action

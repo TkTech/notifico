@@ -6526,6 +6526,18 @@ section > p:last-child {
 .project .name {
   font-size: 16px;
 }
+ul.inline,
+ol.inline {
+  margin-left: 0;
+  list-style: none;
+}
+ul.inline > li,
+ol.inline > li {
+  display: inline-block;
+  *display: inline;
+  padding-right: 5px;
+  *zoom: 1;
+}
 .pull-right {
   float: right;
 }

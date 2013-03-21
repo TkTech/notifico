@@ -25,7 +25,7 @@
                 <header>
                     <h2>Import Options</h2>
                 </header>
-                <div class="content">
+                <div class="section-content">
                     {{ options_form.hidden_tag() }}
                     {{ forms.render_field(options_form.update_projects) }}
                     {{ forms.render_field(options_form.set_hooks) }}
@@ -40,7 +40,7 @@
                 <header>
                     <h2>Your Repos</h2>
                 </header>
-                <div class="content">
+                <div class="section-content">
                     <table class="table table-vertical table-hover">
                         <thead>
                             <tr>
@@ -91,7 +91,7 @@
                 <header>
                     <h2>Summary</h2>
                 </header>
-                <div class="content">
+                <div class="section-content">
                     {% if not summary %}
                     <div class="alert alert-info">
                         Hm, doesn't look like there was anything to import!

@@ -20,9 +20,9 @@
         </div>
         <div style="clear: both;"></div>
       </header>
-      <div class="content">
+      <div class="section-content">
         {% if not projects.count() %}
-          <div class="alert alert-info">
+          <div class="alert alert-block">
             {% if is_owner %}
             You have not created any projects yet.
             {% else %}
@@ -42,7 +42,15 @@
                 </a>
               </div>
               <div class="desc">
-                <small>Created {{ project.created|pretty }}</small>
+                <small>
+                  <ul class="unstyled inline">
+                    <li>Created {{ project.created|pretty }}</li>
+                    {% if is_owner %}
+                    <li><a href="{{ url_for('.edit_project', u=user.username, p=project.name) }}"><i class="icon-pencil"></i> Edit</a></li>
+                    <li><a href="{{ url_for('.delete_project', u=user.username, p=project.name) }}"><i class="icon-trash icon-white"></i> Delete</a></li>
+                    {% endif %}
+                  </ul>
+               </small>
               </div>
             </div>
             <div class="metric pull-right">
