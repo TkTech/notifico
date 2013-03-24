@@ -102,31 +102,48 @@ ol.inline > li {
 }
 
 .nav-container {
-  #gradient > .vertical(white, white);
-  border-bottom: 2px solid #ccc;
+  @nav_background: white;
+  @nav_text_color: black;
+
+  #gradient > .vertical(@nav_background, @nav_background);
+  //border-bottom: 2px solid black;
 
   .nav-top {
     margin-bottom: 0;
+    padding: 10px 20px 0 20px;
 
     .navbar-inner {
       .border-radius(0);
       border: none;
-      #gradient > .vertical(white, white);
+      border-bottom: 2px solid black;
+      #gradient > .vertical(@nav_background, @nav_background);
       .box-shadow(none);
+      padding-left: 0px;
+      padding-right: 0px;
 
       .brand {
         text-shadow: none;
+        color: @nav_text_color;
+        font-weight: 600;
       }
 
       .nav {
-        li {
+        li,
+        .active > li {
           a {
             text-shadow: none;
+            color: @nav_text_color;
+            background-color: @nav_background;
+            .box-shadow(none);
           }
 
           .dropdown-menu {
             .border-radius(0);
           }
+        }
+
+        .active > li > a {
+          text-decoration: underline;
         }
       }
     }
@@ -159,7 +176,7 @@ ol.inline > li {
         text-transform: uppercase;
         padding-bottom: 10px;
         margin-bottom: 20px;
-        border-bottom: 1px solid #EEE;
+        border-bottom: 2px solid #EEE;
       }
 
     }
