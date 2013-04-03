@@ -1,3 +1,5 @@
+import json
+
 from flask import (
     Blueprint,
     render_template,
@@ -6,7 +8,8 @@ from flask import (
     current_app,
     url_for,
     session,
-    abort
+    abort,
+    make_response
 )
 from flask.ext import wtf
 
@@ -189,6 +192,22 @@ def settings(do=None):
         password_form=password_form,
         delete_form=delete_form
     )
+
+
+@account.route('/user.json')
+@user_required
+def user_export():
+    """
+    Provides the user, their projects, channels, and hooks as a JSON
+    file.
+    """
+    response = make_response(
+        json.dumps(
+            g.user.export(), sort_keys=True, indent=4
+        )
+    )
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 
 @account.route('/tokens/')
