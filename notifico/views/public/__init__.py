@@ -2,7 +2,9 @@ from flask import (
     Blueprint,
     render_template,
     g,
-    request
+    request,
+    redirect,
+    url_for
 )
 from flask.ext.sqlalchemy import Pagination
 
@@ -20,47 +22,12 @@ def landing():
     Show a landing page giving a short intro blurb to unregistered users
     and very basic metrics such as total users.
     """
-    # Find the 10 latest public projects.
-    new_projects = (
-        Project.visible(Project.query, user=g.user)
-        .order_by(False)
-        .order_by(Project.created.desc())
-    ).paginate(1, 10, False)
+    if g.user:
+        return redirect(
+            url_for('projects.dashboard', u=g.user.username)
+        )
 
-    # Sum the total number of messages across all projects, caching
-    # it for the next two minutes.
-    total_messages = g.redis.get('cache_message_count')
-    if total_messages is None:
-        total_messages = g.db.session.query(
-            func.sum(Project.message_count)
-        ).scalar()
-        if total_messages is None:
-            total_messages = 0
-
-        g.redis.setex('cache_message_count', 120, total_messages)
-
-    # Total # of users.
-    total_users = User.query.count()
-
-    # Find the 10 most popular networks.
-    top_networks = (
-        Channel.visible(g.db.session.query(
-            Channel.host,
-            func.count(func.distinct(Channel.channel)).label('count')
-        ), user=g.user)
-        .group_by(Channel.host)
-        .order_by('count desc')
-    )
-    total_networks = top_networks.count()
-    top_networks = top_networks.limit(10)
-
-    return render_template('landing.html',
-        new_projects=new_projects,
-        top_networks=top_networks,
-        total_networks=total_networks,
-        total_messages=total_messages,
-        total_users=total_users
-    )
+    return render_template('landing.html')
 
 
 @public.route('/s/networks/')
