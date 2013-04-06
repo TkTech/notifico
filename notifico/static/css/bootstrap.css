@@ -6364,7 +6364,6 @@ p {
 }
 .table-vertical td {
   vertical-align: middle;
-  border-top: none;
 }
 .btn,
 .alert,
