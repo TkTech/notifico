@@ -6489,7 +6489,7 @@ ol.inline > li {
   text-decoration: underline;
 }
 .content {
-  padding-bottom: 20px;
+  padding-bottom: 48px;
   padding-top: 20px;
 }
 .content .content_main {
@@ -6519,9 +6519,7 @@ ol.inline > li {
   font-size: 75%;
 }
 .footer .footer-copyright {
-  border-top: solid #EEE 2px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding: 8px 20px 0 20px;
 }
 .pull-right {
   float: right;

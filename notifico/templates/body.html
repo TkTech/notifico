@@ -69,22 +69,22 @@
                       <i class="icon-user"></i> {{ g.user.username }} <i class="icon-angle-down"></i> 
                   </a>
                   <ul class="dropdown-menu">
-                      <li>
-                        <a href="{{ url_for('account.settings') }}">
-                          Settings
+                    <li>
+                      <a href="{{ url_for('account.settings') }}">
+                        Settings
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{{ url_for('account.tokens') }}">
+                        OAuth Tokens
+                      </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="{{ url_for('account.logout') }}">
+                            Logout
                         </a>
-                      </li>
-                      <li>
-                        <a href="{{ url_for('account.tokens') }}">
-                          OAuth Tokens
-                        </a>
-                      </li>
-                      <li class="divider"></li>
-                      <li>
-                          <a href="{{ url_for('account.logout') }}">
-                              Logout
-                          </a>
-                      </li>
+                    </li>
                   </ul>
                 </li>
                 {% else %}
