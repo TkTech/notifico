@@ -166,9 +166,9 @@ def start(debug=False):
         file_handler.setLevel(logging.WARNING)
         app.logger.addHandler(file_handler)
 
-    if app.config.get('SENTRY_DSN'):
-        sentry.dsn = app.config.get('SENTRY_DSN')
-        sentry.init_app(app)
+        if app.config.get('SENTRY_DSN'):
+            sentry.dsn = app.config.get('SENTRY_DSN')
+            sentry.init_app(app)
 
     # Let SQLAlchemy create any missing tables.
     db.create_all()
