@@ -35,75 +35,128 @@ class BitbucketConfigForm(wtf.Form):
     ))
 
 
-def _make_summary_line(hook, j):
+def simplify_payload(payload):
+    result = {
+        'branch': None,
+        'tag': None,
+        'pusher': None,
+        'files': {
+            'all': set(),
+            'added': set(),
+            'removed': set(),
+            'modified': set()
+        },
+        'original': payload
+    }
+
+    for commit in payload.get('commits', tuple()):
+        # Summarize file changes among all the commits
+        # in this push.
+        for file_ in commit.get('files', tuple()):
+            type_, name = file_['type'], file_['file']
+            result['files'][type_].add(name)
+            result['files']['all'].add(name)
+
+        # Usually only the last commit in the chain will
+        # include the "branch" or "branches" tag.
+        branch = commit.get('branch')
+        if branch:
+            result['branch'] = branch
+
+    # The username of whoever made this push.
+    result['pusher'] = payload.get('user')
+
+    return result
+
+
+def _make_summary_line(hook, j, config):
     """
     Create a formatted line summarizing the commits in `j`.
     """
-    l = []
+    original = j['original']
+    show_branch = config.get('show_branch', True)
+
+    # Buffer for the line summary.
+    line = []
 
     # Project name
-    l.append('{RESET}[{BLUE}{0}{RESET}]'.format(
-        j['repository']['name'],
+    line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+        name=original['repository']['name'],
         **HookService.colors
     ))
 
-    if 'name' in j:
-        # For some reason we don't always get the name of the
-        # pusher (not set in config?)
-        l.append('{0} pushed'.format(j['name']))
+    if j['pusher']:
+        line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
+            pusher=j['pusher'],
+            **HookService.colors
+        ))
 
     # Commit count
-    l.append('{RED}{0}{RESET} {1}'.format(
-        len(j['commits']),
-        'commit' if len(j['commits']) == 1 else 'commits',
+    line.append(u'{GREEN}{count}{RESET} {commits}'.format(
+        count=len(original['commits']),
+        commits='commit' if len(original['commits']) == 1 else 'commits',
         **HookService.colors
+    ))
+
+    if show_branch and j['branch']:
+        line.append(u'to {GREEN}{branch}{RESET}'.format(
+            branch=j['branch'],
+            **HookService.colors
+        ))
+
+    # File movement summary.
+    line.append(u'[+{added}/-{removed}/\u00B1{modified}]'.format(
+        added=len(j['files']['added']),
+        removed=len(j['files']['removed']),
+        modified=len(j['files']['modified'])
     ))
 
     # TODO: We can apparently build URLs to show comparisons
     #       using /compare/<lc>..<lr>, which is completely
     #       undocumented. For now build a link to the last
     #       commit in the set.
-    link = '{0}{1}commits/'.format(
-        j['canon_url'],
-        j['repository']['absolute_url'],
-        j['commits'][-1]['node']
+    link = u'{0}{1}commits/'.format(
+        original['canon_url'],
+        original['repository']['absolute_url'],
+        original['commits'][-1]['node']
     )
-    l.append('{PINK}{0}{RESET}'.format(
+    line.append(u'{PINK}{0}{RESET}'.format(
         BitbucketHook.shorten(link),
         **HookService.colors
     ))
 
-    return ' '.join(l)
+    return u' '.join(line)
 
 
 def _make_commit_line(hook, j, commit):
     """
     Create a formatted line summarizing the single commit `commit`.
     """
-    l = []
+    line = []
 
+    original = j['original']
     config = hook.config or {}
-    show_branch = config.get('show_branch', True)
     show_raw_author = config.get('show_raw_author', False)
 
-    l.append('{RESET}[{BLUE}{0}{RESET}]'.format(
-        j['repository']['name'],
+    line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+        name=original['repository']['name'],
         **HookService.colors
     ))
-    if show_branch and commit['branch']:
-        l.append(commit['branch'])
 
-    l.append('{LIGHT_CYAN}{0}{RESET}'.format(
+    line.append(u'{ORANGE}{0}{RESET}'.format(
         commit['raw_author'] if show_raw_author else commit['author'],
         **HookService.colors
     ))
-    l.append('{PINK}{0}{RESET}'.format(
-        commit['node'],
+
+    line.append(u'{GREEN}{0}{RESET}'.format(
+        commit['node'][:7],
         **HookService.colors
     ))
-    l.append(commit['message'])
 
-    return ' '.join(l)
+    line.append(u'-')
+    line.append(commit['message'])
+
+    return u' '.join(line)
 
 
 class BitbucketHook(HookService):
@@ -120,40 +173,26 @@ class BitbucketHook(HookService):
         if not p:
             return
 
-        j = json.loads(p)
+        j = simplify_payload(json.loads(p))
+        original = j['original']
+
         config = hook.config or {}
         strip = not config.get('use_colors', True)
         branches = config.get('branches', None)
 
-        if branches:
-            branches = [b.strip().lower() for b in branches.split(',')]
-
-        # We don't always get commits in the POST payload when someone
-        # is doing something funky with their repo.
-        if 'commits' not in j:
+        if not original['commits']:
+            # TODO: No commits, nothing to do. We should add an option for
+            # showing tag activity.
             return
 
         if branches:
-            def keep_commit(commit):
-                branch = commit['branch']
-                # FIXME: For whatever reason, Bitbucket thinks it's okay
-                #        to send None/null as the branch name. Not sure how
-                #        to handle this case.
-                if branch and branch.lower() in branches:
-                    return True
-                return False
-
-            # We only want to forward certain branches. Although in practice
-            # a push only comes for a single branch at a time, we check
-            # all of them as Bitbucket provides the field to be future-safe.
-            j['commits'][:] = [c for c in j['commits'] if keep_commit(c)]
-            if not j['commits']:
-                # After filtering, there weren't any commits left to bother
-                # with!
+            branches = [b.strip().lower() for b in branches.split(',')]
+            if j['branch'] and j['branch'].lower() not in branches:
+                # This isn't a branch the user wants.
                 return
 
-        yield cls.message(_make_summary_line(hook, j), strip=strip)
-        for commit in j['commits']:
+        yield cls.message(_make_summary_line(hook, j, config), strip=strip)
+        for commit in original['commits']:
             yield cls.message(_make_commit_line(hook, j, commit), strip=strip)
 
     @classmethod
