@@ -22,7 +22,7 @@ class ProjectDetailsForm(wtf.Form):
     name = wtf.TextField('Project Name', validators=[
         wtf.Required(),
         wtf.Length(2, 50),
-        wtf.Regexp(r'^[a-zA-Z0-9_\-]*$', message=(
+        wtf.Regexp(r'^[a-zA-Z0-9_\-\.]*$', message=(
             'Project name must only contain a to z, 0 to 9, dashes'
             ' and underscores.'
         ))
