@@ -30,6 +30,7 @@ if __name__ == '__main__':
             'Flask-Gravatar',
             'Flask-SQLAlchemy',
             'Flask-XML-RPC',
+            'Flask-Mail',
             'fabric',
             'sqlalchemy',
             'UtopiaIRC',
