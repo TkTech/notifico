@@ -21,7 +21,7 @@ projects = Blueprint('projects', __name__, template_folder='templates')
 class ProjectDetailsForm(wtf.Form):
     name = wtf.TextField('Project Name', validators=[
         wtf.Required(),
-        wtf.Length(2, 50),
+        wtf.Length(1, 50),
         wtf.Regexp(r'^[a-zA-Z0-9_\-\.]*$', message=(
             'Project name must only contain a to z, 0 to 9, dashes'
             ' and underscores.'
