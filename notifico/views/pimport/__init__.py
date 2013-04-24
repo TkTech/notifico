@@ -84,7 +84,10 @@ def github():
     # repos that they have actually created (or forked).
     # If we leave type as the default ("all") we also get
     # repos they have permission on, which we probably don't want.
-    git = Github(access_token.token)
+    git = Github(
+        access_token.token,
+        user_agent="Notifico Github Import/0.1"
+    )
     # Test to make sure our token is still good...
     try:
         git.get_user().login
