@@ -9,25 +9,39 @@
       There are no public channels for the network {{ network }}.
     </div>
     {% else %}
-    <table class="table table-vertical table-striped">
+    <table class="table table-vertical table-striped table-bordered">
       <thead>
         <tr>
-          <th>Created</th>
           <th>Channel</th>
-          <th>Network</th>
           <th>Port</th>
-          <th>SSL</th>
+          <th nowrap>
+            <abbr title="Secure Socket Layer">SSL</abbr>
+          </th>
           <th>Project</th>
         </tr>
       </thead>
       <tbody>
         {% for channel in pagination.items %}
         <tr>
-          <td nowrap>{{ channel.created|pretty_date }}</td>
-          <td nowrap>{% if not channel.public %}<i class="icon-lock"></i> {% endif %}{{ channel.channel }}</td>
-          <td nowrap>{{ channel.host }}</td>
+          <td nowrap>
+            <div class="channelname">
+              {%- if not channel.public -%}
+                <i class="icon-lock pull-left" alt="[This is a private project]" title="This is a private project"></i> 
+              {%- endif -%}
+              {{ channel.channel }} <span class="muted">on</span> {{ channel.host}}
+            </div>
+            <small class="muted">
+              added {{ channel.created|pretty_date }}
+              {% if can_modify %}
+              | <a href="#"><i class="icon-pencil"></i> Edit</a>
+              - <a href="#"><i class="icon-remove"></i> Delete</a>
+              {% endif %}
+            </small>
+          </td>
           <td>{{ channel.port }}</td>
-          <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
+          <td style="text-align: center;">
+            <i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i>
+          </td>
           <td style="width: 100%;">
             {% if channel.project %}{{ repo_link(channel.project) }}{% endif %}
           </td>
