@@ -70,6 +70,11 @@ class GithubConfigForm(wtf.Form):
     ], default=True, description=(
         'If checked, commit messages will include the branch name.'
     ))
+    show_tags = wtf.BooleanField('Show Tags', validators=[
+        wtf.Optional()
+    ], default=True, description=(
+        'If checked, changes to tags will be shown.'
+    ))
     prefer_username = wtf.BooleanField('Prefer Usernames', validators=[
         wtf.Optional()
     ], default=True, description=(
@@ -110,10 +115,14 @@ class GithubHook(HookService):
         strip = not config.get('use_colors', True)
         # Branch names to filter on.
         branches = config.get('branches', None)
+        # Display tag activity?
+        show_tags = config.get('show_tags', True)
 
         if not original['commits']:
-            # TODO: No commits, nothing to do. We should add an option for
-            # showing tag activity.
+            if not show_tags or 'tag' not in j:
+                # No commits, no tags, nothing to do.
+                return
+            yield cls.message(cls._create_tag_summary(j, config), strip=strip)
             return
 
         if branches:
@@ -126,6 +135,61 @@ class GithubHook(HookService):
         yield cls.message(cls._create_push_summary(j, config), strip=strip)
         for formatted_commit in cls._create_commit_summary(j, config):
             yield cls.message(formatted_commit, strip=strip)
+
+    @classmethod
+    def _create_tag_summary(cls, j, config):
+        """
+        Create and return a one-line summary of tag changes in `j`.
+        """
+        original = j['original']
+        show_branch = config.get('show_branch', True)
+        full_project_name = config.get('full_project_name', False)
+
+        line = []
+
+        # The name of the repository.
+        project_name = original['repository']['name']
+        if full_project_name:
+            # The use wants the <username>/<project name> form from
+            # github, not the Notifico name.
+            project_name = '{username}/{project_Name}'.format(
+                username=original['repository']['owner']['name'],
+                project_Name=project_name
+            )
+
+        line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+            name=project_name,
+            **HookService.colors
+        ))
+
+        # The user doing the push, if available.
+        if j['pusher']:
+            line.append(u'{ORANGE}{pusher}{RESET} tagged'.format(
+                pusher=j['pusher'],
+                **HookService.colors
+            ))
+        else:
+            line.append(u'Tagged')
+
+        # The sha1 hash of the head (tagged) commit.
+        line.append(u'{GREEN}{sha}{RESET} as'.format(
+            sha=original['head_commit']['id'][:7],
+            **HookService.colors
+        ))
+
+        # The tag itself.
+        line.append(u'{GREEN}{tag}{RESET}'.format(
+            tag=j['tag'],
+            **HookService.colors
+        ))
+
+        # The shortened URL linking to the head (tagged) commit.
+        line.append(u'{PINK}{link}{RESET}'.format(
+            link=GithubHook.shorten(original['head_commit']['url']),
+            **HookService.colors
+        ))
+
+        return u' '.join(line)
 
     @classmethod
     def _create_push_summary(cls, j, config):
