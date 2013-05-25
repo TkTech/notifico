@@ -12,6 +12,7 @@ from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import func
 
 from notifico import db
+from notifico.services import stats
 from notifico.models import User, Channel, Project
 from notifico.services.hooks import HookService
 
@@ -24,18 +25,6 @@ def landing():
     Show a landing page giving a short intro blurb to unregistered users
     and very basic metrics such as total users.
     """
-    # Create a list of total project counts in the form
-    # [(day, count), ...].
-    projects_graph_data = []
-    now = datetime.datetime.utcnow()
-    for day_ago in range(30):
-        limit = now - datetime.timedelta(days=day_ago)
-
-        projects_graph_data.append((
-            time.mktime(limit.timetuple()) * 1000,
-            Project.query.filter(Project.created <= limit).count()
-        ))
-
     # Find the 10 latest public projects.
     new_projects = (
         Project.visible(Project.query, user=g.user)
@@ -43,41 +32,13 @@ def landing():
         .order_by(Project.created.desc())
     ).paginate(1, 10, False)
 
-    # Sum the total number of messages across all projects, caching
-    # it for the next two minutes.
-    total_messages = current_app.redis.get('cache_message_count')
-    if total_messages is None:
-        total_messages = db.session.query(
-            func.sum(Project.message_count)
-        ).scalar()
-        if total_messages is None:
-            total_messages = 0
-
-        current_app.redis.setex('cache_message_count', 120, total_messages)
-
-    # Total # of users.
-    total_users = User.query.count()
-
-    # Find the 10 most popular networks.
-    top_networks = (
-        Channel.visible(db.session.query(
-            Channel.host,
-            func.count(func.distinct(Channel.channel)).label('count')
-        ), user=g.user)
-        .group_by(Channel.host)
-        .order_by('count desc')
-    )
-    total_networks = top_networks.count()
-    top_networks = top_networks.limit(10)
-
     return render_template(
         'landing.html',
-        projects_graph_data=projects_graph_data,
         new_projects=new_projects,
-        top_networks=top_networks,
-        total_networks=total_networks,
-        total_messages=total_messages,
-        total_users=total_users
+        top_networks=stats.top_networks(limit=10),
+        total_networks=stats.total_networks(),
+        total_messages=stats.total_messages(),
+        total_users=stats.total_users()
     )
 
 
