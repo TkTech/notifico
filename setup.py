@@ -44,7 +44,8 @@ if __name__ == '__main__':
             'xmltodict',
             'unidecode',
             'raven',
-            'blinker'
+            'blinker',
+            'docopt'
         ],
         dependency_links=[
             'https://github.com/TkTech/utopia/tarball/master#egg=UtopiaIRC'
