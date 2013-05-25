@@ -40,7 +40,7 @@ def deploy():
                 '-b 127.0.0.1:4000',
                 '-p notifico.pid',
                 '--daemon',
-                '"notifico:start(debug=False)"'
+                '"notifico:create_instance()"'
             ]), pty=False)
 
         # Try to make sure gunicorn has actually started.
