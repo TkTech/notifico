@@ -142,7 +142,6 @@ class GithubHook(HookService):
         Create and return a one-line summary of tag changes in `j`.
         """
         original = j['original']
-        show_branch = config.get('show_branch', True)
         full_project_name = config.get('full_project_name', False)
 
         line = []
