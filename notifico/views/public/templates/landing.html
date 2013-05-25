@@ -3,10 +3,22 @@
 {% block content_page %}
 <div class="landing-unit">
   <h1 class="landing-unit-title">Notifico</h1>
-  <p class="lead">Notifico is an <a href="https://github.com/TkTech/notifico">open-source</a> replacement for the now-defunct <a href="http://cia.vc">cia.vc</a> service. Notifico receives messages from services and scripts and delivers them to IRC channels.</p>
+  <p class="lead">
+    Notifico is an <a href="https://github.com/TkTech/notifico">open-source</a> replacement
+    for the now-defunct <a href="http://cia.vc">cia.vc</a> service. Notifico receives 
+    messages from services and scripts and delivers them to IRC channels.
+  </p>
   {% if not g.user %}
-  <p><a class="btn btn-success btn-large" href="{{ url_for('account.register') }}">Sign Up</a></p>
-  <p><small class="muted">Already have an account? <a href="{{ url_for('account.login') }}">Login</a> instead.</small></p>
+  <p>
+    <a class="btn btn-success btn-large" href="{{ url_for('account.register') }}">
+      Sign Up
+    </a>
+  </p>
+  <p>
+    <small class="muted">
+      Already have an account? <a href="{{ url_for('account.login') }}">Login</a> instead.
+    </small>
+  </p>
   {% endif %}
 </div>
 <div class="row-fluid">
