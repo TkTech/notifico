@@ -9,12 +9,13 @@ from flask import (
     g,
     url_for,
     redirect,
-    request
+    request,
+    current_app
 )
 from flask.ext import wtf
 from github import Github, GithubException
 
-from notifico import user_required, app
+from notifico import user_required
 from notifico.models import AuthToken, Project, Hook, Channel
 
 pimport = Blueprint('pimport', __name__, template_folder='templates')
@@ -47,14 +48,21 @@ def github():
     """
     if 'code' in request.args:
         # We've finished step one and have a temporary token.
-        r = requests.post('https://github.com/login/oauth/access_token',
+        r = requests.post(
+            'https://github.com/login/oauth/access_token',
             params={
-                'client_id': app.config['SERVICE_GITHUB_CLIENT_ID'],
-                'client_secret': app.config['SERVICE_GITHUB_CLIENT_SECRET'],
+                'client_id': current_app.config[
+                    'SERVICE_GITHUB_CLIENT_ID'
+                ],
+                'client_secret': current_app.config[
+                    'SERVICE_GITHUB_CLIENT_SECRET'
+                ],
                 'code': request.args['code']
-        }, headers={
-            'Accept': 'application/json'
-        })
+            },
+            headers={
+                'Accept': 'application/json'
+            }
+        )
         result = r.json()
         token = AuthToken.new(result['access_token'], 'github')
         g.db.session.add(token)
@@ -74,7 +82,9 @@ def github():
         return redirect(
             'https://github.com/login/oauth/authorize?{0}'.format(
                 urllib.urlencode({
-                    'client_id': app.config['SERVICE_GITHUB_CLIENT_ID'],
+                    'client_id': current_app.config[
+                        'SERVICE_GITHUB_CLIENT_ID'
+                    ],
                     'scope': 'repo'
                 })
             )
@@ -202,7 +212,8 @@ def github():
 
         g.db.session.commit()
 
-    return render_template('github.html',
+    return render_template(
+        'github.html',
         options_form=options_form,
         summary=summary,
         user_repos=admin_repos

@@ -1,30 +1,22 @@
 # -*- coding: utf8 -*-
-import re
 from functools import wraps
-from datetime import datetime
 
-import redis
+from redis import Redis
 from flask import (
     Flask,
     g,
     redirect,
     url_for
 )
+from flask.ext.cache import Cache
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.gravatar import Gravatar
 from raven.contrib.flask import Sentry
 
-app = Flask(__name__)
-db = SQLAlchemy(app)
-sentry = Sentry()
+from notifico.util import pretty
 
-gravatar = Gravatar(
-    app,
-    size=100,
-    rating='g',
-    default='mm',
-    force_lower=False
-)
+db = SQLAlchemy()
+sentry = Sentry()
+cache = Cache()
 
 
 def user_required(f):
@@ -53,124 +45,72 @@ def group_required(name):
         return _wrapped
     return _wrap
 
-from notifico.views.account import account
-from notifico.views.public import public
-from notifico.views.projects import projects
-from notifico.views.pimport import pimport
-from notifico.views.admin import admin
 
-app.register_blueprint(account, url_prefix='/u')
-app.register_blueprint(projects)
-app.register_blueprint(public)
-app.register_blueprint(pimport, url_prefix='/i')
-app.register_blueprint(admin, url_prefix='/_')
-
-
-@app.context_processor
-def installation_variables():
+def create_instance(debug=False):
     """
-    Include static template variables from the configuration file in
-    every outgoing template. Typically used for branding.
-    """
-    return app.config['TEMP_VARS']
-
-
-@app.before_request
-def set_db():
-    g.db = db
-    g.redis = redis.StrictRedis(
-        host=app.config['REDIS_HOST'],
-        port=app.config['REDIS_PORT'],
-        db=app.config['REDIS_DB']
-    )
-
-
-@app.template_filter('fixlink')
-def fix_link(s):
-    """
-    If the string `s` (which is a link) does not begin with http or https,
-    append http and return it.
-    """
-    if not re.match(r'^https?://', s):
-        s = 'http://{0}'.format(s)
-    return s
-
-
-@app.template_filter('pretty')
-def pretty_date(time=False):
-    """
-    Get a datetime object or a int() Epoch timestamp and return a
-    pretty string like 'an hour ago', 'Yesterday', '3 months ago',
-    'just now', etc
-    """
-    now = datetime.now()
-    diff = now - time
-    second_diff = diff.seconds
-    day_diff = diff.days
-
-    if day_diff < 0:
-        return ''
-
-    if day_diff == 0:
-        if second_diff < 10:
-            return "just now"
-        if second_diff < 60:
-            return str(second_diff) + " seconds ago"
-        if second_diff < 120:
-            return "a minute ago"
-        if second_diff < 3600:
-            return str(second_diff / 60) + " minutes ago"
-        if second_diff < 7200:
-            return "an hour ago"
-        if second_diff < 86400:
-            return str(second_diff / 3600) + " hours ago"
-    if day_diff == 1:
-        return "Yesterday"
-    if day_diff < 7:
-        return str(day_diff) + " days ago"
-    if day_diff < 31:
-        return str(day_diff / 7) + " weeks ago"
-    if day_diff < 365:
-        return str(day_diff / 30) + " months ago"
-    return str(day_diff / 365) + " years ago"
-
-
-def start(debug=False):
-    """
-    Sets up a basic deployment ready to run in production in light usage.
-
-    Ex: ``gunicorn -w 4 -b 127.0.0.1:4000 "notifico:start()"``
+    Construct a new Flask instance and return it.
     """
     import os
-    import os.path
-    from werkzeug import SharedDataMiddleware
 
+    app = Flask(__name__)
     app.config.from_object('notifico.default_config')
 
     if app.config.get('HANDLE_STATIC'):
         # We should handle routing for static assets ourself (handy for
         # small and quick deployments).
+        import os.path
+        from werkzeug import SharedDataMiddleware
+
         app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
             '/': os.path.join(os.path.dirname(__file__), 'static')
         })
 
-    if debug:
-        # Override the configuration's DEBUG setting.
-        app.config['DEBUG'] = True
-
     if not app.debug:
-        # If the app is not running with the built-in debugger, log
-        # exceptions to a file.
-        import logging
-        file_handler = logging.FileHandler('notifico.log')
-        file_handler.setLevel(logging.WARNING)
-        app.logger.addHandler(file_handler)
-
+        # If sentry (http://getsentry.com) is configured for
+        # error collection we should use it.
         if app.config.get('SENTRY_DSN'):
             sentry.dsn = app.config.get('SENTRY_DSN')
             sentry.init_app(app)
 
-    # Let SQLAlchemy create any missing tables.
-    db.create_all()
+    # Setup our redis connection (which is already thread safe)
+    app.redis = Redis(
+        host=app.config['REDIS_HOST'],
+        port=app.config['REDIS_PORT'],
+        db=app.config['REDIS_DB']
+    )
+    cache.init_app(app, config={
+        'CACHE_TYPE': 'redis',
+        'CACHE_REDIS_HOST': app.redis,
+        'CACHE_OPTIONS': {
+            'key_prefix': 'cache_'
+        }
+    })
+    db.init_app(app)
+
+    with app.app_context():
+        # Let SQLAlchemy create any missing tables.
+        db.create_all()
+
+    # Import and register all of our blueprints.
+    from notifico.views.account import account
+    from notifico.views.public import public
+    from notifico.views.projects import projects
+    from notifico.views.pimport import pimport
+    from notifico.views.admin import admin
+
+    app.register_blueprint(account, url_prefix='/u')
+    app.register_blueprint(projects)
+    app.register_blueprint(public)
+    app.register_blueprint(pimport, url_prefix='/i')
+    app.register_blueprint(admin, url_prefix='/_')
+
+    # cia.vc XML-RPC kludge.
+    from notifico.services.hooks.cia import handler
+    handler.connect(app, '/RPC2')
+
+    # Setup some custom Jinja2 filters.
+    app.jinja_env.filters['pretty_date'] = pretty.pretty_date
+    app.jinja_env.filters['plural'] = pretty.plural
+    app.jinja_env.filters['fix_link'] = pretty.fix_link
 
     return app

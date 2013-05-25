@@ -31,6 +31,7 @@ if __name__ == '__main__':
             'Flask-SQLAlchemy',
             'Flask-XML-RPC',
             'Flask-Mail',
+            'Flask-Cache',
             'fabric',
             'sqlalchemy',
             'UtopiaIRC',

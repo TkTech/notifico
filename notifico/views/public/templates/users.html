@@ -15,7 +15,7 @@
       <tbody>
         {% for user in pagination.items %}
         <tr>
-          <td nowrap>{{ user.joined|pretty }}</td>
+          <td nowrap>{{ user.joined|pretty_date }}</td>
           <td style="width: 100%;"><a href="{{ url_for('projects.dashboard', u=user.username) }}">{{ user.username }}</a></td>
           <td style="text-align: center;">{{ user.projects.filter_by(public=True).count() }}</td>
         </tr>

@@ -26,7 +26,7 @@
           <div class="desc">
             <small>
               <ul class="unstyled inline">
-                <li>Created {{ project.created|pretty }}</li>
+                <li>Created {{ project.created|pretty_date }}</li>
                 {% if is_owner %}
                 <li><a href="{{ url_for('.edit_project', u=user.username, p=project.name) }}"><i class="icon-pencil"></i> Edit</a></li>
                 <li><a href="{{ url_for('.delete_project', u=user.username, p=project.name) }}"><i class="icon-trash icon-white"></i> Delete</a></li>

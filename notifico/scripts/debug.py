@@ -3,8 +3,8 @@
 """
 Starts a local notifico notifico instance for debugging & developing.
 """
-from notifico import start
+from notifico import create_instance
 
 if __name__ == '__main__':
-    app = start(debug=True)
+    app = create_instance(debug=True)
     app.run()

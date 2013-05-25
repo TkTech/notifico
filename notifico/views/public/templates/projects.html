@@ -15,7 +15,7 @@
       <tbody>
         {% for project in pagination.items %}
         <tr>
-          <td nowrap>{{ project.created|pretty }}</td>
+          <td nowrap>{{ project.created|pretty_date }}</td>
           <td style="width: 100%;">
             {{ repo_link(project) }}
           </td>

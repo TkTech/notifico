@@ -23,7 +23,7 @@
       <tbody>
         {% for channel in pagination.items %}
         <tr>
-          <td nowrap>{{ channel.created|pretty }}</td>
+          <td nowrap>{{ channel.created|pretty_date }}</td>
           <td nowrap>{% if not channel.public %}<i class="icon-lock"></i> {% endif %}{{ channel.channel }}</td>
           <td nowrap>{{ channel.host }}</td>
           <td>{{ channel.port }}</td>

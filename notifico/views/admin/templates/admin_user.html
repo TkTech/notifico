@@ -20,7 +20,7 @@
   </div>
   <div class="span4">
     <ul class="unstyled">
-      <li><i class="icon-calendar"></i> Created {{ u.joined|pretty }}</li>
+      <li><i class="icon-calendar"></i> Created {{ u.joined|pretty_date }}</li>
       <li><i class="icon-th"></i> Has <em>{{ u.projects.count() }}</em> projects</li>
       <li><i class="icon-envelope"></i> {{ u.email }}</li>
     </ul>
