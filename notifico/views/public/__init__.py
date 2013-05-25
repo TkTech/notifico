@@ -1,12 +1,9 @@
-import time
-import datetime
-
+# -*- coding: utf-8 -*-
 from flask import (
     Blueprint,
     render_template,
     g,
-    request,
-    current_app
+    request
 )
 from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import func
@@ -60,7 +57,8 @@ def networks():
     items = q.limit(per_page).offset((page - 1) * per_page).all()
     pagination = Pagination(q, page, per_page, total, items)
 
-    return render_template('networks.html',
+    return render_template(
+        'networks.html',
         pagination=pagination,
         per_page=per_page
     )
@@ -78,7 +76,8 @@ def network(network):
 
     pagination = q.paginate(page, per_page, False)
 
-    return render_template('channels.html',
+    return render_template(
+        'channels.html',
         per_page=per_page,
         network=network,
         pagination=pagination
@@ -99,7 +98,8 @@ def projects(page=1):
 
     pagination = q.paginate(page, per_page, False)
 
-    return render_template('projects.html',
+    return render_template(
+        'projects.html',
         pagination=pagination,
         per_page=per_page
     )
@@ -118,7 +118,8 @@ def users(page=1):
 
     pagination = q.paginate(page, per_page, False)
 
-    return render_template('users.html',
+    return render_template(
+        'users.html',
         pagination=pagination,
         per_page=per_page
     )
@@ -127,6 +128,7 @@ def users(page=1):
 @public.route('/s/services')
 def services():
     services = HookService.services
-    return render_template('services.html',
+    return render_template(
+        'services.html',
         services=services
     )
