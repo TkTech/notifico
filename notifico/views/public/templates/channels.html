@@ -1,6 +1,16 @@
 {% extends "no_sidebar.html" %}
 {% from "ui/page.html" import render_pagination, link_p %}
 
+{% block style %}
+  <style>
+  .c-channel {}
+  .c-port,
+  .c-ssl {
+    text-align: center !important;
+  }
+  </style>
+{% endblock %}
+
 {% block content_page %}
   <h3>Channels on {{ network }}</h3>
   <div class="section-content">
@@ -12,9 +22,9 @@
     <table class="table table-vertical table-striped table-bordered">
       <thead>
         <tr>
-          <th>Channel</th>
-          <th>Port</th>
-          <th nowrap>
+          <th class="c-channel">Channel</th>
+          <th class="c-port">Port</th>
+          <th class="c-ssl" nowrap>
             <abbr title="Secure Socket Layer">SSL</abbr>
           </th>
           <th>Project</th>
@@ -28,7 +38,7 @@
               {%- if not channel.public -%}
                 <i class="icon-lock pull-left" alt="[This is a private project]" title="This is a private project"></i> 
               {%- endif -%}
-              {{ channel.channel }} <span class="muted">on</span> {{ channel.host}}
+              {{ channel.channel }}
             </div>
             <small class="muted">
               added {{ channel.created|pretty_date }}
@@ -38,8 +48,8 @@
               {% endif %}
             </small>
           </td>
-          <td>{{ channel.port }}</td>
-          <td style="text-align: center;">
+          <td class="c-port">{{ channel.port }}</td>
+          <td class="c-ssl">
             <i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i>
           </td>
           <td style="width: 100%;">
