@@ -151,8 +151,8 @@ def register():
     if form.validate_on_submit():
         # Checks out, go ahead and create our new user.
         u = User.new(form.username.data, form.email.data, form.password.data)
-        g.db.session.add(u)
-        g.db.session.commit()
+        db.session.add(u)
+        db.session.commit()
         # ... and send them back to the login screen.
         return redirect(url_for('.login'))
 
@@ -172,7 +172,7 @@ def settings(do=None):
     if do == 'p' and password_form.validate_on_submit():
         # Change the users password.
         g.user.set_password(password_form.password.data)
-        g.db.session.commit()
+        db.session.commit()
         return redirect(url_for('.settings'))
     elif do == 'd' and delete_form.validate_on_submit():
         # Delete this users account and all related data.
@@ -183,8 +183,8 @@ def settings(do=None):
             del session['_ue']
         # Remove the user from the DB.
         g.user.projects.order_by(False).delete()
-        g.db.session.delete(g.user)
-        g.db.session.commit()
+        db.session.delete(g.user)
+        db.session.commit()
 
         return redirect(url_for('.login'))
 
@@ -228,8 +228,8 @@ def tokens(tid=None):
             return abort(403)
 
         t.owner.tokens.remove(t)
-        g.db.session.delete(t)
-        g.db.session.commit()
+        db.session.delete(t)
+        db.session.commit()
 
         return redirect(url_for('.tokens'))
 

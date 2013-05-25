@@ -11,7 +11,7 @@ from flask import (
 )
 from flask.ext import wtf
 
-from notifico import user_required
+from notifico import db, user_required
 from notifico.models import User, Project, Hook, Channel
 from notifico.services.hooks import HookService
 
@@ -151,7 +151,7 @@ def new():
             )
             p.full_name = '{0}/{1}'.format(g.user.username, p.name)
             g.user.projects.append(p)
-            g.db.session.add(p)
+            db.session.add(p)
 
             if p.public:
                 # New public projects get added to #commits by default.
@@ -164,7 +164,7 @@ def new():
                 )
                 p.channels.append(c)
 
-            g.db.session.commit()
+            db.session.commit()
 
             return redirect(url_for('.details', u=g.user.username, p=p.name))
 
@@ -195,7 +195,7 @@ def edit_project(u, p):
             p.website = form.website.data
             p.public = form.public.data
             p.full_name = '{0}/{1}'.format(g.user.username, p.name)
-            g.db.session.commit()
+            db.session.commit()
             return redirect(url_for('.dashboard', u=u.username))
 
     return render_template('edit_project.html',
@@ -217,8 +217,8 @@ def delete_project(u, p):
         return abort(403)
 
     if request.method == 'POST' and request.form.get('do') == 'd':
-        g.db.session.delete(p)
-        g.db.session.commit()
+        db.session.delete(p)
+        db.session.commit()
         return redirect(url_for('.dashboard', u=u.username))
 
     return render_template('delete_project.html', project=p)
@@ -279,14 +279,14 @@ def new_hook(u, p, sid):
     if form and hook.validate(form, request):
         h = Hook.new(sid, config=hook.pack_form(form))
         p.hooks.append(h)
-        g.db.session.add(h)
-        g.db.session.commit()
+        db.session.add(h)
+        db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
     elif form is None and request.method == 'POST':
         h = Hook.new(sid)
         p.hooks.append(h)
-        g.db.session.add(h)
-        g.db.session.commit()
+        db.session.add(h)
+        db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('new_hook.html',
@@ -320,12 +320,12 @@ def edit_hook(u, p, hid):
 
     if form and hook_service.validate(form, request):
         h.config = hook_service.pack_form(form)
-        g.db.session.add(h)
-        g.db.session.commit()
+        db.session.add(h)
+        db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
     elif form is None and request.method == 'POST':
-        g.db.session.add(h)
-        g.db.session.commit()
+        db.session.add(h)
+        db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
     elif form:
         hook_service.load_form(form, h.config)
@@ -363,7 +363,7 @@ def hook_receive(pid, key):
 
     hook._request(h.project.owner, request, h)
 
-    g.db.session.commit()
+    db.session.commit()
     return ''
 
 
@@ -386,8 +386,8 @@ def delete_hook(u, p, hid):
 
     if request.method == 'POST' and request.form.get('do') == 'd':
         p.hooks.remove(h)
-        g.db.session.delete(h)
-        g.db.session.commit()
+        db.session.delete(h)
+        db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('delete_hook.html',
@@ -425,8 +425,8 @@ def new_channel(u, p):
                 public=form.public.data
             )
             p.channels.append(c)
-            g.db.session.add(c)
-            g.db.session.commit()
+            db.session.add(c)
+            db.session.commit()
             return redirect(url_for('.details', p=p.name, u=u.username))
         else:
             form.channel.errors = [wtf.ValidationError(
@@ -462,8 +462,8 @@ def delete_channel(u, p, cid):
 
     if request.method == 'POST' and request.form.get('do') == 'd':
         c.project.channels.remove(c)
-        g.db.session.delete(c)
-        g.db.session.commit()
+        db.session.delete(c)
+        db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template('delete_channel.html',

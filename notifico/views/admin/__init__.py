@@ -37,7 +37,7 @@ def admin_make():
         return redirect(url_for('public.landing'))
 
     g.user.add_group('admin')
-    g.db.session.commit()
+    db.session.commit()
     return redirect(url_for('public.landing'))
 
 
@@ -74,7 +74,7 @@ def admin_user(username):
 
     if do == 'p' and password_form.validate_on_submit():
         u.set_password(password_form.password.data)
-        g.db.session.commit()
+        db.session.commit()
         return redirect(url_for('.admin_user', username=username))
 
     return render_template(
@@ -91,8 +91,8 @@ def delete_project(pid):
     if not p:
         return redirect(url_for('.admin_projects'))
 
-    g.db.session.delete(p)
-    g.db.session.commit()
+    db.session.delete(p)
+    db.session.commit()
 
     return redirect(url_for('.admin_projects'))
 
@@ -104,15 +104,15 @@ def admin_orphans():
     Murders all orphans.
     """
     # Clean up orphaned channels.
-    g.db.session.query(Channel).\
+    db.session.query(Channel).\
         filter(~Channel.project.has()).\
         delete(synchronize_session=False)
 
     # Clean up orphaned hooks.
-    g.db.session.query(Hook).\
+    db.session.query(Hook).\
         filter(~Hook.project.has()).\
         delete(synchronize_session=False)
 
-    g.db.session.commit()
+    db.session.commit()
 
     return 'Orphans cleaned.'

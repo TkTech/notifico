@@ -65,9 +65,9 @@ def github():
         )
         result = r.json()
         token = AuthToken.new(result['access_token'], 'github')
-        g.db.session.add(token)
+        db.session.add(token)
         g.user.tokens.append(token)
-        g.db.session.commit()
+        db.session.commit()
         return redirect(url_for('.github'))
 
     # Check to see if the user has previously authenticated.
@@ -113,8 +113,8 @@ def github():
             ).first()
             if access_token:
                 g.user.tokens.remove(access_token)
-                g.db.session.delete(access_token)
-                g.db.session.commit()
+                db.session.delete(access_token)
+                db.session.commit()
             return redirect(request.path)
 
     user = git.get_user()
@@ -146,10 +146,10 @@ def github():
                 )
                 p.full_name = '{0}/{1}'.format(g.user.username, p.name)
                 g.user.projects.append(p)
-                g.db.session.add(p)
+                db.session.add(p)
                 # We need to commit to generate the project.id which is
                 # used for the following steps.
-                g.db.session.commit()
+                db.session.commit()
 
                 summary.append((
                     'Project {0} created.'.format(repo.name),
@@ -178,7 +178,7 @@ def github():
                     # and create one.
                     h = Hook.new(10)
                     p.hooks.append(h)
-                    g.db.session.add(h)
+                    db.session.add(h)
 
                     repo.create_hook('web', {
                         'url': url_for(
@@ -208,9 +208,9 @@ def github():
                         public=True
                     )
                     p.channels.append(c)
-                    g.db.session.add(c)
+                    db.session.add(c)
 
-        g.db.session.commit()
+        db.session.commit()
 
     return render_template(
         'github.html',

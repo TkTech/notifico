@@ -6,12 +6,12 @@ from flask import (
     render_template,
     g,
     request,
-    redirect,
-    url_for
+    current_app
 )
 from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import func, extract
+from sqlalchemy import func
 
+from notifico import db
 from notifico.models import User, Channel, Project
 from notifico.services.hooks import HookService
 
@@ -45,22 +45,22 @@ def landing():
 
     # Sum the total number of messages across all projects, caching
     # it for the next two minutes.
-    total_messages = g.redis.get('cache_message_count')
+    total_messages = current_app.redis.get('cache_message_count')
     if total_messages is None:
-        total_messages = g.db.session.query(
+        total_messages = db.session.query(
             func.sum(Project.message_count)
         ).scalar()
         if total_messages is None:
             total_messages = 0
 
-        g.redis.setex('cache_message_count', 120, total_messages)
+        current_app.redis.setex('cache_message_count', 120, total_messages)
 
     # Total # of users.
     total_users = User.query.count()
 
     # Find the 10 most popular networks.
     top_networks = (
-        Channel.visible(g.db.session.query(
+        Channel.visible(db.session.query(
             Channel.host,
             func.count(func.distinct(Channel.channel)).label('count')
         ), user=g.user)
@@ -87,7 +87,7 @@ def networks():
     page = max(int(request.args.get('page', 1)), 1)
 
     q = (
-        Channel.visible(g.db.session.query(
+        Channel.visible(db.session.query(
             Channel.host,
             func.count(func.distinct(Channel.channel)).label('di_count'),
             func.count(Channel.channel).label('count')
