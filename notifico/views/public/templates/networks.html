@@ -8,8 +8,7 @@
       <thead>
         <tr>
           <th>Host</th>
-          <th style="text-align: center;">Channels (Unique)</th>
-          <th style="text-align: center;">Channels (Total)</th>
+          <th style="text-align: center;">Channels</th>
         </tr>
       </thead>
       <tbody>
@@ -19,11 +18,6 @@
           <td nowrap style="text-align: center;">
             <a href="{{ url_for('.network', network=network) }}">
               {{ di_count }}
-            </a>
-          </td>
-          <td nowrap style="text-align: center;">
-            <a href="{{ url_for('.network', network=network) }}">
-              {{ count }}
             </a>
           </td>
         </tr>
