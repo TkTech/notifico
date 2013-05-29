@@ -13,7 +13,7 @@ from flask import (
 )
 from flask.ext import wtf
 
-from notifico import user_required
+from notifico import db, user_required
 from notifico.models import User, AuthToken
 
 account = Blueprint('account', __name__, template_folder='templates')
