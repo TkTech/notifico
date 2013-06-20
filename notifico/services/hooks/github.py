@@ -87,6 +87,12 @@ class GithubConfigForm(wtf.Form):
         'If checked, show the full github project name (ex: tktech/notifico)'
         ' instead of the Notifico project name (ex: notifico)'
     ))
+    title_only = wtf.BooleanField('Title Only', validators=[
+        wtf.Optional()
+    ], default=False, description=(
+        'If checked, only the commits title (the commit message up to'
+        ' the first new line) will be emitted.'
+    ))
 
 
 class GithubHook(HookService):
@@ -259,6 +265,7 @@ class GithubHook(HookService):
         """
         prefer_username = config.get('prefer_username', True)
         full_project_name = config.get('full_project_name', False)
+        title_only = config.get('title_only', False)
 
         original = j['original']
 
@@ -307,7 +314,13 @@ class GithubHook(HookService):
             ))
 
             line.append(u'-')
-            line.append(commit['message'])
+
+            message = commit['message']
+            if title_only:
+                message_lines = message.split('\n')
+                line.append(message_lines[0] if message_lines else message)
+            else:
+                line.append(message)
 
             yield u' '.join(line)
 
