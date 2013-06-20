@@ -48,6 +48,6 @@ if __name__ == '__main__':
             'docopt'
         ],
         dependency_links=[
-            'https://github.com/TkTech/utopia/tarball/master#egg=UtopiaIRC'
+            'https://github.com/TkTech/utopia/tarball/deploy#egg=UtopiaIRC'
         ]
     )
