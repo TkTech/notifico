@@ -11,8 +11,12 @@
       {{ forms.render_field(form.password) }}
       {{ forms.render_field(form.confirm) }}
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Create Account</button>
-        <a href="{{ url_for('public.landing') }}" class="btn">Cancel</a>
+        <button type="submit" class="btn btn-success">
+          <i class="icon-plus"></i> Create Account
+        </button>
+        <a href="{{ url_for('public.landing') }}" class="btn btn-danger">
+          <i class="icon-remove"></i> Cancel
+        </a>
       </div>
     </form>
   </div>
