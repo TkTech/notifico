@@ -1,0 +1,18 @@
+{% extends "no_sidebar.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block content_page %}
+  <h2>Password Reset</h2>
+  <div class="section-content">
+    <form class="form form-horizontal" method='POST' action="{{ url_for('.reset_pick_password') }}">
+      {{ form.hidden_tag() }}
+      {{ forms.render_field(form.password) }}
+      {{ forms.render_field(form.confirm) }}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success">
+          Save New Password
+        </button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

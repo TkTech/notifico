@@ -3,6 +3,7 @@
 
 Usage:
     notifico www [options]
+    notifico init
 
 Options:
     --debug                 Enable debugging.
@@ -15,6 +16,7 @@ import sys
 from docopt import docopt
 
 from notifico import create_instance
+from notifico.models import *
 
 
 def main(argv):
@@ -27,6 +29,12 @@ def main(argv):
             port=int(args['--port']),
             host=args['--host']
         )
+    elif args['init']:
+        app = create_instance()
+        with app.app_context():
+            # Let SQLAlchemy create any missing tables.
+            db.create_all()
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

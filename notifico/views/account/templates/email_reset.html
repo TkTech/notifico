@@ -1,0 +1,11 @@
+Hello {{ user.username }},
+<p>
+    A password reset has been request for your account.
+    If you did not request this reset, please ignore this email.
+    <br /><br />
+    Click or copy the link below to reset your password.
+    <br /><br />
+    <a href="{{ reset_link }}">{{ reset_link }}</a>
+    <br /><br />
+    This link will expire in {{ hours }} hours.
+</p>

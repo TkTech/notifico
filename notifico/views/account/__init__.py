@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 
 from flask import (
@@ -9,88 +10,26 @@ from flask import (
     url_for,
     session,
     abort,
-    make_response
+    make_response,
+    request,
+    flash
 )
-from flask.ext import wtf
-
 from notifico import db, user_required
 from notifico.models import User, AuthToken
+from notifico.services import reset, background
+from notifico.views.account.forms import (
+    UserLoginForm,
+    UserRegisterForm,
+    UserDeleteForm,
+    UserForgotForm,
+    UserResetForm,
+    UserPasswordForm
+)
 
 account = Blueprint('account', __name__, template_folder='templates')
 # Usernames that cannot be registered because they clash with internal
 # routes.
 _reserved = ('new',)
-
-
-class UserRegisterForm(wtf.Form):
-    username = wtf.TextField('Username', validators=[
-        wtf.Required(),
-        wtf.Length(min=2, max=50),
-        wtf.Regexp('^[a-zA-Z0-9_]*$', message=(
-            'Username must only contain a to z, 0 to 9, and underscores.'
-        ))
-    ], description=(
-        'Your username is public and used as part of your project name.'
-    ))
-    email = wtf.TextField('Email', validators=[
-        wtf.Required(),
-        wtf.validators.Email()
-    ])
-    password = wtf.PasswordField('Password', validators=[
-        wtf.Required(),
-        wtf.Length(5),
-        wtf.EqualTo('confirm', 'Passwords do not match.'),
-    ])
-    confirm = wtf.PasswordField('Confirm Password')
-
-    def validate_username(form, field):
-        username = field.data.strip().lower()
-        if username in _reserved or User.username_exists(username):
-            raise wtf.ValidationError(
-                'Sorry, but that username is taken.'
-            )
-
-
-class UserLoginForm(wtf.Form):
-    username = wtf.TextField('Username', validators=[
-        wtf.Required()
-    ])
-    password = wtf.PasswordField('Password', validators=[
-        wtf.Required()
-    ])
-
-    def validate_password(form, field):
-        if not User.login(form.username.data, field.data):
-            raise wtf.ValidationError('Incorrect username and/or password.')
-
-
-class UserPasswordForm(wtf.Form):
-    old = wtf.PasswordField('Old Password', validators=[
-        wtf.Required()
-    ])
-    password = wtf.PasswordField('Password', validators=[
-        wtf.Required(),
-        wtf.Length(5),
-        wtf.EqualTo('confirm', 'Passwords do not match.'),
-    ])
-    confirm = wtf.PasswordField('Confirm Password')
-
-    def validate_old(form, field):
-        if not User.login(g.user.username, field.data):
-            raise wtf.ValidationError('Old Password is incorrect.')
-
-
-class UserDeleteForm(wtf.Form):
-    password = wtf.PasswordField('Password', validators=[
-        wtf.Required(),
-        wtf.Length(5),
-        wtf.EqualTo('confirm', 'Passwords do not match.'),
-    ])
-    confirm = wtf.PasswordField('Confirm Password')
-
-    def validate_password(form, field):
-        if not User.login(g.user.username, field.data):
-            raise wtf.ValidationError('Password is incorrect.')
 
 
 @account.before_app_request
@@ -134,6 +73,122 @@ def logout():
     return redirect(url_for('.login'))
 
 
+@account.route('/forgot', methods=['GET', 'POST'])
+def forgot_password():
+    """
+    If NOTIFICO_PASSWORD_RESET is enabled and Flask-Mail is configured,
+    this view allows you to request a password reset email. It also
+    handles accepting those tokens.
+    """
+    # Because this functionality depends on Flask-Mail and
+    # celery being properly configured, we default to disabled.
+    if not current_app.config.get('NOTIFICO_PASSWORD_RESET'):
+        flash(
+            'Password resets have been disabled by the administrator.',
+            category='warning'
+        )
+        return redirect('.login')
+
+    # How long should reset tokens last? We default
+    # to 24 hours.
+    token_expiry = current_app.config.get(
+        'NOTIFICO_PASSWORD_RESET_EXPIRY',
+        60 * 60 * 24
+    )
+
+    form = UserForgotForm()
+    if form.validate_on_submit():
+        user = User.by_username(form.username.data)
+        new_token = reset.add_token(user, expire=token_expiry)
+
+        # Send the email as a background job so we don't block
+        # up the browser (and to use celery's built-in rate
+        # limiting).
+        background.send_mail.delay(
+            'Notifico - Password Reset for {username}'.format(
+                username=user.username
+            ),
+            # We're already using Jinja2, so we might as well use
+            # it to render our email templates as well.
+            html=render_template(
+                'email_reset.html',
+                user=user,
+                reset_link=url_for(
+                    '.reset_password',
+                    token=new_token,
+                    uid=user.id,
+                    _external=True
+                ),
+                hours=token_expiry / 60 / 60
+            ),
+            recipients=[user.email],
+            sender=current_app.config['NOTIFICO_MAIL_SENDER']
+        )
+        flash('A reset email has been sent.', category='success')
+        return redirect(url_for('.login'))
+
+    return render_template('forgot.html', form=form)
+
+
+@account.route('/reset')
+def reset_password():
+    """
+    Endpoint for password reset emails, which validates the token
+    and UID pair, then redirects to the password set form.
+    """
+    token = request.args.get('token')
+    uid = request.args.get('uid')
+
+    u = User.query.get(int(uid))
+    if not u or not reset.valid_token(u, token):
+        flash('Your reset request is invalid or expired.', category='warning')
+        return redirect(url_for('.login'))
+
+    session['reset_token'] = token
+    session['reset_user_id'] = uid
+
+    return redirect(url_for('.reset_pick_password'))
+
+
+@account.route('/reset/password', methods=['GET', 'POST'])
+def reset_pick_password():
+    token = session.get('reset_token')
+    user_id = session.get('reset_user_id')
+
+    if not token or not user_id:
+        return redirect(url_for('.login'))
+
+    u = User.query.get(int(user_id))
+    if not u or not reset.valid_token(u, token):
+        flash(
+            'Your reset request is invalid or expired.',
+            category='warning'
+        )
+        return redirect(url_for('.login'))
+
+    form = UserResetForm()
+    if form.validate_on_submit():
+        u.set_password(form.password.data)
+        db.session.commit()
+
+        # The user has successfully reset their password,
+        # so we want to clean up any other reset tokens as
+        # well as our stashed session token.
+        reset.clear_tokens(u)
+        session.pop('reset_token', None)
+        session.pop('reset_user_id', None)
+
+        flash(
+            'The password for {username} has been reset.'.format(
+                username=u.username
+            ),
+            category='success'
+        )
+        return redirect(url_for('.login'))
+
+    return render_template('reset.html', form=form)
+
+
 @account.route('/register', methods=['GET', 'POST'])
 def register():
     """
@@ -144,7 +199,7 @@ def register():
         return redirect(url_for('public.landing'))
 
     # Make sure this instance is allowing new users.
-    if not current_app.config.get('PUBLIC_NEW_USERS', True):
+    if not current_app.config.get('NOTIFICO_NEW_USERS', True):
         return redirect(url_for('public.landing'))
 
     form = UserRegisterForm()
@@ -188,7 +243,8 @@ def settings(do=None):
 
         return redirect(url_for('.login'))
 
-    return render_template('settings.html',
+    return render_template(
+        'settings.html',
         password_form=password_form,
         delete_form=delete_form
     )
