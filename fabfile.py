@@ -1,19 +1,18 @@
 # -*- coding: utf8 -*-
-import os.path
-
 from fabric import colors
 from fabric.api import *
-from fabric.utils import puts
+from fabric.utils import abort
 from fabric.contrib.project import rsync_project
 from fabric.contrib.files import exists
 
 
-def production():
+def live():
     """
-    Defaults for deploying to a production server.
+    Defaults for deploying to a live server.
     """
     env.hosts = ['n.tkte.ch']
     env.user = 'notifico'
+    env.ubin = '~/.local/bin'
 
 
 def bootstrap():
@@ -21,6 +20,9 @@ def bootstrap():
 
 
 def deploy():
+    # Since we use the deploying users home folder as the base,
+    # we must have it at a minimum.
+    require('user', provided_by=['live'])
     # Make sure our CSS is up to date.
     with lcd('notifico/static'):
         local('lessc less/bootstrap.less css/bootstrap.css')
@@ -47,11 +49,51 @@ def deploy():
         put('misc/deploy/supervisord.conf', 'supervisord.conf')
 
         # Start or reload supervisord if it's already running.
-        if exists('supervisord.pid'):
-            run('~/.local/bin/supervisorctl reread')
-            run('~/.local/bin/supervisorctl update')
-        else:
-            run('~/.local/bin/supervisord -c supervisord.conf')
+        with path(env.ubin):
+            if exists('supervisord.pid'):
+                # Reread the configuration file.
+                run('supervisorctl reread')
+                # Only reload processes whose configuration has
+                # actually been changed.
+                run('supervisorctl update')
+            else:
+                run('supervisord -c supervisord.conf')
+
+
+def restart_bots():
+    require('user', provided_by=['live'])
+
+    with cd('notifico'):
+        if not exists('supervisord.pid'):
+            abort(colors.red('supervisord is not running!'))
+            return
+
+        with path(env.ubin):
+            run('supervisorctl restart notifico-bots')
+
+
+def restart_www():
+    require('user', provided_by=['live'])
+
+    with cd('notifico'):
+        if not exists('supervisord.pid'):
+            abort(colors.red('supervisord is not running!'))
+            return
+
+        with path(env.ubin):
+            run('supervisorctl restart notifico-www')
+
+
+def restart_worker():
+    require('user', provided_by=['live'])
+
+    with cd('notifico'):
+        if not exists('supervisord.pid'):
+            abort(colors.red('supervisord is not running!'))
+            return
+
+        with path(env.ubin):
+            run('supervisorctl restart notifico-worker')
 
 
 def css():
