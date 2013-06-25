@@ -89,10 +89,14 @@
                 </li>
                 {% else %}
                 <li>
-                  <a href="{{ url_for('account.login') }}">Login</a>
+                  <a href="{{ url_for('account.login') }}">
+                    <i class="icon-signin"></i> Login
+                  </a>
                 </li>
                 <li>
-                  <a href="{{ url_for('account.register') }}">Register</a>
+                  <a href="{{ url_for('account.register') }}">
+                    <i class="icon-plus"></i> Register
+                  </a>
                 </li>
                 {% endif %}
               </ul>
