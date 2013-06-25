@@ -99,6 +99,8 @@ ol.inline > li {
 .nav-container {
   @nav_background: white;
   @nav_text_color: black;
+  @nav_hover_color: #0088cc;
+  @nav_active_color: @nav_hover_color;
 
   #gradient > .vertical(@nav_background, @nav_background);
   //border-bottom: 2px solid black;
@@ -108,13 +110,13 @@ ol.inline > li {
     padding: 10px 20px 0 20px;
 
     .navbar-inner {
+      .box-shadow(none);
       .border-radius(0);
       border: none;
       border-bottom: 2px solid black;
-      #gradient > .vertical(@nav_background, @nav_background);
-      .box-shadow(none);
       padding-left: 0px;
       padding-right: 0px;
+      #gradient > .vertical(@nav_background, @nav_background);
 
       .brand {
         text-shadow: none;
@@ -122,25 +124,21 @@ ol.inline > li {
         font-weight: 600;
       }
 
-      .nav {
-        li,
-        .active > li {
-          a {
-            text-shadow: none;
-            color: @nav_text_color;
-            background-color: @nav_background;
-            .box-shadow(none);
-          }
+      .nav > li > a {
+        color: @nav_text_color;
 
-          .dropdown-menu {
-            .border-radius(0);
-          }
-        }
-
-        .active > li > a {
-          text-decoration: underline;
+        &:focus,
+        &:hover {
+          color: @nav_hover_color;
         }
       }
+
+      .nav > li.active > a {
+        color: @nav_active_color;
+        .box-shadow(none);
+        background: none transparent;
+      }
+
     }
   }
 }
