@@ -9,16 +9,26 @@ from fabric.contrib.files import exists
 
 
 def production():
-    """Defaults for deploying to a production server."""
-    env.directory = os.path.join('/', 'home', 'notifico')
-    env.notifico_dir = os.path.join(env.directory, 'notifico')
+    """
+    Defaults for deploying to a production server.
+    """
+    env.hosts = ['n.tkte.ch']
+    env.user = 'notifico'
+
+
+def bootstrap():
+    run('pip install --user supervisor')
 
 
 def deploy():
-    require('directory', provided_by=('production',))
+    # Make sure our CSS is up to date.
+    with lcd('notifico/static'):
+        local('lessc less/bootstrap.less css/bootstrap.css')
+
+    # Copy any changes (and only changes) to the server.
     rsync_project(
         local_dir='./',
-        remote_dir=env.notifico_dir,
+        remote_dir='notifico',
         exclude=[
             'ENV',
             '*.pyc',
@@ -28,47 +38,19 @@ def deploy():
             'local_config.py'
         ]
     )
-    with cd(env.notifico_dir):
+
+    with cd('notifico'):
+        # Run setup.py to install any new dependencies,
+        # or changes to existing dependencies.
         run('python setup.py install --user')
-
-        if exists('notifico.pid'):
-            run('kill -HUP `cat notifico.pid`')
-        else:
-            run(' '.join([
-                '~/.local/bin/gunicorn',
-                '-w 4',
-                '-b 127.0.0.1:4000',
-                '-p notifico.pid',
-                '--daemon',
-                '"notifico:create_instance()"'
-            ]), pty=False)
-
-        # Try to make sure gunicorn has actually started.
-        if exists('notifico.pid'):
-            with settings(warn_only=True):
-                result = run('kill -0 `cat notifico.pid`')
-
-            if result.failed:
-                puts(colors.red('Gunicorn is not running!'))
-            else:
-                puts(colors.green('Gunicorn started.'))
-        else:
-            puts(colors.red('Gunicorn is not running!'))
-
-
-def deploy_bots():
-    require('directory', provided_by=('production',))
-    with cd(env.notifico_dir):
-        run('pip install --user supervisor')
         # Update the supervisord configuration.
         put('misc/deploy/supervisord.conf', 'supervisord.conf')
 
-        if exists('/tmp/supervisord.pid'):
-            # Supervisord is already running, so ask it to restart
-            # the running bots.
-            run('~/.local/bin/supervisorctl restart bots')
+        # Start or reload supervisord if it's already running.
+        if exists('supervisord.pid'):
+            run('~/.local/bin/supervisorctl reread')
+            run('~/.local/bin/supervisorctl update')
         else:
-            # ... otherwise, start the daemon with our config file.
             run('~/.local/bin/supervisord -c supervisord.conf')
 
 
