@@ -2,6 +2,7 @@
 from functools import wraps
 
 from redis import Redis
+from celery import Celery
 from flask import (
     Flask,
     g,
@@ -9,6 +10,7 @@ from flask import (
     url_for
 )
 from flask.ext.cache import Cache
+from flask.ext.mail import Mail
 from flask.ext.sqlalchemy import SQLAlchemy
 from raven.contrib.flask import Sentry
 
@@ -17,6 +19,8 @@ from notifico.util import pretty
 db = SQLAlchemy()
 sentry = Sentry()
 cache = Cache()
+mail = Mail()
+celery = Celery()
 
 
 def user_required(f):
@@ -55,7 +59,7 @@ def create_instance():
     app = Flask(__name__)
     app.config.from_object('notifico.default_config')
 
-    if app.config.get('HANDLE_STATIC'):
+    if app.config.get('NOTIFICO_ROUTE_STATIC'):
         # We should handle routing for static assets ourself (handy for
         # small and quick deployments).
         import os.path
@@ -78,6 +82,9 @@ def create_instance():
         port=app.config['REDIS_PORT'],
         db=app.config['REDIS_DB']
     )
+    # Attach Flask-Cache to our application instance. We override
+    # the backend configuration settings because we only want one
+    # Redis instance.
     cache.init_app(app, config={
         'CACHE_TYPE': 'redis',
         'CACHE_REDIS_HOST': app.redis,
@@ -85,11 +92,13 @@ def create_instance():
             'key_prefix': 'cache_'
         }
     })
+    # Attach Flask-Mail to our application instance.
+    mail.init_app(app)
+    # Attach Flask-SQLAlchemy to our application instance.
     db.init_app(app)
 
-    with app.app_context():
-        # Let SQLAlchemy create any missing tables.
-        db.create_all()
+    # Update celery's configuration with our application config.
+    celery.config_from_object(app.config)
 
     # Import and register all of our blueprints.
     from notifico.views.account import account

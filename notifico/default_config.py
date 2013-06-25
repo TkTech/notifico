@@ -24,6 +24,19 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(db_path)
 CSRF_ENABLED = True
 
 # ---
+# Flask-Mail
+# ---
+# Allows Notifico to send password reset emails and other
+# notifications.
+# MAIL_SERVER = 'localhost'
+# MAIL_PORT = 25
+# MAIL_USE_TLS = False
+# MAIL_USE_SSL = False
+# MAIL_USERNAME = None
+# MAIL_PASSWORD = None
+# DEFAULT_MAIL_SENDER = None
+
+# ---
 # Redis Configuration
 # ---
 REDIS_HOST = 'localhost'
@@ -49,16 +62,34 @@ GOOGLE = None
 SENTRY_DSN = None
 
 # ---
+# Celery Configuration
+# ---
+BROKER_URL = 'redis://'
+CELERY_RESULT_BACKEND = 'redis://'
+CELERY_IMPORTS = ('notifico.services.background',)
+CELERY_TASK_SERIALIZER = 'json'
+
+
+# ---
 # Misc. Settings
 # ---
+
 # Should Notifico route static assets (/css/, /js/, etc...)?
 # This is really only useful for debugging and for small deployments.
 # Larger deploys should set this to False and have their proxy/server
 # handle the /static directory.
-HANDLE_STATIC = True
+NOTIFICO_ROUTE_STATIC = True
 
 # Should new users be allowed to register?
-PUBLIC_NEW_USERS = True
+NOTIFICO_NEW_USERS = True
+
+# Should notifico send password reset emails? This requires
+# Flask-Mail to be properly configured.
+NOTIFICO_PASSWORD_RESET = False
+# How long (in seconds) password resets should be valid for.
+NOTIFICO_PASSWORD_RESET_EXPIRY = 60 * 60 * 24
+# The address or (name, address) to use when sending an email.
+NOTIFICO_MAIL_SENDER = None
 
 try:
     from local_config import *

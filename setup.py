@@ -45,7 +45,8 @@ if __name__ == '__main__':
             'unidecode',
             'raven',
             'blinker',
-            'docopt'
+            'docopt',
+            'celery'
         ],
         dependency_links=[
             'https://github.com/TkTech/utopia/tarball/deploy#egg=UtopiaIRC'
