@@ -6354,8 +6354,9 @@ a.badge:hover {
 }
 html,
 body {
-  background-color: white;
+  background-color: #ffffff;
   height: 100%;
+  color: #444;
 }
 html,
 body,
@@ -6486,12 +6487,6 @@ ol.inline > li {
 .content {
   padding-bottom: 48px;
   padding-top: 20px;
-}
-.content .content_main {
-  background-color: #ffffff;
-}
-.content .content_main .content_page {
-  background-color: #ffffff;
 }
 .content .content_main .content_page .contents {
   padding: 0 20px 12px 20px;

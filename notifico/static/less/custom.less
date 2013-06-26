@@ -1,9 +1,16 @@
 @import "mixins.less";
 
+@background_color: white;
+@text_color: #444;
+@nav_background: @background_color;
+@nav_text_color: black;
+@nav_hover_color: #0088cc;
+@nav_active_color: @nav_hover_color;
+
 html, body {
-  //background-color: #f6f6f6;
-  background-color: white;
+  background-color: @background_color;
   height: 100%;
+  color: @text_color;
 }
 
 html, body, p {
@@ -97,11 +104,6 @@ ol.inline > li {
 }
 
 .nav-container {
-  @nav_background: white;
-  @nav_text_color: black;
-  @nav_hover_color: #0088cc;
-  @nav_active_color: @nav_hover_color;
-
   #gradient > .vertical(@nav_background, @nav_background);
   //border-bottom: 2px solid black;
 
@@ -144,22 +146,11 @@ ol.inline > li {
 }
 
 .content {
-  @sidebar_background: white;
-  @content_background: white;
-
   padding-bottom: 48px;
   padding-top: 20px;
 
   .content_main {
-    background-color: @sidebar_background;
-
-    .content_sidebar {
-
-    }
-
     .content_page {
-      background-color: @content_background;
-
       // Fix the padding
       .contents {
         padding: 0 20px 12px 20px;
