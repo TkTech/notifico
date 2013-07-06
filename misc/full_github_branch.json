@@ -1,0 +1,81 @@
+{
+  "ref": "refs\/heads\/patch-21",
+  "after": "943d2e7055e934b916ced734c4e705b7c83b2c0e",
+  "before": "0000000000000000000000000000000000000000",
+  "created": true,
+  "deleted": false,
+  "forced": true,
+  "base_ref": "refs\/heads\/master",
+  "compare": "https:\/\/github.com\/Sharparam\/TriEngine\/compare\/patch-21",
+  "commits": [
+
+  ],
+  "head_commit": {
+    "id": "943d2e7055e934b916ced734c4e705b7c83b2c0e",
+    "distinct": true,
+    "message": "Rewrite of resource system.\n\nResources are now handled by Resources.ResourceManager and are fully\ngeneric.\nIAudioManager no longer handles its own resources, and instead uses\nResourceManager.\nUpdated documentation.",
+    "timestamp": "2013-07-02T10:14:37-07:00",
+    "url": "https:\/\/github.com\/Sharparam\/TriEngine\/commit\/943d2e7055e934b916ced734c4e705b7c83b2c0e",
+    "author": {
+      "name": "Adam Hellberg",
+      "email": "sharparam@sharparam.com",
+      "username": "Sharparam"
+    },
+    "committer": {
+      "name": "Adam Hellberg",
+      "email": "sharparam@sharparam.com",
+      "username": "Sharparam"
+    },
+    "added": [
+      "TriDevs.TriEngine\/Resources\/IResource.cs",
+      "TriDevs.TriEngine\/Resources\/ResourceException.cs",
+      "TriDevs.TriEngine\/Resources\/ResourceManager.cs"
+    ],
+    "removed": [
+      "TriDevs.TriEngine\/Resources.cs"
+    ],
+    "modified": [
+      "TriDevs.TriEngine.EngineTest\/WindowTest.cs",
+      "TriDevs.TriEngine\/Audio\/AudioManager.cs",
+      "TriDevs.TriEngine\/Audio\/IAudioManager.cs",
+      "TriDevs.TriEngine\/Audio\/ISong.cs",
+      "TriDevs.TriEngine\/Audio\/ISound.cs",
+      "TriDevs.TriEngine\/Audio\/NullAudioManager.cs",
+      "TriDevs.TriEngine\/GameWindow2D.cs",
+      "TriDevs.TriEngine\/Shaders\/Shader.cs",
+      "TriDevs.TriEngine\/StateManagement\/GameState.cs",
+      "TriDevs.TriEngine\/Text\/Font.cs",
+      "TriDevs.TriEngine\/Text\/TextObject.cs",
+      "TriDevs.TriEngine\/TriDevs.TriEngine.csproj"
+    ]
+  },
+  "repository": {
+    "id": 8084202,
+    "name": "TriEngine",
+    "url": "https:\/\/github.com\/Sharparam\/TriEngine",
+    "description": "General-purpose engine in C#\/OpenGL",
+    "homepage": "",
+    "watchers": 0,
+    "stargazers": 0,
+    "forks": 0,
+    "fork": true,
+    "size": 456,
+    "owner": {
+      "name": "Sharparam",
+      "email": "sharparam@sharparam.com"
+    },
+    "private": false,
+    "open_issues": 0,
+    "has_issues": true,
+    "has_downloads": true,
+    "has_wiki": true,
+    "language": "C#",
+    "created_at": 1360280795,
+    "pushed_at": 1372787440,
+    "master_branch": "master"
+  },
+  "pusher": {
+    "name": "Sharparam",
+    "email": "sharparam@sharparam.com"
+  }
+}
