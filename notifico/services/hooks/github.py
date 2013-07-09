@@ -125,10 +125,12 @@ class GithubHook(HookService):
         show_tags = config.get('show_tags', True)
 
         if not original['commits']:
-            if not show_tags or 'tag' not in j:
-                # No commits, no tags, nothing to do.
-                return
-            yield cls.message(cls._create_tag_summary(j, config), strip=strip)
+            if show_tags and j['tag']:
+                yield cls.message(cls._create_non_commit_summary(j, config), strip=strip)
+            if j['branch']:
+                yield cls.message(cls._create_non_commit_summary(j, config), strip=strip)
+
+            # No commits, no tags, no new branch. Nothing to do
             return
 
         if branches:
@@ -143,9 +145,9 @@ class GithubHook(HookService):
             yield cls.message(formatted_commit, strip=strip)
 
     @classmethod
-    def _create_tag_summary(cls, j, config):
+    def _create_non_commit_summary(cls, j, config):
         """
-        Create and return a one-line summary of tag changes in `j`.
+        Create and return a one-line summary of things not involving commits in `j`.
         """
         original = j['original']
         full_project_name = config.get('full_project_name', False)
@@ -169,26 +171,37 @@ class GithubHook(HookService):
 
         # The user doing the push, if available.
         if j['pusher']:
-            line.append(u'{ORANGE}{pusher}{RESET} tagged'.format(
+            line.append(u'{ORANGE}{pusher}{RESET}'.format(
                 pusher=j['pusher'],
                 **HookService.colors
             ))
-        else:
-            line.append(u'Tagged')
 
-        # The sha1 hash of the head (tagged) commit.
-        line.append(u'{GREEN}{sha}{RESET} as'.format(
-            sha=original['head_commit']['id'][:7],
-            **HookService.colors
-        ))
+        if j['tag']:
+            # Verb with proper capitalization
+            line.append(u'tagged' if j['pusher'] else u'Tagged')
 
-        # The tag itself.
-        line.append(u'{GREEN}{tag}{RESET}'.format(
-            tag=j['tag'],
-            **HookService.colors
-        ))
+            # The sha1 hash of the head (tagged) commit.
+            line.append(u'{GREEN}{sha}{RESET} as'.format(
+                sha=original['head_commit']['id'][:7],
+                **HookService.colors
+            ))
 
-        # The shortened URL linking to the head (tagged) commit.
+            # The tag itself.
+            line.append(u'{GREEN}{tag}{RESET}'.format(
+                tag=j['tag'],
+                **HookService.colors
+            ))
+        elif j['branch']:
+            # Verb with proper capitalization
+            line.append(u'created branch' if j['pusher'] else u'Created branch')
+
+            # The branch name
+            line.append(u'{GREEN}{branch}{RESET}'.format(
+                branch=j['branch'],
+                **HookService.colors
+            ))
+
+        # The shortened URL linking to the head commit.
         line.append(u'{PINK}{link}{RESET}'.format(
             link=GithubHook.shorten(original['head_commit']['url']),
             **HookService.colors
