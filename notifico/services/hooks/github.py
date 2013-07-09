@@ -193,7 +193,10 @@ class GithubHook(HookService):
             ))
         elif j['branch']:
             # Verb with proper capitalization
-            line.append(u'created branch' if j['pusher'] else u'Created branch')
+            if original['deleted']:
+                line.append(u'deleted branch' if j['pusher'] else u'Deleted branch')
+            else:
+                line.append(u'created branch' if j['pusher'] else u'Created branch')
 
             # The branch name
             line.append(u'{GREEN}{branch}{RESET}'.format(
@@ -201,11 +204,12 @@ class GithubHook(HookService):
                 **HookService.colors
             ))
 
-        # The shortened URL linking to the head commit.
-        line.append(u'{PINK}{link}{RESET}'.format(
-            link=GithubHook.shorten(original['head_commit']['url']),
-            **HookService.colors
-        ))
+        if original['head_commit']:
+            # The shortened URL linking to the head commit.
+            line.append(u'{PINK}{link}{RESET}'.format(
+                link=GithubHook.shorten(original['head_commit']['url']),
+                **HookService.colors
+            ))
 
         return u' '.join(line)
 
