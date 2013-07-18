@@ -113,6 +113,11 @@ def create_instance():
     app.register_blueprint(pimport, url_prefix='/i')
     app.register_blueprint(admin, url_prefix='/_')
 
+    # Register our custom error handlers.
+    from notifico.views import errors
+
+    app.error_handler_spec[None][500] = errors.error_500
+
     # cia.vc XML-RPC kludge.
     from notifico.services.hooks.cia import handler
     handler.connect(app, '/RPC2')

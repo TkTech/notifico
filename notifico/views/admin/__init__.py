@@ -56,7 +56,8 @@ def admin_projects(page=1):
 
     pagination = q.paginate(page, per_page, False)
 
-    return render_template('admin_projects.html',
+    return render_template(
+        'admin_projects.html',
         pagination=pagination,
         per_page=per_page
     )
@@ -116,3 +117,13 @@ def admin_orphans():
     db.session.commit()
 
     return 'Orphans cleaned.'
+
+
+@admin.route('/error/<int:code>')
+@group_required('admin')
+def admin_error(code):
+    """
+    Raise the error code provided in `code`. This is an internal
+    method used to test custom error handlers.
+    """
+    return abort(code)
