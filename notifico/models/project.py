@@ -77,3 +77,28 @@ class Project(db.Model):
         Returns ``True`` if `user` is the owner of this project.
         """
         return user and user.id == self.owner.id
+
+    def can_see(self, user):
+        if self.public:
+            # Public projects are always visible.
+            return True
+        if user and user.in_group('admin'):
+            # Admins can always see projects.
+            return True
+        elif self.is_owner(user):
+            # The owner of the project can always see it.
+            return True
+
+        return False
+
+    def can_modify(self, user):
+        """
+        Returns ``True`` if `user` can modify this project.
+        """
+        if user and user.in_group('admin'):
+            # Admins can always modify projects.
+            return True
+        elif self.is_owner(user):
+            return True
+
+        return False

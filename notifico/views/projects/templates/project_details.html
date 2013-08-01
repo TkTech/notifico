@@ -15,7 +15,7 @@
     {% endif %}
   </ul>
 
-{% if is_owner %}
+{% if can_modify %}
   <a id="hooks"></a>
   <h2>Message Hooks</h2>
   <div class="section-content">
@@ -69,7 +69,7 @@
       </tbody>
     </table>
     {% endif %}
-    {% if is_owner %}
+    {% if can_modify %}
     <a href="{{ url_for('.new_hook', p=project.name, u=user.username) }}" class="btn btn-success">
       <i class="icon-plus"></i> Create New Hook
     </a>
@@ -96,7 +96,7 @@
           <th>Host</th>
           <th>Port</th>
           <th>SSL</th>
-          {% if is_owner %}
+          {% if can_modify %}
           <th style="text-align: center;">Public</th>
           <th></th>
           {% endif %}
@@ -109,7 +109,7 @@
           <td>{{ channel.host }}</td>
           <td>{{ channel.port }}</td>
           <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-          {% if is_owner %}
+          {% if can_modify %}
           <td style="text-align: center;">
             <i class="icon-{% if channel.public %}ok{% else %}lock{% endif %}"></i>
           </td>
@@ -128,7 +128,7 @@
       </tbody>
     </table>
     {% endif %}
-    {% if is_owner %}
+    {% if can_modify %}
     <a href="{{ url_for('.new_channel', p=project.name, u=user.username) }}" class="btn btn-success">
       <i class="icon-plus"></i> Add New Channel
     </a>
