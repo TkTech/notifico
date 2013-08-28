@@ -1,10 +1,11 @@
 # -*- coding: utf8 -*-
 __all__ = ('BotManager',)
+import logging
 from collections import defaultdict, namedtuple
 
 from utopia import Account
 
-
+logger = logging.getLogger(__name__)
 Channel = namedtuple('Channel', ['channel', 'password'])
 
 
@@ -81,7 +82,23 @@ class BotManager(object):
             ),
             network
         )
-        bot.connect()
+        try:
+            bot.connect()
+        except Exception:
+            logger.error(
+                'An issue occured connection to a host',
+                exc_info=True,
+                extra={
+                    'data': {
+                        'host': network.host,
+                        'port': network.port,
+                        'ssl': network.ssl,
+                        'password': network.password
+                    }
+                }
+            )
+            return None
+
         self._active_bots[network._replace(ssl=False)].add(bot)
         return bot
 

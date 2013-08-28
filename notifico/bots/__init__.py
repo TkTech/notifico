@@ -4,6 +4,8 @@ import json
 import redis
 import gevent
 from utopia import Network
+from raven.handlers.logging import SentryHandler
+from raven.conf import setup_logging
 
 from notifico.bots.manager import BotManager, Channel
 from notifico.bots.bot import BotificoBot
@@ -11,6 +13,10 @@ import notifico.default_config as config
 
 
 def start_manager():
+    if config.SENTRY_DSN:
+        handler = SentryHandler(config.SENTRY_DSN)
+        setup_logging(handler)
+
     r = redis.StrictRedis(
         host=config.REDIS_HOST,
         port=config.REDIS_PORT,
