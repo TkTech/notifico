@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""__init__.py
+
+Project related views, such as project creation and details.
+"""
 from functools import wraps
 
 from flask import (
@@ -228,31 +234,23 @@ def delete_project(u, p):
 @project_action
 def details(u, p):
     """
-    Show an existing project's details.
+    Show the details for an existing project.
     """
-    # Check to see if this project should be visible to
-    # the current user.
-    if not p.public:
-        if not g.user:
-            # This isn't a public project and there is no user to
-            # check against.
-            return abort(403)
-        elif not p.is_owner(g.user) and not g.user.in_group('admin'):
-            # This isn't a public project, this isn't the owner, and
-            # isn't an admin user.
-            return abort(403)
+    if not p.can_see(g.user):
+        return redirect(url_for('public.landing'))
 
-    is_owner = p.is_owner(g.user)
+    can_modify = p.can_modify(g.user)
 
     visible_channels = p.channels
-    if not is_owner:
+    if not can_modify:
         visible_channels = visible_channels.filter_by(public=True)
 
-    return render_template('project_details.html',
-        is_owner=is_owner,
+    return render_template(
+        'project_details.html',
         project=p,
         user=u,
         visible_channels=visible_channels,
+        can_modify=can_modify,
         page_title='Notifico! - {u.username}/{p.name}'.format(
             u=u,
             p=p
