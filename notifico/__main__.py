@@ -15,7 +15,7 @@ import sys
 
 from docopt import docopt
 
-from notifico import create_instance
+from notifico import create_instance, db
 from notifico.models import *
 
 
