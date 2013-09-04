@@ -93,6 +93,11 @@ class GithubConfigForm(wtf.Form):
         'If checked, only the commits title (the commit message up to'
         ' the first new line) will be emitted.'
     ))
+    distinct_only = wtf.BooleanField('Distinct Commits Only', validators=[
+        wtf.Optional()
+    ], default=True, description=(
+        'Commits will only be announced the first time they are seen.'
+    ))
 
 
 class GithubHook(HookService):
@@ -283,6 +288,12 @@ class GithubHook(HookService):
         original = j['original']
 
         for commit in original['commits']:
+            if config.get('distinct_only', True):
+                if not commit['distinct']:
+                    # This commit has been seen in the repo
+                    # before, skip over it and to the next one
+                    continue
+
             committer = commit.get('committer', {})
             author = commit.get('author', {})
 
