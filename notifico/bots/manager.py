@@ -37,10 +37,12 @@ class BotManager(object):
         """
         # Find all of the bots active on the given network.
         bot = self.find_bot_for_channel(network, channel)
+
         if bot is None:
             # For some reason we were unable to find a bot
             # able to send to this channel.
             return False
+
         return bot.send_message(channel, message)
 
     def find_bot_for_channel(self, network, channel):
@@ -86,7 +88,7 @@ class BotManager(object):
             bot.connect()
         except Exception:
             logger.error(
-                'An issue occured connection to a host',
+                'An issue occured while connecting to a host',
                 exc_info=True,
                 extra={
                     'data': {
@@ -123,6 +125,9 @@ class BotManager(object):
         network = client.network._replace(ssl=False)
 
         if network not in self._active_bots:
+            logger.debug(
+                'Tried to remove a network that wasn\'t active.'
+            )
             return
 
         self._active_bots[network].discard(client)
