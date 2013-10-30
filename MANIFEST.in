@@ -1,0 +1,3 @@
+recursive-include notifico/templates *
+recursive-include notifico/views/*/templates *
+recursive-include notifico/static *
