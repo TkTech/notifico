@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 Channel = namedtuple('Channel', ['channel', 'password'])
 
 _network = namedtuple('Network', ['host', 'port', 'ssl', 'password'])
+
+
 class Network(_network):
 
     @classmethod
@@ -53,7 +55,6 @@ class BotManager(object):
             # For some reason we were unable to find a bot
             # able to send to this channel.
             logger.warning("Unable to locate a bot to send message",
-                            exc_info=True,
                             extra={
                                 'data': {
                                     'host': network.host,
@@ -108,7 +109,7 @@ class BotManager(object):
 
         try:
             bot.network = network
-            bot.connect(network.host, port = network.port, ssl = network.ssl)
+            bot.connect(network.host, port=network.port, ssl=network.ssl)
         except Exception:
             logger.error(
                 'An issue occured while connecting to a host',

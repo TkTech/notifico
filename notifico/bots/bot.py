@@ -31,7 +31,8 @@ class BotificoBot(BasicClient):
 
     def can_send_to_channel(self, channel):
         channel = channel.channel
-        channel_limit = 40 # TODO: fetch real value
+        # TODO: fetch real value
+        channel_limit = 40
 
         channel = self.ext.channels[channel]
         if channel.joined or len(self.ext.channels.channels) < channel_limit:
