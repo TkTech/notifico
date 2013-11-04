@@ -49,6 +49,6 @@ if __name__ == '__main__':
             'celery'
         ],
         dependency_links=[
-            'https://github.com/TkTech/utopia/tarball/deploy#egg=UtopiaIRC'
+            'https://github.com/TkTech/utopia/tarball/dev#egg=UtopiaIRC'
         ]
     )

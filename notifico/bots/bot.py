@@ -2,58 +2,54 @@
 __all__ = ('BotificoBot',)
 from collections import deque
 
-from utopia import Client, client_queue
+from utopia.basic import BasicClient
 
 
-class BotificoBot(Client):
+class BotificoBot(BasicClient):
     def __init__(self, manager, *args, **kwargs):
-        super(BotificoBot, self).__init__(*args, **kwargs)
+        BasicClient.__init__(self, *args, **kwargs)
         self._manager = manager
         self._messages = deque()
-        self._ready = False
+
+        self.on_bad_nick.connect(self.on_nick_conflict, sender = self)
+        self.on_disconnect.connect(self._on_disconnect, sender = self)
 
     @property
     def manager(self):
         return self._manager
 
-    @client_queue
     def send_message(self, channel, message):
-        yield (self._send_message, channel, message)
+        password = channel.password
+        channel = channel.channel
+        _channel = self.ext.channels[channel]
 
-    def _send_message(self, channel, message):
-        c = self[channel.channel]
-        c.join()
-        c.send(message)
+        if not _channel.joined:
+            _channel.join()
 
-    def message_not_handled(self, client, message):
-        print(message)
+        # TODO: add message queue
+        _channel.msg(message)
 
-    def next_nickname(self):
-        return self.manager.free_nick()
+    def can_send_to_channel(self, channel):
+        channel = channel.channel
+        # TODO: fetch real value
+        channel_limit = 40
 
-    def event_ready(self, client):
-        self._ready = True
-
-    def will_join(self, channel):
-        prefix = channel[0]
-        # Maximum number of channels for channels with this prefix.
-        channel_limit = self.channel_limit(prefix=prefix, default=20)
-
-        # Find all the channels we're already in with this prefix.
-        channels = list(self.channels_by_prefix(prefix=prefix))
-        if len(channels) >= channel_limit:
+        channel = self.ext.channels[channel]
+        if channel.joined or len(self.ext.channels.channels) < channel_limit:
+            return True
+        else:
             return False
 
-        return True
+    @staticmethod
+    def on_nick_conflict(sender):
+        return self.manager.free_nick()
 
-    def message_privmsg(self, client, message):
-        # Stop PRIVMSG from going to message_not_handled
-        pass
-
-    def event_disconnected(self):
+    @staticmethod
+    def _on_disconnect(sender, error):
         """
         The client has been disconnected, for any reason. Usually occurs
         on a network error.
         """
-        self.manager.give_up_nick(self.account.nickname)
-        self.manager.remove_bot(self)
+
+        sender.manager.give_up_nick(sender.nickname)
+        sender.manager.remove_bot(sender)

@@ -2,11 +2,24 @@
 __all__ = ('BotManager',)
 import logging
 from collections import defaultdict, namedtuple
-
-from utopia import Account
+from utopia.ext.channels import ChannelPlugin
 
 logger = logging.getLogger(__name__)
 Channel = namedtuple('Channel', ['channel', 'password'])
+
+_network = namedtuple('Network', ['host', 'port', 'ssl', 'password'])
+
+
+class Network(_network):
+
+    @classmethod
+    def new(cls, host, port=6667, ssl=False, password=None):
+        return cls(
+            host=host,
+            port=port,
+            ssl=ssl,
+            password=password
+        )
 
 
 class BotManager(object):
@@ -41,6 +54,15 @@ class BotManager(object):
         if bot is None:
             # For some reason we were unable to find a bot
             # able to send to this channel.
+            logger.warning("Unable to locate a bot to send message",
+                            extra={
+                                'data': {
+                                    'host': network.host,
+                                    'port': network.port,
+                                    'ssl': network.ssl,
+                                    'password': network.password
+                                }
+                            })
             return False
 
         return bot.send_message(channel, message)
@@ -59,7 +81,7 @@ class BotManager(object):
         # a free one, and if none are willing (ex: maximum channels)
         # create a new one.
         for bot in network_bots:
-            if bot.will_join(channel):
+            if bot.can_send_to_channel(channel):
                 return bot
         else:
             return self._create_bot(network)
@@ -77,15 +99,17 @@ class BotManager(object):
         nickname = self.free_nick()
         bot = self._bot_class(
             self,
-            Account.new(
-                nickname=nickname,
-                username=u"notifico",
-                realname=u"Notifico! - http://n.tkte.ch/"
-            ),
-            network
-        )
+            plugins=[
+                ChannelPlugin()
+            ])
+        bot.set_identity(
+            nickname=nickname,
+            username=u"notifico",
+            realname=u"Notifico! - http://n.tkte.ch/")
+
         try:
-            bot.connect()
+            bot.network = network
+            bot.connect(network.host, port=network.port, ssl=network.ssl)
         except Exception:
             logger.error(
                 'An issue occured while connecting to a host',

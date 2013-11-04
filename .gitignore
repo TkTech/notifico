@@ -18,3 +18,7 @@ local_config.py
 # Alembic migrations
 alembic/
 alembic.ini
+
+# build crud
+build
+dist
