@@ -1,20 +1,58 @@
-# Cached python bytecode
-*.pyc
-*.egg-info/
+###OSX###
 
-# VirtualEnv
-ENV/
-
-# OS X Cache Cruft
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon
 
-# Testing SQLite Database
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+
+###Python###
+
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Project-specific
 testing.db
-
-# Testing configuration
-local_config/
 local_config.py
-
-# Alembic migrations
-alembic/
-alembic.ini
