@@ -3,6 +3,7 @@
 
 Usage:
     notifico www [options]
+    notifico bots
     notifico init
 
 Options:
@@ -16,6 +17,7 @@ import sys
 from docopt import docopt
 
 from notifico import create_instance, db
+from notifico.bots import start_manager
 from notifico.models import *
 
 
@@ -29,6 +31,8 @@ def main(argv):
             port=int(args['--port']),
             host=args['--host']
         )
+    if args ['bots']:
+        start_manager()
     elif args['init']:
         app = create_instance()
         with app.app_context():
