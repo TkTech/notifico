@@ -57,7 +57,7 @@ def create_instance():
     import os
 
     app = Flask(__name__)
-    app.config.from_object('notifico.default_config')
+    app.config.from_object('notifico.config')
 
     if app.config.get('NOTIFICO_ROUTE_STATIC'):
         # We should handle routing for static assets ourself (handy for

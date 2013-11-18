@@ -9,7 +9,7 @@ from raven.conf import setup_logging
 
 from notifico.bots.manager import BotManager, Channel
 from notifico.bots.bot import BotificoBot
-import notifico.default_config as config
+import notifico.config as config
 
 
 def start_manager():
