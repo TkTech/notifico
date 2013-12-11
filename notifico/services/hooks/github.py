@@ -100,6 +100,35 @@ class GithubConfigForm(wtf.Form):
     ))
 
 
+def _create_push_final_summary(j, config):
+    # The name of the repository.
+    original = j['original']
+    full_project_name = config.get('full_project_name', False)
+    line_limit = config.get('line_limit', 3)
+
+    line = []
+
+    project_name = original['repository']['name']
+    if full_project_name:
+        # The use wants the <username>/<project name> form from
+        # github, not the Notifico name.
+        project_name = '{username}/{project_Name}'.format(
+            username=original['repository']['owner']['name'],
+            project_Name=project_name
+        )
+
+    line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+        name=project_name,
+        **HookService.colors
+    ))
+
+    line.append(u'... and {count} more commits.'.format(
+        count=len(original.get('commits', [])) - line_limit
+    ))
+
+    return u' '.join(line)
+
+
 class GithubHook(HookService):
     """
     HookService hook for http://github.com.
@@ -128,6 +157,9 @@ class GithubHook(HookService):
         branches = config.get('branches', None)
         # Display tag activity?
         show_tags = config.get('show_tags', True)
+        # Limit the number of lines to display before the summary.
+        # 3 is the default on github.com's IRC service
+        line_limit = config.get('line_limit', 3)
 
         if not original['commits']:
             if show_tags and j['tag']:
@@ -145,8 +177,20 @@ class GithubHook(HookService):
                 # This isn't a branch the user wants.
                 return
 
+        # A short summarization of the commits in the push.
         yield cls.message(cls._create_push_summary(j, config), strip=strip)
-        for formatted_commit in cls._create_commit_summary(j, config):
+
+        # A one-line summary for each commit in the push.
+        line_iterator = cls._create_commit_summary(j, config)
+
+        for i, formatted_commit in enumerate(line_iterator):
+            if i >= line_limit:
+                yield cls.message(_create_push_final_summary(
+                    j,
+                    config
+                ), strip=strip)
+                break
+
             yield cls.message(formatted_commit, strip=strip)
 
     @classmethod
