@@ -7,6 +7,7 @@ from flask.ext import wtf
 
 from notifico.services.hooks import HookService
 
+
 class JenkinsConfigForm(wtf.Form):
     print_started = wtf.BooleanField('Print Started', validators=[
         wtf.Optional()
@@ -42,7 +43,8 @@ class JenkinsConfigForm(wtf.Form):
 
 class JenkinsHook(HookService):
     """
-    HookService hook for https://wiki.jenkins-ci.org/display/JENKINS/Notification+Plugin.
+    HookService hook for
+    https://wiki.jenkins-ci.org/display/JENKINS/Notification+Plugin.
     """
     SERVICE_NAME = 'Jenkins CI'
     SERVICE_ID = 70
@@ -58,9 +60,9 @@ class JenkinsHook(HookService):
             return
 
         phases = {
-            'STARTED' : hook.config.get('print_started', False),
-            'COMPLETED' : hook.config.get('print_completed', False),
-            'FINISHED' : hook.config.get('print_finished', True)
+            'STARTED': hook.config.get('print_started', False),
+            'COMPLETED': hook.config.get('print_completed', False),
+            'FINISHED': hook.config.get('print_finished', True)
         }
         if not phases.get(payload['build']['phase'], False):
             return
@@ -76,7 +78,6 @@ class JenkinsHook(HookService):
         """
         Prefixes lines with [JobName] and adds colours
         """
-
         prefix = u'{RESET}[{BLUE}{name}{RESET}] '.format(
             name=payload['name'],
             **HookService.colors
@@ -88,12 +89,14 @@ class JenkinsHook(HookService):
         """
         Create and return a one-line summary of the build
         """
-
         status_colour = {
-            'SUCCESS' : HookService.colors['GREEN'],
-            'UNSTABLE' : HookService.colors['YELLOW'],
-            'FAILURE' : HookService.colors['RED']
-        }.get(payload['build'].get('status', 'SUCCESS'), HookService.colors['RED'])
+            'SUCCESS': HookService.colors['GREEN'],
+            'UNSTABLE': HookService.colors['YELLOW'],
+            'FAILURE': HookService.colors['RED']
+        }.get(
+            payload['build'].get('status', 'SUCCESS'),
+            HookService.colors['RED']
+        )
 
         lines = []
 
@@ -131,7 +134,6 @@ class JenkinsHook(HookService):
 
         line = u' '.join(lines)
         return cls._prefix_line(line, payload)
-
 
     @classmethod
     def form(cls):
