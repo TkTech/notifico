@@ -55,7 +55,10 @@ class JenkinsHook(HookService):
 
     @classmethod
     def handle_request(cls, user, request, hook):
-        payload = json.loads(request.data)
+        try:
+            payload = json.loads(request.data)
+        except ValueError:
+            return
         if not payload:
             return
 
