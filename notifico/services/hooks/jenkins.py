@@ -95,7 +95,7 @@ class JenkinsHook(HookService):
         status_colour = {
             'SUCCESS': HookService.colors['GREEN'],
             'UNSTABLE': HookService.colors['YELLOW'],
-            'FAILURE': HookService.colors['RED']
+            'FAILED': HookService.colors['RED']
         }.get(
             payload['build'].get('status', 'SUCCESS'),
             HookService.colors['RED']
@@ -110,7 +110,7 @@ class JenkinsHook(HookService):
         ))
 
         # Status
-        status = ''
+        status = u''
         if 'status' in payload['build']:
             status = u'{status_colour}{message}{RESET}'.format(
                 status_colour=status_colour,
@@ -119,9 +119,9 @@ class JenkinsHook(HookService):
             )
 
         # Current phase
-        phase = ''
+        phase = u''
         if not omit_phase:
-            phase = '{status_colour}{message}{RESET}'.format(
+            phase = u'{status_colour}{message}{RESET}'.format(
                 status_colour=status_colour,
                 message=payload['build']['phase'].capitalize(),
                 **HookService.colors
