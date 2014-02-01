@@ -7,6 +7,25 @@ from flask.ext import wtf
 
 from notifico.services.hooks import HookService
 
+def fmt_string_validator(form, field):
+    fmt = field.data
+
+    try:
+        fmt.format(
+            status_colour='',
+            number='',
+            phase='',
+            status='',
+            url='',
+            **HookService.colors
+        )
+    except KeyError, e:
+       raise wtf.ValidationError(
+           'Invalid colour or keyword "{}"'.format(e.message)
+        )
+    except Exception, e:
+        raise wtf.ValidationError(e.message)
+
 
 class JenkinsConfigForm(wtf.Form):
     print_started = wtf.BooleanField('Print Started', validators=[
@@ -27,11 +46,17 @@ class JenkinsConfigForm(wtf.Form):
         'If checked, sends a message for every finished job.'
     ))
 
-    omit_phase = wtf.BooleanField('Omit Phase', validators=[
-        wtf.Optional()
-    ], default=True, description=(
-        'If checked, does not add the job\'s current phase to the message. '
-        'Recommended if only one of the above is checked.'
+    fmt_string = wtf.TextField('Format String', validators=[
+        fmt_string_validator,
+        wtf.Length(max=1024)
+    ], description=(
+        'A python format-string used to format the final output.<br> E.g. '
+
+        '<code>{ORANGE}jenkins{RESET} built {status_colour}#{number}{RESET} '
+        '{phase} ({status_colour}{status}{RESET}) {PINK}{url}{RESET}</code>'
+    ), default=(
+        '{ORANGE}jenkins{RESET} built {status_colour}#{number}{RESET} {phase} '
+        '({status_colour}{status}{RESET}) {PINK}{url}{RESET}'
     ))
 
     use_colors = wtf.BooleanField('Use Colors', validators=[
@@ -70,9 +95,12 @@ class JenkinsHook(HookService):
         if not phases.get(payload['build']['phase'], False):
             return
 
-        omit_phase = hook.config.get('omit_phase', False)
         strip = not hook.config.get('use_colors', True)
-        summary = cls._create_summary(payload, omit_phase)
+        fmt_string = hook.config.get('fmt_string',
+            '{ORANGE}jenkins{RESET} built {status_colour}#{number}{RESET} '
+            '{phase} ({status_colour}{status}{RESET}) {PINK}{url}{RESET}'
+        )
+        summary = cls._create_summary(payload, fmt_string)
 
         yield cls.message(summary, strip)
 
@@ -88,54 +116,33 @@ class JenkinsHook(HookService):
         return prefix + line
 
     @classmethod
-    def _create_summary(cls, payload, omit_phase=False):
+    def _create_summary(cls, payload, fmt_string):
         """
         Create and return a one-line summary of the build
         """
         status_colour = {
             'SUCCESS': HookService.colors['GREEN'],
-            'UNSTABLE': HookService.colors['YELLOW'],
-            'FAILED': HookService.colors['RED']
+            'UNSTABLE': HookService.colors['ORANGE'],
+            'FAILURE' : HookService.colors['RED'], # what it really is
+            'FAILED': HookService.colors['RED'] # according to the docs
         }.get(
             payload['build'].get('status', 'SUCCESS'),
             HookService.colors['RED']
         )
 
-        lines = []
+        number = payload['build']['number']
+        phase = payload['build']['phase'].lower()
+        status = payload['build']['status'].lower()
+        url = payload['build']['full_url']
 
-        # Build number
-        lines.append(u'Jenkins CI - build #{number}'.format(
-            project=payload['name'],
-            number=payload['build']['number'],
-        ))
-
-        # Status
-        status = u''
-        if 'status' in payload['build']:
-            status = u'{status_colour}{message}{RESET}'.format(
-                status_colour=status_colour,
-                message=payload['build']['status'].capitalize(),
-                **HookService.colors
-            )
-
-        # Current phase
-        phase = u''
-        if not omit_phase:
-            phase = u'{status_colour}{message}{RESET}'.format(
-                status_colour=status_colour,
-                message=payload['build']['phase'].capitalize(),
-                **HookService.colors
-            )
-
-        lines.append(' | '.join(filter(bool, [phase, status])))
-
-        # URL to build
-        lines.append(u'{PINK}{url}{RESET}'.format(
-            url=payload['build']['full_url'],
+        line = fmt_string.format(
+            status_colour=status_colour,
+            number=number,
+            phase=phase,
+            status=status,
+            url=url,
             **HookService.colors
-        ))
-
-        line = u' '.join(lines)
+        )
         return cls._prefix_line(line, payload)
 
     @classmethod
