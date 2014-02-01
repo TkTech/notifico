@@ -52,10 +52,10 @@ class JenkinsConfigForm(wtf.Form):
     ], description=(
         'A python format-string used to format the final output.<br> E.g. '
 
-        '<code>{YELLOW}jenkins{RESET} built {status_colour}#{number}{RESET} '
+        '<code>{ORANGE}jenkins{RESET} built {status_colour}#{number}{RESET} '
         '{phase} ({status_colour}{status}{RESET}) {PINK}{url}{RESET}</code>'
     ), default=(
-        '{YELLOW}jenkins{RESET} built {status_colour}#{number}{RESET} {phase} '
+        '{ORANGE}jenkins{RESET} built {status_colour}#{number}{RESET} {phase} '
         '({status_colour}{status}{RESET}) {PINK}{url}{RESET}'
     ))
 
@@ -97,7 +97,7 @@ class JenkinsHook(HookService):
 
         strip = not hook.config.get('use_colors', True)
         fmt_string = hook.config.get('fmt_string',
-            '{YELLOW}jenkins{RESET} built {status_colour}#{number}{RESET} '
+            '{ORANGE}jenkins{RESET} built {status_colour}#{number}{RESET} '
             '{phase} ({status_colour}{status}{RESET}) {PINK}{url}{RESET}'
         )
         summary = cls._create_summary(payload, fmt_string)
@@ -122,7 +122,7 @@ class JenkinsHook(HookService):
         """
         status_colour = {
             'SUCCESS': HookService.colors['GREEN'],
-            'UNSTABLE': HookService.colors['YELLOW'],
+            'UNSTABLE': HookService.colors['ORANGE'],
             'FAILURE' : HookService.colors['RED'], # what it really is
             'FAILED': HookService.colors['RED'] # according to the docs
         }.get(
