@@ -142,11 +142,16 @@ class GithubHook(HookService):
 
     @classmethod
     def handle_request(cls, user, request, hook):
-        p = request.form.get('payload', None)
-        if not p:
-            return
+        # Support both json payloads as well as form encoded payloads
+        if request.is_json:
+            payload = request.get_json()
+        else:
+            try:
+                payload = json.loads(request.form['payload'])
+            except KeyError:
+                return
 
-        j = simplify_payload(json.loads(p))
+        j = simplify_payload(payload)
         original = j['original']
 
         # Config may not exist for pre-migrate hooks.
