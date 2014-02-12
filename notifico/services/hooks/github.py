@@ -143,7 +143,7 @@ class GithubHook(HookService):
     @classmethod
     def handle_request(cls, user, request, hook):
         # Support both json payloads as well as form encoded payloads
-        if request.is_json:
+        if request.headers.get('Content-Type') == 'application/json':
             payload = request.get_json()
         else:
             try:
