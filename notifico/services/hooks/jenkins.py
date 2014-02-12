@@ -9,35 +9,32 @@ from notifico.services.hooks import HookService
 
 
 class JenkinsConfigForm(wtf.Form):
-    print_started = wtf.BooleanField('Print Started', validators=[
-        wtf.Optional()
-    ], default=False, description=(
-        'If checked, sends a message for every started job.'
+    phase = wtf.SelectMultipleField('Phase',
+        default=['finished'],
+        choices=[
+            ('started', 'Started'),
+            ('completed', 'Completed'),
+            ('finished', 'Finished')
+        ],
+        description=(
+            'Print messages for selected fields.'
     ))
 
-    print_completed = wtf.BooleanField('Print Completed', validators=[
-        wtf.Optional()
-    ], default=False, description=(
-        'If checked, sends a message for every completed job.'
-    ))
-
-    print_finished = wtf.BooleanField('Print Finished', validators=[
-        wtf.Optional()
-    ], default=True, description=(
-        'If checked, sends a message for every finished job.'
-    ))
-
-    omit_phase = wtf.BooleanField('Omit Phase', validators=[
-        wtf.Optional()
-    ], default=True, description=(
-        'If checked, does not add the job\'s current phase to the message. '
-        'Recommended if only one of the above is checked.'
+    status = wtf.SelectMultipleField('Status',
+        default=['success', 'unstable', 'failure'],
+        choices=[
+            ('success', 'Success'),
+            ('unstable', 'Unstable'),
+            ('failure', 'Failure')
+        ],
+        description=(
+            'Print messages for selected fields.'
     ))
 
     use_colors = wtf.BooleanField('Use Colors', validators=[
         wtf.Optional()
     ], default=True, description=(
-        'If checked, commit messages will include minor mIRC coloring.'
+        'If checked, messages will include minor mIRC coloring.'
     ))
 
 
@@ -62,17 +59,21 @@ class JenkinsHook(HookService):
         if not payload:
             return
 
-        phases = {
-            'STARTED': hook.config.get('print_started', False),
-            'COMPLETED': hook.config.get('print_completed', False),
-            'FINISHED': hook.config.get('print_finished', True)
-        }
-        if not phases.get(payload['build']['phase'], False):
+        phase = payload['build']['phase'].lower()
+        if not phase in hook.config.get('phase', []):
             return
 
-        omit_phase = hook.config.get('omit_phase', False)
+        status = payload['build'].get('status', 'SUCCESS').lower()
+        # yeah documentation of the plugin differs
+        # from the actual implementation?
+        if status == 'failed':
+            status = 'failure'
+        if not status in hook.config.get('status', []):
+            return
+
+
         strip = not hook.config.get('use_colors', True)
-        summary = cls._create_summary(payload, omit_phase)
+        summary = cls._create_summary(payload)
 
         yield cls.message(summary, strip)
 
@@ -88,54 +89,39 @@ class JenkinsHook(HookService):
         return prefix + line
 
     @classmethod
-    def _create_summary(cls, payload, omit_phase=False):
+    def _create_summary(cls, payload):
         """
         Create and return a one-line summary of the build
         """
         status_colour = {
             'SUCCESS': HookService.colors['GREEN'],
-            'UNSTABLE': HookService.colors['YELLOW'],
+            'UNSTABLE': HookService.colors['ORANGE'],
+            # documentation differs from implementation
+            'FAILURE' : HookService.colors['RED'],
             'FAILED': HookService.colors['RED']
         }.get(
             payload['build'].get('status', 'SUCCESS'),
             HookService.colors['RED']
         )
 
-        lines = []
+        number = payload['build']['number']
+        phase = payload['build']['phase'].lower()
+        status = payload['build']['status'].lower()
+        url = payload['build']['full_url']
 
-        # Build number
-        lines.append(u'Jenkins CI - build #{number}'.format(
-            project=payload['name'],
-            number=payload['build']['number'],
-        ))
+        fmt_string = (
+            '{ORANGE}jenkins{RESET} built {status_colour}#{number}{RESET} '
+            '{phase} ({status_colour}{status}{RESET}) {PINK}{url}{RESET}'
+        )
 
-        # Status
-        status = u''
-        if 'status' in payload['build']:
-            status = u'{status_colour}{message}{RESET}'.format(
-                status_colour=status_colour,
-                message=payload['build']['status'].capitalize(),
-                **HookService.colors
-            )
-
-        # Current phase
-        phase = u''
-        if not omit_phase:
-            phase = u'{status_colour}{message}{RESET}'.format(
-                status_colour=status_colour,
-                message=payload['build']['phase'].capitalize(),
-                **HookService.colors
-            )
-
-        lines.append(' | '.join(filter(bool, [phase, status])))
-
-        # URL to build
-        lines.append(u'{PINK}{url}{RESET}'.format(
-            url=payload['build']['full_url'],
+        line = fmt_string.format(
+            status_colour=status_colour,
+            number=number,
+            phase=phase,
+            status=status,
+            url=url,
             **HookService.colors
-        ))
-
-        line = u' '.join(lines)
+        )
         return cls._prefix_line(line, payload)
 
     @classmethod
