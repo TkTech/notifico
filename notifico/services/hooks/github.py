@@ -151,7 +151,311 @@ class GithubHook(HookService):
             except KeyError:
                 return
 
-        j = simplify_payload(payload)
+        event = request.headers.get('X-GitHub-Event', '')
+        event_handler = {
+            'ping' : cls._handle_ping,
+            'push' : cls._handle_push,
+            'issues' : cls._handle_issues,
+            'issue_comment' : cls._handle_issue_comment,
+            'commit_comment' : cls._handle_commit_comment,
+            'create' : cls._handle_create,
+            'delete' : cls._handle_delete,
+            'pull_request' : cls._handle_pull_request,
+            'pull_request_review_comment' : cls._handle_pull_request_review_comment,
+            'gollum' : cls._handle_gollum,
+            'watch' : cls._handle_watch,
+            'release' : cls._handle_release,
+            'fork' : cls._handle_fork,
+            'member' : cls._handle_member,
+            'public' : cls._handle_public,
+            'team_add' : cls._handle_team_add,
+            'status' : cls._handle_status,
+            'deployment' : cls._handle_deployment,
+            'deployment_status' : cls._handle_deployment_status
+        }
+
+        if not event in event_handler:
+            return
+
+        return event_handler[event](user, request, hook, payload)
+
+    @classmethod
+    def _handle_ping(cls, user, request, hook, json):
+        yield u'{RESET}[{BLUE}GitHub{RESET}] {zen}'.format(
+            zen=json['zen'],
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_issues(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
+             'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['issue']['user']['login'],
+            action=json['action'],
+            num=json['issue']['number'],
+            title=json['issue']['title'],
+            url=GithubHook.shorten(json['issue']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_issue_comment(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} commented on '
+            'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['comment']['user']['login'],
+            action=json['action'],
+            num=json['issue']['number'],
+            title=json['issue']['title'],
+            url=GithubHook.shorten(json['comment']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_commit_comment(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} commented on '
+            'commit {GREEN}{commit}{RESET} - {PINK}{url}{RESET}'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['comment']['user']['login'],
+            commit=json['comment']['commit_id'],
+            url=GithubHook.shorten(json['comment']['html_url'])
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_create(cls, user, request, hook, json):
+        fmt_string = u' '.join([
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} '
+                'created {ref_type}',
+            # null/None if repository was created
+            u'{GREEN}{ref}{RESET}' if json['ref'] else u'',
+            u'- {PINK}{url}{RESET}'
+        ])
+
+        # URL points to repo, no other url available
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['sender']['login'],
+            ref_type=json['ref_type'],
+            ref=json['ref'],
+            url=GithubHook.shorten(json['repository']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_delete(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} deleted '
+            '{ref_type} {GREEN}{ref}{RESET} - {PINK}{url}{RESET}'
+        )
+
+        # URL points to repo, no other url available
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['sender']['login'],
+            ref_type=json['ref_type'],
+            ref=json['ref'],
+            url=GithubHook.shorten(json['repository']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_pull_request(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} pull '
+            'request {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['pull_request']['user']['login'],
+            action=json['action'],
+            num=json['number'],
+            title=json['pull_request']['title'],
+            url=GithubHook.shorten(json['pull_request']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_pull_request_review_comment(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} reviewed pull '
+            'request {GREEN}#{num}{RESET} commit - {PINK}{url}{RESET}'
+        )
+
+        num = json['comment']['pull_request_url'].split('/')[-1]
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['comment']['user']['login'],
+            num=num,
+            url=GithubHook.shorten(json['comment']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_gollum(cls, user, request, hook, json):
+        name=json['repository']['name']
+
+        if len(json['pages']) > 1:
+            # Multiple pages changed
+            fmt_string = (
+                u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} '
+                'updated the Wiki'
+            )
+
+            yield fmt_string.format(
+                name=name,
+                who=json['sender']['login'],
+                **HookService.colors
+            )
+
+            fmt_string_page = (
+                u'{RESET}[{BLUE}{name}{RESET}] Page {GREEN}{pname}{RESET} {action} '
+                '- {PINK}{url}{RESET}'
+            )
+
+            for page in json['pages']:
+                yield fmt_string_page.format(
+                    name=name,
+                    pname=page['page_name'],
+                    action=page['action'],
+                    url=GithubHook.shorten(page['html_url']),
+                    **HookService.colors
+                )
+        else:
+            # Only one page
+            fmt_string = (
+                u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
+                'page {GREEN}{pname}{RESET} - {PINK}{url}{RESET}'
+            )
+
+            yield fmt_string.format(
+                name=name,
+                who=json['sender']['login'],
+                pname=json['pages'][0]['page_name'],
+                action=json['pages'][0]['action'],
+                url=GithubHook.shorten(json['pages'][0]['html_url']),
+                **HookService.colors
+            )
+
+    @classmethod
+    def _handle_watch(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} started '
+            'watching {GREEN}{name}{RESET} - {PINK}{url}{RESET}'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['sender']['login'],
+            url=GithubHook.shorten(json['sender']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_release(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
+            '{GREEN}{tag_name} | {title}{RESET} - {PINK}{url}{RESET}'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['release']['author']['login'],
+            action=json['action'],
+            tag_name=json['release']['tag_name'],
+            title=json['release']['name'],
+            url=GithubHook.shorten(json['release']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_fork(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} forked '
+            'the repository - {PINK}{url}{RESET}'
+        )
+
+        # URL points to repo, no other url available
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['forkee']['owner']['login'],
+            url=GithubHook.shorten(json['forkee']['owner']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_member(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
+            'user {GREEN}{whom}{RESET} - {PINK}{url}{RESET}'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['sender']['login'],
+            action=json['action'],
+            whom=json['member']['login'],
+            url=GithubHook.shorten(json['member']['html_url']),
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_public(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} made the '
+            'repository public!'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['sender']['login'],
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_team_add(cls, user, request, hook, json):
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} added the team '
+            '{GREEN}{tname}{RESET} to the repository!'
+        )
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            who=json['sender']['login'],
+            tname=json['team']['name'],
+            **HookService.colors
+        )
+
+    @classmethod
+    def _handle_status(cls, user, request, hook, json):
+        yield ''
+
+    @classmethod
+    def _handle_deployment(cls, user, request, hook, json):
+        yield ''
+
+    @classmethod
+    def _handle_deployment_status(cls, user, request, hook, json):
+        yield ''
+
+    @classmethod
+    def _handle_push(cls, user, request, hook, json):
+        j = simplify_payload(json)
         original = j['original']
 
         # Config may not exist for pre-migrate hooks.
