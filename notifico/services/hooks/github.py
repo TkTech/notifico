@@ -281,7 +281,7 @@ class GithubHook(HookService):
 
         yield fmt_string.format(
             name=json['repository']['name'],
-            who=json['pull_request']['user']['login'],
+            who=json['sender']['login'],
             action=json['action'],
             num=json['number'],
             title=json['pull_request']['title'],
