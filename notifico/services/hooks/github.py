@@ -42,6 +42,9 @@ def simplify_payload(payload):
     # web hooks coming from the "Test Hook" button.
     if 'pusher' in payload:
         result['pusher'] = payload['pusher'].get('name')
+        # Github returns the string 'none' when a deploy key pushes
+        if result['pusher'] == 'none':
+            result['pusher'] = u'A deploy key'
 
     # Summarize file movement over all the commits.
     for commit in payload.get('commits', tuple()):
