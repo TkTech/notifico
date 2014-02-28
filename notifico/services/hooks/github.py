@@ -198,7 +198,7 @@ class GithubHook(HookService):
 
         yield fmt_string.format(
             name=json['repository']['name'],
-            who=json['issue']['user']['login'],
+            who=json['sender']['login'],
             action=json['action'],
             num=json['issue']['number'],
             title=json['issue']['title'],
@@ -215,7 +215,7 @@ class GithubHook(HookService):
 
         yield fmt_string.format(
             name=json['repository']['name'],
-            who=json['comment']['user']['login'],
+            who=json['sender']['login'],
             action=json['action'],
             num=json['issue']['number'],
             title=json['issue']['title'],
@@ -378,7 +378,7 @@ class GithubHook(HookService):
 
         yield fmt_string.format(
             name=json['repository']['name'],
-            who=json['release']['author']['login'],
+            who=json['sender']['login'],
             action=json['action'],
             tag_name=json['release']['tag_name'],
             title=json['release']['name'],
