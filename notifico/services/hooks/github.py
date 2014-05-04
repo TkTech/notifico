@@ -358,8 +358,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_watch(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} started '
-            'watching {GREEN}{name}{RESET} - {PINK}{url}{RESET}'
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} starred '
+            '{GREEN}{name}{RESET} - {PINK}{url}{RESET}'
         )
 
         yield fmt_string.format(
