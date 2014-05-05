@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 __all__ = ('BotManager',)
+import random
 import logging
 from collections import defaultdict, namedtuple
 
@@ -21,7 +22,6 @@ class BotManager(object):
         # A stack of released nicknames to keep our nicknames
         # unique across all networks.
         self._nick_stack = []
-        self._max_nick = 0
 
     @property
     def active_bots(self):
@@ -104,22 +104,35 @@ class BotManager(object):
         self._active_bots[network._replace(ssl=False)].add(bot)
         return bot
 
-    def free_nick(self):
+    def free_nick(self, suffix_length=4):
         """
-        Return a free nickname to try.
-        """
-        if self._nick_stack:
-            # A previously used nick that has been free'd is available.
-            return self._nick_stack.pop()
+        Returns a randomly generated nickname to use for client
+        registration. Keeps track of which nicks are already in use globally.
 
-        self._max_nick += 1
-        return 'Not-{0:03}'.format(self._max_nick)
+        :param suffix_length: The maximum length for the randomly generated
+                              nickname suffix.
+        """
+        # Keep trying until we get a nickname that's not already in use.
+        while True:
+            new_nick = 'Not-{random_suffix:x}'.format(
+                # By far the fastest pure-python method for a short hex
+                # identifier.
+                random_suffix=random.randrange(
+                    16**suffix_length
+                )
+            )
+
+            if new_nick not in self._nick_stack:
+                break
+
+        self._nick_stack.append(new_nick)
+        return new_nick
 
     def give_up_nick(self, nickname):
         """
         A retiring bot is giving its nick up.
         """
-        self._nick_stack.append(nickname)
+        self._nick_stack.remove(nickname)
 
     def remove_bot(self, client):
         network = client.network._replace(ssl=False)
