@@ -33,7 +33,7 @@ class GithubForm(wtf.Form):
     set_commits = wtf.BooleanField('Add to #commits', default=True,
         description=(
             'Sets up public projects you select to broadcast to #commits'
-            ' on irc.freenode.net as a default channel (you can always remove'
+            ' on chat.freenode.net as a default channel (you can always remove'
             ' it later).'
         )
     )
@@ -191,10 +191,10 @@ def github():
 
             if options_form.set_commits.data and p.public:
                 # The user wanted us to add their public projects
-                # to #commits@irc.freenode.net for them, but only if it
+                # to #commits@chat.freenode.net for them, but only if it
                 # isn't already there.
                 c = Channel.query.filter_by(
-                    host='irc.freenode.net',
+                    host='chat.freenode.net',
                     channel='#commits',
                     project_id=p.id
                 ).first()
@@ -202,7 +202,7 @@ def github():
                     # It does *not* already exist, so go ahead and add it.
                     c = Channel.new(
                         '#commits',
-                        'irc.freenode.net',
+                        'chat.freenode.net',
                         6667,
                         ssl=False,
                         public=True

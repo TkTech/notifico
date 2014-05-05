@@ -66,7 +66,7 @@ class ChannelDetailsForm(wtf.Form):
     host = wtf.TextField('Host', validators=[
         wtf.Required(),
         wtf.Length(min=1, max=255)
-    ], default='irc.freenode.net')
+    ], default='chat.freenode.net')
     port = wtf.IntegerField('Port', validators=[
         wtf.NumberRange(1024, 66552)
     ], default=6667)
@@ -163,7 +163,7 @@ def new():
                 # New public projects get added to #commits by default.
                 c = Channel.new(
                     '#commits',
-                    'irc.freenode.net',
+                    'chat.freenode.net',
                     6667,
                     ssl=False,
                     public=True
