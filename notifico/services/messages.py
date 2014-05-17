@@ -38,7 +38,7 @@ class MessageService(object):
             'type': 'message',
             # Contents of the message.
             'payload': {
-                'msg': message
+                'msg': message.replace('\n', '').replace('\r', '')
             },
             # Destination.
             'channel': {
