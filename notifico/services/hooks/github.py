@@ -234,7 +234,7 @@ class GithubHook(HookService):
             name=json['repository']['name'],
             who=json['comment']['user']['login'],
             commit=json['comment']['commit_id'],
-            url=GithubHook.shorten(json['comment']['html_url'])
+            url=GithubHook.shorten(json['comment']['html_url']),
             **HookService.colors
         )
 
