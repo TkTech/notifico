@@ -156,25 +156,27 @@ class GithubHook(HookService):
 
         event = request.headers.get('X-GitHub-Event', '')
         event_handler = {
-            'ping' : cls._handle_ping,
-            'push' : cls._handle_push,
-            'issues' : cls._handle_issues,
-            'issue_comment' : cls._handle_issue_comment,
-            'commit_comment' : cls._handle_commit_comment,
-            'create' : cls._handle_create,
-            'delete' : cls._handle_delete,
-            'pull_request' : cls._handle_pull_request,
-            'pull_request_review_comment' : cls._handle_pull_request_review_comment,
-            'gollum' : cls._handle_gollum,
-            'watch' : cls._handle_watch,
-            'release' : cls._handle_release,
-            'fork' : cls._handle_fork,
-            'member' : cls._handle_member,
-            'public' : cls._handle_public,
-            'team_add' : cls._handle_team_add,
-            'status' : cls._handle_status,
-            'deployment' : cls._handle_deployment,
-            'deployment_status' : cls._handle_deployment_status
+            'ping': cls._handle_ping,
+            'push': cls._handle_push,
+            'issues': cls._handle_issues,
+            'issue_comment': cls._handle_issue_comment,
+            'commit_comment': cls._handle_commit_comment,
+            'create': cls._handle_create,
+            'delete': cls._handle_delete,
+            'pull_request': cls._handle_pull_request,
+            'pull_request_review_comment': (
+                cls._handle_pull_request_review_comment
+            ),
+            'gollum': cls._handle_gollum,
+            'watch': cls._handle_watch,
+            'release': cls._handle_release,
+            'fork': cls._handle_fork,
+            'member': cls._handle_member,
+            'public': cls._handle_public,
+            'team_add': cls._handle_team_add,
+            'status': cls._handle_status,
+            'deployment': cls._handle_deployment,
+            'deployment_status': cls._handle_deployment_status
         }
 
         if not event in event_handler:
@@ -193,7 +195,7 @@ class GithubHook(HookService):
     def _handle_issues(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
-             'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
+            'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
         )
 
         yield fmt_string.format(
@@ -242,7 +244,7 @@ class GithubHook(HookService):
     def _handle_create(cls, user, request, hook, json):
         fmt_string = u' '.join([
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} '
-                'created {ref_type}',
+            'created {ref_type}',
             # null/None if repository was created
             u'{GREEN}{ref}{RESET}' if json['ref'] else u'',
             u'- {PINK}{url}{RESET}'
@@ -311,7 +313,7 @@ class GithubHook(HookService):
 
     @classmethod
     def _handle_gollum(cls, user, request, hook, json):
-        name=json['repository']['name']
+        name = json['repository']['name']
 
         if len(json['pages']) > 1:
             # Multiple pages changed
@@ -327,8 +329,8 @@ class GithubHook(HookService):
             )
 
             fmt_string_page = (
-                u'{RESET}[{BLUE}{name}{RESET}] Page {GREEN}{pname}{RESET} {action} '
-                '- {PINK}{url}{RESET}'
+                u'{RESET}[{BLUE}{name}{RESET}] Page {GREEN}{pname}{RESET}'
+                ' {action} - {PINK}{url}{RESET}'
             )
 
             for page in json['pages']:
@@ -433,8 +435,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_team_add(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} added the team '
-            '{GREEN}{tname}{RESET} to the repository!'
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} added the'
+            ' team {GREEN}{tname}{RESET} to the repository!'
         )
 
         yield fmt_string.format(
@@ -475,9 +477,15 @@ class GithubHook(HookService):
 
         if not original['commits']:
             if show_tags and j['tag']:
-                yield cls.message(cls._create_non_commit_summary(j, config), strip=strip)
+                yield cls.message(
+                    cls._create_non_commit_summary(j, config),
+                    strip=strip
+                )
             if j['branch']:
-                yield cls.message(cls._create_non_commit_summary(j, config), strip=strip)
+                yield cls.message(
+                    cls._create_non_commit_summary(j, config),
+                    strip=strip
+                )
 
             # No commits, no tags, no new branch. Nothing to do
             return
@@ -508,7 +516,8 @@ class GithubHook(HookService):
     @classmethod
     def _create_non_commit_summary(cls, j, config):
         """
-        Create and return a one-line summary of things not involving commits in `j`.
+        Create and return a one-line summary of things not involving commits
+        in `j`.
         """
         original = j['original']
         full_project_name = config.get('full_project_name', False)
@@ -555,9 +564,13 @@ class GithubHook(HookService):
         elif j['branch']:
             # Verb with proper capitalization
             if original['deleted']:
-                line.append(u'deleted branch' if j['pusher'] else u'Deleted branch')
+                line.append(
+                    u'deleted branch' if j['pusher'] else u'Deleted branch'
+                )
             else:
-                line.append(u'created branch' if j['pusher'] else u'Created branch')
+                line.append(
+                    u'created branch' if j['pusher'] else u'Created branch'
+                )
 
             # The branch name
             line.append(u'{GREEN}{branch}{RESET}'.format(
