@@ -448,7 +448,23 @@ class GithubHook(HookService):
 
     @classmethod
     def _handle_status(cls, user, request, hook, json):
-        yield ''
+        fmt_string = (
+            u'{RESET}[{BLUE}{name}{RESET}] {status_color}{status}{RESET}. '
+            '{description} - {PINK}{url}{RESET}'
+        )
+
+        status_color = HookService.colors['GREEN']
+        if not json['state'].lower() == 'success':
+            status_color = HookService.colors['RED']
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            status_color=status_color,
+            status=json['state'].capitalize(),
+            description=json['description'],
+            url=json['target_url'],
+            **HookService.colors
+        )
 
     @classmethod
     def _handle_deployment(cls, user, request, hook, json):
