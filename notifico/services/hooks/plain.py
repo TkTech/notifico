@@ -6,7 +6,7 @@ from notifico.services.hooks import HookService
 
 
 class PlainTextConfigForm(wtf.Form):
-    use_colors = wtf.BooleanField('Use Colors', validators=[
+    use_colours = wtf.BooleanField('Use Colors', validators=[
         wtf.Optional()
     ], default=False, description=(
         'If checked, messages will include mIRC colouring.'
