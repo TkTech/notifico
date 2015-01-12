@@ -78,7 +78,7 @@ class HookService(object):
         if handler is None:
             # It's entirely possible for a message body to be a NOP,
             # so don't do anything at all.
-            continue
+            return
 
         for message in handler:
             combined.append(message)
