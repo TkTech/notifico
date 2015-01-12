@@ -74,6 +74,12 @@ class HookService(object):
 
         ms = MessageService(redis=cls._redis())
         handler = cls.handle_request(user, request, hook, *args, **kwargs)
+
+        if handler is None:
+            # It's entirely possible for a message body to be a NOP,
+            # so don't do anything at all.
+            continue
+
         for message in handler:
             combined.append(message)
             for channel in hook.project.channels:
