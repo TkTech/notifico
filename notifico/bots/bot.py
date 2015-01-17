@@ -11,6 +11,9 @@ class BotificoBot(Client):
         self._manager = manager
         self._messages = deque()
         self._ready = False
+        # Increase the default minimum message delay to 2 seconds.
+        # Needs an exposed interface!
+        self._message_min_delay = 2.
 
     @property
     def manager(self):
