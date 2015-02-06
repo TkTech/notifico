@@ -1,0 +1,4 @@
+recursive-include notifico *
+recursive-exclude notifico *.pyc
+recursive-exclude notifico *.pyo
+prune notifico/static/less
