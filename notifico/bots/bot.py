@@ -1,62 +1,118 @@
 # -*- coding: utf8 -*-
-__all__ = ('BotificoBot',)
+
 from collections import deque
+from functools import wraps, partial
 
-from utopia import Client, client_queue
+from utopia import signals
+from utopia.client import ProtocolClient
+from utopia.plugins.protocol import ISupportPlugin
 
 
-class BotificoBot(Client):
-    def __init__(self, manager, *args, **kwargs):
-        super(BotificoBot, self).__init__(*args, **kwargs)
-        self._manager = manager
-        self._messages = deque()
-        self._ready = False
-        # Increase the default minimum message delay to 2 seconds.
-        # Needs an exposed interface!
-        self._message_min_delay = 2.
+class BotificoBot(ProtocolClient):
+    def __init__(self, identity, host, port=6667, ssl=False, plugins=None):
+        plugins = plugins or []
+        self._isupport = ISupportPlugin()
+        plugins.append(self.isupport)
+        ProtocolClient.__init__(self, identity, host, port, ssl, plugins)
 
-    @property
-    def manager(self):
-        return self._manager
+        self._channels = dict()
 
-    @client_queue
     def send_message(self, channel, message):
-        yield (self._send_message, channel, message)
+        name = channel.channel.lower()
 
-    def _send_message(self, channel, message):
-        c = self[channel.channel]
-        c.join()
-        c.send(message)
+        if name not in self._channels:
+            self._channels[name] = Channel(self, name)
 
-    def message_not_handled(self, client, message):
-        print(message)
-
-    def next_nickname(self):
-        return self.manager.free_nick()
-
-    def event_ready(self, client):
-        self._ready = True
+        self._channels[name].join(channel.password)
+        self._channels[name].message(message)
 
     def will_join(self, channel):
-        prefix = channel[0]
+        prefix = channel.channel[0]
         # Maximum number of channels for channels with this prefix.
-        channel_limit = self.channel_limit(prefix=prefix, default=20)
+        channel_limit = self._isupport[1].get('CHANLIMIT', {}).get(prefix, 20)
 
         # Find all the channels we're already in with this prefix.
-        channels = list(self.channels_by_prefix(prefix=prefix))
+        channels = [c for c in self._channels if c[0] == prefix]
         if len(channels) >= channel_limit:
             return False
 
         return True
 
-    def message_privmsg(self, client, message):
-        # Stop PRIVMSG from going to message_not_handled
-        pass
 
-    def event_disconnected(self):
+class Channel(object):
+    def filter_channel(f):
+        @wraps(f)
+        def _f(self, client, prefix, target, args):
+            if target.lower() == self.lname:
+                f(self, client, prefix, target, args)
+        return _f
+
+    def __init__(self, client, name):
+        self._client = client
+        self._name = name
+
+        self._joined = False
+        self._message_queue = deque()
+
+        signals.m.on_JOIN.connect(self.on_join, sender=client)
+
+    @property
+    def name(self):
         """
-        The client has been disconnected, for any reason. Usually occurs
-        on a network error.
+        Channel name.
         """
-        self.manager.give_up_nick(self.account.nickname)
-        self.manager.remove_bot(self)
+        return self.name
+
+    @property
+    def lname(self):
+        """
+        Channel name in lowercase.
+        """
+        return self.name.lower()
+
+    @property
+    def joined(self):
+        """
+        True if bot is currently in this channel.
+        """
+        return self._joined
+
+    def join(self, password=None):
+        """
+        Attempt to join the channel.
+        """
+        if not self._joined:
+            self._client.join_channel(self.lname, password)
+
+    def _send_message(self, message, type_='PRIVMSG'):
+        self._message_queue.append(
+            (self._client.send, type_, self.name, message)
+        )
+
+        self._check_message_queue()
+
+    message = partial(_send_message, type_='PRIVMSG')
+    message.__doc__ = 'Send privmsg to this channel.'
+    notice = partial(_send_message, type_='NOTICE')
+    notice.__doc__ = 'Send notice to this channel.'
+
+    @filter_channel
+    def on_join(self, client, prefix, target, args):
+        if prefix[0].lower() == client.identity.nick.lower():
+            self._joined = True
+            self._check_message_queue()
+
+    @filter_channel
+    def on_kick(self, client, prefix, target, args):
+        if prefix[0].lower() == client.identity.nick.lower():
+            self._joined = False
+
+    def _check_message_queue(self):
+        """
+        Check the channel's message queue. If non-empty and joined,
+        pop a message and send it.
+        """
+        while self._joined and self._message_queue:
+            message = self._message_queue.popleft()
+            message[0](*message[1:])
+            # maybe gevent.sleep(interval)
