@@ -153,6 +153,8 @@ class BotManager(object):
         self._nick_stack.remove(nickname)
 
     def remove_bot(self, client):
+        signals.on_disconnect.disconnect(self.remove_bot, sender=client)
+
         network = Network.from_client(client)._replace(ssl=False)
 
         if network not in self._active_bots:
