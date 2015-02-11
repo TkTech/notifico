@@ -3,30 +3,53 @@
 from collections import deque
 from functools import wraps, partial
 
+import gevent
+
 from utopia import signals
 from utopia.client import ProtocolClient
 from utopia.plugins.protocol import ISupportPlugin
+from utopia.plugins.util import LogPlugin
 
 
 class BotificoBot(ProtocolClient):
     def __init__(self, identity, host, port=6667, ssl=False, plugins=None):
-        plugins = plugins or []
         self._isupport = ISupportPlugin()
-        plugins.append(self.isupport)
+        plugins = plugins or []
+        plugins.append(self._isupport)
+
         ProtocolClient.__init__(self, identity, host, port, ssl, plugins)
 
+        self.message_min_delay = 1.5
+
+        self._ready = False
         self._channels = dict()
 
+        signals.on_registered.connect(self.on_ready, sender=self)
+
+    @property
+    def ready(self):
+        """
+        Is the client fully connected and can accept commands like JOIN.
+        """
+        return self._ready
+
     def send_message(self, channel, message):
+        """
+        Sends a privmsg message to a channel.
+        """
         name = channel.channel.lower()
 
         if name not in self._channels:
-            self._channels[name] = Channel(self, name)
+            self._channels[name] = Channel(self, name, channel.password)
+            self._channels[name].message_min_delay = self.message_min_delay
 
-        self._channels[name].join(channel.password)
+        self._channels[name].join()
         self._channels[name].message(message)
 
     def will_join(self, channel):
+        """
+        Returns True if this bot can join this channel.
+        """
         prefix = channel.channel[0]
         # Maximum number of channels for channels with this prefix.
         channel_limit = self._isupport[1].get('CHANLIMIT', {}).get(prefix, 20)
@@ -38,6 +61,16 @@ class BotificoBot(ProtocolClient):
 
         return True
 
+    def on_ready(self, client):
+        # no need to disconnect the event, on_registered fires only once
+        self._ready = True
+
+        # join the channels we have messages for,
+        # but we couldn't join yet
+        for name, channel in self._channels.items():
+            if not channel.joined:
+                channel.join()
+
 
 class Channel(object):
     def filter_channel(f):
@@ -47,28 +80,32 @@ class Channel(object):
                 f(self, client, prefix, target, args)
         return _f
 
-    def __init__(self, client, name):
+    def __init__(self, client, name, password=None):
         self._client = client
         self._name = name
+        self._password = password
+
+        self.message_min_delay = 0
 
         self._joined = False
         self._message_queue = deque()
 
         signals.m.on_JOIN.connect(self.on_join, sender=client)
+        signals.m.on_KICK.connect(self.on_kick, sender=client)
 
     @property
     def name(self):
         """
         Channel name.
         """
-        return self.name
+        return self._name
 
     @property
     def lname(self):
         """
         Channel name in lowercase.
         """
-        return self.name.lower()
+        return self._name.lower()
 
     @property
     def joined(self):
@@ -77,24 +114,31 @@ class Channel(object):
         """
         return self._joined
 
-    def join(self, password=None):
+    def join(self):
         """
         Attempt to join the channel.
         """
-        if not self._joined:
-            self._client.join_channel(self.lname, password)
+        if not self._joined and self._client.ready:
+            self._client.join_channel(self.lname, self._password)
 
-    def _send_message(self, message, type_='PRIVMSG'):
+    def _send_message(self, func, message):
         self._message_queue.append(
-            (self._client.send, type_, self.name, message)
+            (func, self.name, message)
         )
 
         self._check_message_queue()
 
-    message = partial(_send_message, type_='PRIVMSG')
-    message.__doc__ = 'Send privmsg to this channel.'
-    notice = partial(_send_message, type_='NOTICE')
-    notice.__doc__ = 'Send notice to this channel.'
+    def message(self, message):
+        """
+        Sends a privmsg to this channel.
+        """
+        return self._send_message(self._client.privmsg, message)
+
+    def notice(self, message):
+        """
+        Sends a notice to this channel.
+        """
+        return self._send_message(self._client.notice, message)
 
     @filter_channel
     def on_join(self, client, prefix, target, args):
@@ -104,15 +148,15 @@ class Channel(object):
 
     @filter_channel
     def on_kick(self, client, prefix, target, args):
-        if prefix[0].lower() == client.identity.nick.lower():
+        if args[0].lower() == client.identity.nick.lower():
             self._joined = False
 
     def _check_message_queue(self):
         """
         Check the channel's message queue. If non-empty and joined,
-        pop a message and send it.
+        sends all messages.
         """
         while self._joined and self._message_queue:
             message = self._message_queue.popleft()
             message[0](*message[1:])
-            # maybe gevent.sleep(interval)
+            gevent.sleep(self.message_min_delay)

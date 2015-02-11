@@ -8,6 +8,7 @@ from utopia import signals
 from utopia.client import Identity
 from utopia.plugins.handshake import HandshakePlugin
 from utopia.plugins.protocol import EasyProtocolPlugin
+from utopia.plugins.util import LogPlugin
 
 from notifico.bots.util import Network
 from notifico.bots.plugins import NickInUsePlugin
@@ -83,9 +84,9 @@ class BotManager(object):
         nickname = self.free_nick()
         bot = self._bot_class(
             Identity(
-                nickname=nickname,
-                username=u"notifico",
-                realname=u"Notifico! - http://n.tkte.ch/",
+                nickname,
+                user=u"notifico",
+                real=u"Notifico! - http://n.tkte.ch/",
                 password=network.password
             ),
             network.host,
@@ -94,7 +95,10 @@ class BotManager(object):
             plugins=[
                 EasyProtocolPlugin(),
                 HandshakePlugin(),
-                NickInUsePlugin()
+                NickInUsePlugin(self.free_nick),
+                # LogPlugin(logger=logging.getLogger(
+                #     '({0}:{1}:{2})'.format(*network)
+                # ))
             ]
         )
         try:
