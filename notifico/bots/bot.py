@@ -44,6 +44,9 @@ class BotificoBot(ProtocolClient):
             self._channels[name] = Channel(self, name, channel.password)
             self._channels[name].message_min_delay = self.message_min_delay
 
+        # there might be that rare event when the channel password gets
+        # changed *and* notifico got kicked from the channel
+        self._channels[name]._password = channel.password
         self._channels[name].message(message)
 
     def will_join(self, channel):
