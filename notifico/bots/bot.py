@@ -1,9 +1,10 @@
 # -*- coding: utf8 -*-
 
-from collections import deque
 from functools import wraps, partial
 
 import gevent
+import gevent.queue
+import gevent.event
 
 from utopia import signals
 from utopia.client import ProtocolClient
@@ -43,7 +44,6 @@ class BotificoBot(ProtocolClient):
             self._channels[name] = Channel(self, name, channel.password)
             self._channels[name].message_min_delay = self.message_min_delay
 
-        self._channels[name].join()
         self._channels[name].message(message)
 
     def will_join(self, channel):
@@ -87,11 +87,14 @@ class Channel(object):
 
         self.message_min_delay = 0
 
-        self._joined = False
-        self._message_queue = deque()
+        self._joined = gevent.event.Event()
+        self._message_queue = gevent.queue.Queue()
 
         signals.m.on_JOIN.connect(self.on_join, sender=client)
         signals.m.on_KICK.connect(self.on_kick, sender=client)
+
+        # start off the sender greenlet
+        gevent.spawn(self._check_message_queue)
 
     @property
     def name(self):
@@ -112,21 +115,23 @@ class Channel(object):
         """
         True if bot is currently in this channel.
         """
-        return self._joined
+        return self._joined.is_set()
 
     def join(self):
         """
         Attempt to join the channel.
         """
-        if not self._joined and self._client.ready:
+        if not self.joined and self._client.ready:
             self._client.join_channel(self.lname, self._password)
+            return True
+        return False
 
     def _send_message(self, func, message):
-        self._message_queue.append(
+        # this should not block anyways, since the queue size
+        # is unlimited
+        self._message_queue.put_nowait(
             (func, self.name, message)
         )
-
-        self._check_message_queue()
 
     def message(self, message):
         """
@@ -143,20 +148,25 @@ class Channel(object):
     @filter_channel
     def on_join(self, client, prefix, target, args):
         if prefix[0].lower() == client.identity.nick.lower():
-            self._joined = True
-            self._check_message_queue()
+            self._joined.set()
 
     @filter_channel
     def on_kick(self, client, prefix, target, args):
         if args[0].lower() == client.identity.nick.lower():
-            self._joined = False
+            self._joined.clear()
 
     def _check_message_queue(self):
         """
         Check the channel's message queue. If non-empty and joined,
         sends all messages.
         """
-        while self._joined and self._message_queue:
-            message = self._message_queue.popleft()
-            message[0](*message[1:])
-            gevent.sleep(self.message_min_delay)
+        # wait for a message
+        message = self._message_queue.get()
+        self.join()
+        # there is a message, but the channel might not
+        # be joined yet (this will not block if we are already in the channel)
+        self._joined.wait()
+        # send the message
+        message[0](*message[1:])
+
+        gevent.spawn_later(self.message_min_delay, self._check_message_queue)
