@@ -5,6 +5,7 @@ Usage:
     notifico www [options]
     notifico bots
     notifico init
+    notifico worker
 
 Options:
     --debug                 Enable debugging.
@@ -16,7 +17,7 @@ import sys
 
 from docopt import docopt
 
-from notifico import create_instance, db
+from notifico import create_instance, db, celery
 from notifico.bots import start_manager
 from notifico.models import *
 
@@ -31,13 +32,17 @@ def main(argv):
             port=int(args['--port']),
             host=args['--host']
         )
-    if args ['bots']:
+    elif args ['bots']:
         start_manager()
     elif args['init']:
         app = create_instance()
         with app.app_context():
             # Let SQLAlchemy create any missing tables.
             db.create_all()
+    elif args['worker']:
+        app = create_instance()
+        with app.app_context():
+            celery.start()
 
 
 if __name__ == '__main__':
