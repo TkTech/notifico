@@ -11,7 +11,7 @@ from utopia.plugins.protocol import EasyProtocolPlugin
 from utopia.plugins.util import LogPlugin
 
 from notifico.bots.util import Network
-from notifico.bots.plugins import NickInUsePlugin
+from notifico.bots.plugins import NickInUsePlugin, CTCPPlugin
 
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,12 @@ class BotManager(object):
         # A stack of released nicknames to keep our nicknames
         # unique across all networks.
         self._nick_stack = []
+
+        self._ctcp_responses = {
+            'PING': CTCPPlugin.ctcp_ping,
+            'TIME': CTCPPlugin.ctcp_time,
+            'VERSION': 'Notifico! - http://n.tkte.ch/'
+        }
 
     @property
     def active_bots(self):
@@ -96,9 +102,10 @@ class BotManager(object):
                 EasyProtocolPlugin(),
                 HandshakePlugin(),
                 NickInUsePlugin(self.free_nick),
-                # LogPlugin(logger=logging.getLogger(
-                #     '({0}:{1}:{2})'.format(*network)
-                # ))
+                CTCPPlugin(self._ctcp_responses),
+                #  LogPlugin(logger=logging.getLogger(
+                #      '({0}:{1}:{2})'.format(*network)
+                #  ))
             ]
         )
         try:
