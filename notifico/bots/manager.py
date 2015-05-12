@@ -2,12 +2,19 @@
 __all__ = ('BotManager',)
 import random
 import logging
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 
-from utopia import Account
+from utopia import signals
+from utopia.client import Identity
+from utopia.plugins.handshake import HandshakePlugin
+from utopia.plugins.protocol import EasyProtocolPlugin
+from utopia.plugins.util import LogPlugin
+
+from notifico.bots.util import Network
+from notifico.bots.plugins import NickInUsePlugin, CTCPPlugin
+
 
 logger = logging.getLogger(__name__)
-Channel = namedtuple('Channel', ['channel', 'password'])
 
 
 class BotManager(object):
@@ -22,6 +29,12 @@ class BotManager(object):
         # A stack of released nicknames to keep our nicknames
         # unique across all networks.
         self._nick_stack = []
+
+        self._ctcp_responses = {
+            'PING': CTCPPlugin.ctcp_ping,
+            'TIME': CTCPPlugin.ctcp_time,
+            'VERSION': 'Notifico! - http://n.tkte.ch/'
+        }
 
     @property
     def active_bots(self):
@@ -76,13 +89,24 @@ class BotManager(object):
         """
         nickname = self.free_nick()
         bot = self._bot_class(
-            self,
-            Account.new(
-                nickname=nickname,
-                username=u"notifico",
-                realname=u"Notifico! - http://n.tkte.ch/"
+            Identity(
+                nickname,
+                user=u"notifico",
+                real=u"Notifico! - http://n.tkte.ch/",
+                password=network.password
             ),
-            network
+            network.host,
+            port=network.port,
+            ssl=network.ssl,
+            plugins=[
+                EasyProtocolPlugin(),
+                HandshakePlugin(),
+                NickInUsePlugin(self.free_nick),
+                CTCPPlugin(self._ctcp_responses),
+                #  LogPlugin(logger=logging.getLogger(
+                #      '({0}:{1}:{2})'.format(*network)
+                #  ))
+            ]
         )
         try:
             bot.connect()
@@ -101,6 +125,7 @@ class BotManager(object):
             )
             return None
 
+        signals.on_disconnect.connect(self.remove_bot, sender=bot)
         self._active_bots[network._replace(ssl=False)].add(bot)
         return bot
 
@@ -135,7 +160,9 @@ class BotManager(object):
         self._nick_stack.remove(nickname)
 
     def remove_bot(self, client):
-        network = client.network._replace(ssl=False)
+        signals.on_disconnect.disconnect(self.remove_bot, sender=client)
+
+        network = Network.from_client(client)._replace(ssl=False)
 
         if network not in self._active_bots:
             logger.debug(
