@@ -34,7 +34,7 @@ if __name__ == '__main__':
             'Flask-Cache',
             'fabric',
             'sqlalchemy',
-            'UtopiaIRC',
+            'utopia',
             'gevent',
             'oauth2',
             'redis',
@@ -49,6 +49,6 @@ if __name__ == '__main__':
             'celery'
         ],
         dependency_links=[
-            'https://github.com/TkTech/utopia/tarball/deploy#egg=UtopiaIRC'
+            'https://github.com/notifico/utopia/tarball/master#egg=utopia'
         ]
     )
