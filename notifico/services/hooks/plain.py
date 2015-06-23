@@ -34,7 +34,14 @@ class PlainTextHook(HookService):
             if not p:
                 return
 
-        yield cls.message(p[:512], strip=not config.get('use_colours', False))
+        for line in p.splitlines():
+            yield cls.message(
+                # FIXME: Hard-cap each line to 512 characters.
+                #        This needs to be done intelligently, likely
+                #        by the bot itself.
+                line[:512],
+                strip=not config.get('use_colours', False)
+            )
 
     @classmethod
     def form(cls):
