@@ -65,7 +65,7 @@ SENTRY_DSN = None
 # Celery Configuration
 # ---
 BROKER_URL = 'redis://'
-CELERY_RESULT_BACKEND = 'redis://'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_IMPORTS = ('notifico.services.background',)
 CELERY_TASK_SERIALIZER = 'json'
 
