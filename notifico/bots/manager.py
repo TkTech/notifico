@@ -103,9 +103,9 @@ class BotManager(object):
                 HandshakePlugin(),
                 NickInUsePlugin(self.free_nick),
                 CTCPPlugin(self._ctcp_responses),
-                #  LogPlugin(logger=logging.getLogger(
-                #      '({0}:{1}:{2})'.format(*network)
-                #  ))
+                LogPlugin(logger=logging.getLogger(
+                    '({0}:{1}:{2})'.format(*network)
+                ))
             ]
         )
         try:
