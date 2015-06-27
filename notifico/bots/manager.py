@@ -33,7 +33,7 @@ class BotManager(object):
         self._ctcp_responses = {
             'PING': CTCPPlugin.ctcp_ping,
             'TIME': CTCPPlugin.ctcp_time,
-            'VERSION': 'Notifico! - http://n.tkte.ch/'
+            'VERSION': 'Notifico! - https://github.com/notifico/notifico'
         }
 
     @property
