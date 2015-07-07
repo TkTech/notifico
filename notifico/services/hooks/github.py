@@ -103,22 +103,124 @@ class GithubConfigForm(wtf.Form):
     ))
 
 
-def _create_push_final_summary(j, config):
+def _create_push_summary(project_name, j, config):
+    """
+    Create and return a one-line summary of the push in `j`.
+    """
+    original = j['original']
+    show_branch = config.get('show_branch', True)
+
+    # Build the push summary.
+    line = []
+
+    line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+        name=project_name,
+        **HookService.colors
+    ))
+
+    # The user doing the push, if available.
+    if j['pusher']:
+        line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
+            pusher=j['pusher'],
+            **HookService.colors
+        ))
+
+    # The number of commits included in this push.
+    line.append(u'{GREEN}{count}{RESET} {commits}'.format(
+        count=len(original['commits']),
+        commits='commit' if len(original['commits']) == 1 else 'commits',
+        **HookService.colors
+    ))
+
+    if show_branch and j['branch']:
+        line.append(u'to {GREEN}{branch}{RESET}'.format(
+            branch=j['branch'],
+            **HookService.colors
+        ))
+
+    # File movement summary.
+    line.append(u'[+{added}/-{removed}/\u00B1{modified}]'.format(
+        added=len(j['files']['added']),
+        removed=len(j['files']['removed']),
+        modified=len(j['files']['modified'])
+    ))
+
+    # The shortened URL linking to the compare page.
+    line.append(u'{PINK}{compare_link}{RESET}'.format(
+        compare_link=GithubHook.shorten(original['compare']),
+        **HookService.colors
+    ))
+
+    return u' '.join(line)
+
+
+def _create_commit_summary(project_name, j, config):
+    """
+    Create and yield a one-line summary of each commit in `j`.
+    """
+    prefer_username = config.get('prefer_username', True)
+    title_only = config.get('title_only', False)
+
+    original = j['original']
+
+    for commit in original['commits']:
+        if config.get('distinct_only', True):
+            if not commit['distinct']:
+                # This commit has been seen in the repo
+                # before, skip over it and to the next one
+                continue
+
+        committer = commit.get('committer', {})
+        author = commit.get('author', {})
+
+        line = []
+
+        line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+            name=project_name,
+            **HookService.colors
+        ))
+
+        # Show the committer.
+        attribute_to = None
+        if prefer_username:
+            attribute_to = author.get('username')
+            if attribute_to is None:
+                attribute_to = author.get('username')
+
+        if attribute_to is None:
+            attribute_to = author.get('name')
+            if attribute_to is None:
+                attribute_to = committer.get('name')
+
+        if attribute_to:
+            line.append(u'{ORANGE}{attribute_to}{RESET}'.format(
+                attribute_to=attribute_to,
+                **HookService.colors
+            ))
+
+        line.append(u'{GREEN}{sha}{RESET}'.format(
+            sha=commit['id'][:7],
+            **HookService.colors
+        ))
+
+        line.append(u'-')
+
+        message = commit['message']
+        if title_only:
+            message_lines = message.split('\n')
+            line.append(message_lines[0] if message_lines else message)
+        else:
+            line.append(message)
+
+        yield u' '.join(line)
+
+
+def _create_push_final_summary(project_name, j, config):
     # The name of the repository.
     original = j['original']
-    full_project_name = config.get('full_project_name', False)
     line_limit = config.get('line_limit', 3)
 
     line = []
-
-    project_name = original['repository']['name']
-    if full_project_name:
-        # The use wants the <username>/<project name> form from
-        # github, not the Notifico name.
-        project_name = '{username}/{project_Name}'.format(
-            username=original['repository']['owner']['name'],
-            project_Name=project_name
-        )
 
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=project_name,
@@ -179,7 +281,7 @@ class GithubHook(HookService):
             'deployment_status': cls._handle_deployment_status
         }
 
-        if not event in event_handler:
+        if event not in event_handler:
             return
 
         return event_handler[event](user, request, hook, payload)
@@ -490,6 +592,9 @@ class GithubHook(HookService):
         # Limit the number of lines to display before the summary.
         # 3 is the default on github.com's IRC service
         line_limit = config.get('line_limit', 3)
+        # The use wants the <username>/<project name> form from
+        # github, not the Notifico name.
+        full_project_name = config.get('full_project_name', False)
 
         if not original['commits']:
             if show_tags and j['tag']:
@@ -513,15 +618,24 @@ class GithubHook(HookService):
                 # This isn't a branch the user wants.
                 return
 
+        project_name = original['repository']['name']
+        if full_project_name:
+            project_name = '{username}/{project_Name}'.format(
+                username=original['repository']['owner']['name'],
+                project_Name=project_name
+            )
+
         # A short summarization of the commits in the push.
-        yield cls.message(cls._create_push_summary(j, config), strip=strip)
+        yield cls.message(_create_push_summary(project_name, j, config), strip=strip)
 
         # A one-line summary for each commit in the push.
-        line_iterator = cls._create_commit_summary(j, config)
+        line_iterator = _create_commit_summary(project_name, j, config)
 
+        num_commits = len(j['original'].get('commits', []))
         for i, formatted_commit in enumerate(line_iterator):
-            if i >= line_limit:
+            if i > line_limit or (i == line_limit and not num_commits == i+1):
                 yield cls.message(_create_push_final_summary(
+                    project_name,
                     j,
                     config
                 ), strip=strip)
@@ -602,140 +716,6 @@ class GithubHook(HookService):
             ))
 
         return u' '.join(line)
-
-    @classmethod
-    def _create_push_summary(cls, j, config):
-        """
-        Create and return a one-line summary of the push in `j`.
-        """
-        original = j['original']
-        show_branch = config.get('show_branch', True)
-        full_project_name = config.get('full_project_name', False)
-
-        # Build the push summary.
-        line = []
-
-        # The name of the repository.
-        project_name = original['repository']['name']
-        if full_project_name:
-            # The use wants the <username>/<project name> form from
-            # github, not the Notifico name.
-            project_name = '{username}/{project_Name}'.format(
-                username=original['repository']['owner']['name'],
-                project_Name=project_name
-            )
-
-        line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
-            name=project_name,
-            **HookService.colors
-        ))
-
-        # The user doing the push, if available.
-        if j['pusher']:
-            line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
-                pusher=j['pusher'],
-                **HookService.colors
-            ))
-
-        # The number of commits included in this push.
-        line.append(u'{GREEN}{count}{RESET} {commits}'.format(
-            count=len(original['commits']),
-            commits='commit' if len(original['commits']) == 1 else 'commits',
-            **HookService.colors
-        ))
-
-        if show_branch and j['branch']:
-            line.append(u'to {GREEN}{branch}{RESET}'.format(
-                branch=j['branch'],
-                **HookService.colors
-            ))
-
-        # File movement summary.
-        line.append(u'[+{added}/-{removed}/\u00B1{modified}]'.format(
-            added=len(j['files']['added']),
-            removed=len(j['files']['removed']),
-            modified=len(j['files']['modified'])
-        ))
-
-        # The shortened URL linking to the compare page.
-        line.append(u'{PINK}{compare_link}{RESET}'.format(
-            compare_link=GithubHook.shorten(original['compare']),
-            **HookService.colors
-        ))
-
-        return u' '.join(line)
-
-    @classmethod
-    def _create_commit_summary(cls, j, config):
-        """
-        Create and yield a one-line summary of each commit in `j`.
-        """
-        prefer_username = config.get('prefer_username', True)
-        full_project_name = config.get('full_project_name', False)
-        title_only = config.get('title_only', False)
-
-        original = j['original']
-
-        for commit in original['commits']:
-            if config.get('distinct_only', True):
-                if not commit['distinct']:
-                    # This commit has been seen in the repo
-                    # before, skip over it and to the next one
-                    continue
-
-            committer = commit.get('committer', {})
-            author = commit.get('author', {})
-
-            line = []
-
-            # The name of the repository.
-            project_name = original['repository']['name']
-            if full_project_name:
-                # The use wants the <username>/<project name> form from
-                # github, not the Notifico name.
-                project_name = '{username}/{project_Name}'.format(
-                    username=original['repository']['owner']['name'],
-                    project_Name=project_name
-                )
-
-            line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
-                name=project_name,
-                **HookService.colors
-            ))
-
-            # Show the committer.
-            attribute_to = None
-            if prefer_username:
-                attribute_to = author.get('username')
-                if attribute_to is None:
-                    attribute_to = author.get('username')
-
-            if attribute_to is None:
-                attribute_to = author.get('name')
-                if attribute_to is None:
-                    attribute_to = committer.get('name')
-
-            if attribute_to:
-                line.append(u'{ORANGE}{attribute_to}{RESET}'.format(
-                    attribute_to=attribute_to,
-                    **HookService.colors
-                ))
-
-            line.append(u'{GREEN}{sha}{RESET}'.format(
-                sha=commit['id'][:7],
-                **HookService.colors
-            ))
-
-            line.append(u'-')
-
-            message = commit['message']
-            if title_only:
-                message_lines = message.split('\n')
-                line.append(message_lines[0] if message_lines else message)
-            else:
-                line.append(message)
-
-            yield u' '.join(line)
 
     @classmethod
     def shorten(cls, url):
