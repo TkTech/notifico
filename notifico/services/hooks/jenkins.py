@@ -10,11 +10,11 @@ from notifico.services.hooks import HookService
 
 class JenkinsConfigForm(wtf.Form):
     phase = wtf.SelectMultipleField('Phase',
-        default=['finished'],
+        default=['finalized'],
         choices=[
             ('started', 'Started'),
             ('completed', 'Completed'),
-            ('finished', 'Finished')
+            ('finalized', 'Finalized')
         ],
         description=(
             'Print messages for selected fields.'
@@ -60,7 +60,10 @@ class JenkinsHook(HookService):
             return
 
         phase = payload['build']['phase'].lower()
-        if not phase in hook.config.get('phase', []):
+        # finished is the the phase name of an older version
+        if phase == 'finished':
+            phase = 'finalized'
+        if phase not in hook.config.get('phase', []):
             return
 
         status = payload['build'].get('status', 'SUCCESS').lower()
@@ -68,9 +71,8 @@ class JenkinsHook(HookService):
         # from the actual implementation?
         if status == 'failed':
             status = 'failure'
-        if not status in hook.config.get('status', []):
+        if status not in hook.config.get('status', []):
             return
-
 
         strip = not hook.config.get('use_colors', True)
         summary = cls._create_summary(payload)
@@ -97,26 +99,45 @@ class JenkinsHook(HookService):
             'SUCCESS': HookService.colors['GREEN'],
             'UNSTABLE': HookService.colors['ORANGE'],
             # documentation differs from implementation
-            'FAILURE' : HookService.colors['RED'],
+            'FAILURE': HookService.colors['RED'],
             'FAILED': HookService.colors['RED']
         }.get(
-            payload['build'].get('status', 'SUCCESS'),
+            payload['build'].get('status', 'SUCCESS').upper(),
             HookService.colors['RED']
         )
 
         number = payload['build']['number']
         phase = payload['build']['phase'].lower()
-        status = payload['build']['status'].lower()
         url = payload['build']['full_url']
 
+        status = payload['build'].get('status', '').lower()
+        if status:
+            # make sure this string starts with a space or
+            # the formatting won't look good (see fmt_string)
+            status = ': {status_colour}{status}{RESET}'.format(
+                status_colour=status_colour,
+                status=status,
+                **HookService.colors
+            )
+
+        commit = ''
+        scm = payload['build'].get('scm', {})
+        if scm.get('commit'):
+            # space is important again
+            commit = '({GREEN}{commit}{RESET}) '.format(
+                commit=scm.get('commit')[:7],
+                **HookService.colors
+            )
+
         fmt_string = (
-            '{ORANGE}jenkins{RESET} built {status_colour}#{number}{RESET} '
-            '{phase} ({status_colour}{status}{RESET}) {PINK}{url}{RESET}'
+            '{ORANGE}jenkins{RESET} build {status_colour}#{number}{RESET} '
+            '{commit}{phase}{status} {PINK}{url}{RESET}'
         )
 
         line = fmt_string.format(
             status_colour=status_colour,
             number=number,
+            commit=commit,
             phase=phase,
             status=status,
             url=url,
