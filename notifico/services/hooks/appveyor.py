@@ -9,13 +9,6 @@ from flask.ext import wtf
 from notifico.services.hooks import HookService
 
 class AppVeyorConfigForm(wtf.Form):
-    token = wtf.TextField('X-Notifico-Auth Token', validators=[
-        wtf.Required(),
-        wtf.Length(max=1024)
-    ], description=(
-        'Used to authenticate incoming webhooks.<br>'
-        'Set the X-Notifico-Auth header to this same value as a secured value in your AppVeyor configuration.'
-    ))
     use_colors = wtf.BooleanField('Use Colors', validators=[
         wtf.Optional()
     ], default=True, description=(
@@ -35,11 +28,6 @@ class AppVeyorHook(HookService):
 
     @classmethod
     def handle_request(cls, user, request, hook):
-        token = hook.config.get('token')
-        token_header = request.headers.get('X-Notifico-Auth')
-        if token != token_header:
-            return
-
         payload = request.get_json()
         if not payload:
             return
