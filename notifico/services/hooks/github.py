@@ -626,7 +626,10 @@ class GithubHook(HookService):
             )
 
         # A short summarization of the commits in the push.
-        yield cls.message(_create_push_summary(project_name, j, config), strip=strip)
+        yield cls.message(
+            _create_push_summary(project_name, j, config),
+            strip=strip
+        )
 
         # A one-line summary for each commit in the push.
         line_iterator = _create_commit_summary(project_name, j, config)
@@ -677,14 +680,18 @@ class GithubHook(HookService):
             ))
 
         if j['tag']:
-            # Verb with proper capitalization
-            line.append(u'tagged' if j['pusher'] else u'Tagged')
+            if not original.get('head_commit'):
+                line.append(u'deleted' if j['pusher'] else u'Deleted')
+                line.append(u'tag')
+            else:
+                # Verb with proper capitalization
+                line.append(u'tagged' if j['pusher'] else u'Tagged')
 
-            # The sha1 hash of the head (tagged) commit.
-            line.append(u'{GREEN}{sha}{RESET} as'.format(
-                sha=original['head_commit']['id'][:7],
-                **HookService.colors
-            ))
+                # The sha1 hash of the head (tagged) commit.
+                line.append(u'{GREEN}{sha}{RESET} as'.format(
+                    sha=original['head_commit']['id'][:7],
+                    **HookService.colors
+                ))
 
             # The tag itself.
             line.append(u'{GREEN}{tag}{RESET}'.format(
