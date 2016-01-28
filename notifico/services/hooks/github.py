@@ -735,7 +735,7 @@ class GithubHook(HookService):
         # will return a 201 created on success and return the new url
         # in the Location header.
         try:
-            r = requests.post('http://git.io', data={
+            r = requests.post('https://git.io', data={
                 'url': url
             }, timeout=4.0)
         except requests.exceptions.Timeout:
