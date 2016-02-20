@@ -2,11 +2,9 @@
 {% if not project.public %}
 <i class="icon-lock"></i>
 {% endif %}
-<a href="{{ url_for('projects.dashboard', u=project.owner.username) }}">
-  {{ project.owner.username }}
-</a><span class="muted">/</span><a href="{{ url_for('projects.details', u=project.owner.username, p=project.name) }}">
-  {{ project.name }}
-</a>
+<a href="{{ url_for('projects.dashboard', u=project.owner.username) }}">{{ project.owner.username }}</a>
+<span class="muted">/</span>
+<a href="{{ url_for('projects.details', u=project.owner.username, p=project.name) }}">{{ project.name }}</a>
 {% endmacro %}
 {% macro active(end) %}
 {% if request.endpoint.startswith(end) %}active{% endif %}
