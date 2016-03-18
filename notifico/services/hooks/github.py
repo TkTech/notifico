@@ -596,6 +596,13 @@ class GithubHook(HookService):
         # github, not the Notifico name.
         full_project_name = config.get('full_project_name', False)
 
+        if branches:
+            # The user wants to filter by branch name.
+            branches = [b.strip().lower() for b in branches.split(',')]
+            if j['branch'] and j['branch'].lower() not in branches:
+                # This isn't a branch the user wants.
+                return
+
         if not original['commits']:
             if show_tags and j['tag']:
                 yield cls.message(
@@ -610,13 +617,6 @@ class GithubHook(HookService):
 
             # No commits, no tags, no new branch. Nothing to do
             return
-
-        if branches:
-            # The user wants to filter by branch name.
-            branches = [b.strip().lower() for b in branches.split(',')]
-            if j['branch'] and j['branch'].lower() not in branches:
-                # This isn't a branch the user wants.
-                return
 
         project_name = original['repository']['name']
         if full_project_name:
