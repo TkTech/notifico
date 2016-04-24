@@ -92,7 +92,7 @@ class BotManager(object):
             Identity(
                 nickname,
                 user=u"notifico",
-                real=u"Notifico! - http://n.tkte.ch/",
+                real=u"Notifico! - https://n.tkte.ch/",
                 password=network.password
             ),
             network.host,
