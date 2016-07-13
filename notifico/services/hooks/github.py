@@ -299,16 +299,18 @@ class GithubHook(HookService):
             u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} {action} '
             'issue {TEAL}#{num}{GREY}: {title} - {LIGHT_GREY}{url}{GREY}'
         )
-
-        yield fmt_string.format(
-            name=json['repository']['name'],
-            who=json['sender']['login'],
-            action=json['action'],
-            num=json['issue']['number'],
-            title=json['issue']['title'],
-            url=GithubHook.shorten(json['issue']['html_url']),
-            **HookService.colors
-        )
+        if json['action'].find('labeled') != -1:
+            yield ''
+        else:
+            yield fmt_string.format(
+                name=json['repository']['name'],
+                who=json['sender']['login'],
+                action=json['action'],
+                num=json['issue']['number'],
+                title=json['issue']['title'],
+                url=GithubHook.shorten(json['issue']['html_url']),
+                **HookService.colors
+            )
 
     @classmethod
     def _handle_issue_comment(cls, user, request, hook, json):
@@ -385,16 +387,18 @@ class GithubHook(HookService):
             u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} {action} pull '
             'request {TEAL}#{num}{GREY}: {title} - {LIGHT_GREY}{url}{GREY}'
         )
-
-        yield fmt_string.format(
-            name=json['repository']['name'],
-            who=json['sender']['login'],
-            action=json['action'],
-            num=json['number'],
-            title=json['pull_request']['title'],
-            url=GithubHook.shorten(json['pull_request']['html_url']),
-            **HookService.colors
-        )
+        if json['action'].find('labeled') != -1:
+            yield ''
+        else:
+            yield fmt_string.format(
+                name=json['repository']['name'],
+                who=json['sender']['login'],
+                action=json['action'],
+                num=json['number'],
+                title=json['pull_request']['title'],
+                url=GithubHook.shorten(json['pull_request']['html_url']),
+                **HookService.colors
+            )
 
     @classmethod
     def _handle_pull_request_review_comment(cls, user, request, hook, json):
@@ -559,14 +563,17 @@ class GithubHook(HookService):
         if not json['state'].lower() == 'success':
             status_color = HookService.colors['RED']
 
-        yield fmt_string.format(
-            name=json['repository']['name'],
-            status_color=status_color,
-            status=json['state'].capitalize(),
-            description=json['description'],
-            url=json['target_url'],
-            **HookService.colors
-        )
+        if not json['state'].lower() == 'pending':
+            yield fmt_string.format(
+                name=json['repository']['name'],
+                status_color=status_color,
+                status=json['state'].capitalize(),
+                description=json['description'],
+                url=json['target_url'],
+                **HookService.colors
+            )
+        else:
+            yield ''
 
     @classmethod
     def _handle_deployment(cls, user, request, hook, json):
@@ -680,38 +687,18 @@ class GithubHook(HookService):
             ))
 
         if j['tag']:
-            if not original.get('head_commit'):
-                line.append(u'deleted' if j['pusher'] else u'Deleted')
-                line.append(u'tag')
-            else:
-                # Verb with proper capitalization
-                line.append(u'tagged' if j['pusher'] else u'Tagged')
+            # Verb with proper capitalization
+            line.append(u'tagged' if j['pusher'] else u'Tagged')
 
-                # The sha1 hash of the head (tagged) commit.
-                line.append(u'{TEAL}{sha}{GREY} as'.format(
-                    sha=original['head_commit']['id'][:7],
-                    **HookService.colors
-                ))
+            # The sha1 hash of the head (tagged) commit.
+            line.append(u'{TEAL}{sha}{GREY} as'.format(
+                sha=original['head_commit']['id'][:7],
+                **HookService.colors
+            ))
 
             # The tag itself.
             line.append(u'{TEAL}{tag}{GREY}'.format(
                 tag=j['tag'],
-                **HookService.colors
-            ))
-        elif j['branch']:
-            # Verb with proper capitalization
-            if original['deleted']:
-                line.append(
-                    u'deleted branch' if j['pusher'] else u'Deleted branch'
-                )
-            else:
-                line.append(
-                    u'created branch' if j['pusher'] else u'Created branch'
-                )
-
-            # The branch name
-            line.append(u'{TEAL}{branch}{GREY}'.format(
-                branch=j['branch'],
                 **HookService.colors
             ))
 
