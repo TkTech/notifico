@@ -554,26 +554,7 @@ class GithubHook(HookService):
 
     @classmethod
     def _handle_status(cls, user, request, hook, json):
-        fmt_string = (
-            u'{GREY}[{BLUE}{name}{GREY}] {status_color}{status}{GREY}. '
-            '{description} - {LIGHT_GREY}{url}{GREY}'
-        )
-
-        status_color = HookService.colors['GREEN']
-        if not json['state'].lower() == 'success':
-            status_color = HookService.colors['RED']
-
-        if not json['state'].lower() == 'pending':
-            yield fmt_string.format(
-                name=json['repository']['name'],
-                status_color=status_color,
-                status=json['state'].capitalize(),
-                description=json['description'],
-                url=json['target_url'],
-                **HookService.colors
-            )
-        else:
-            yield ''
+        yield ''
 
     @classmethod
     def _handle_deployment(cls, user, request, hook, json):
