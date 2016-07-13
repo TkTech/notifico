@@ -113,27 +113,27 @@ def _create_push_summary(project_name, j, config):
     # Build the push summary.
     line = []
 
-    line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+    line.append(u'{GREY}[{BLUE}{name}{GREY}]'.format(
         name=project_name,
         **HookService.colors
     ))
 
     # The user doing the push, if available.
     if j['pusher']:
-        line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
+        line.append(u'{TEAL}{pusher}{GREY} pushed'.format(
             pusher=j['pusher'],
             **HookService.colors
         ))
 
     # The number of commits included in this push.
-    line.append(u'{GREEN}{count}{RESET} {commits}'.format(
+    line.append(u'{TEAL}{count}{GREY} {commits}'.format(
         count=len(original['commits']),
         commits='commit' if len(original['commits']) == 1 else 'commits',
         **HookService.colors
     ))
 
     if show_branch and j['branch']:
-        line.append(u'to {GREEN}{branch}{RESET}'.format(
+        line.append(u'to {TEAL}{branch}{GREY}'.format(
             branch=j['branch'],
             **HookService.colors
         ))
@@ -146,7 +146,7 @@ def _create_push_summary(project_name, j, config):
     ))
 
     # The shortened URL linking to the compare page.
-    line.append(u'{PINK}{compare_link}{RESET}'.format(
+    line.append(u'{LIGHT_GREY}{compare_link}{GREY}'.format(
         compare_link=GithubHook.shorten(original['compare']),
         **HookService.colors
     ))
@@ -175,7 +175,7 @@ def _create_commit_summary(project_name, j, config):
 
         line = []
 
-        line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+        line.append(u'{GREY}[{BLUE}{name}{GREY}]'.format(
             name=project_name,
             **HookService.colors
         ))
@@ -193,12 +193,12 @@ def _create_commit_summary(project_name, j, config):
                 attribute_to = committer.get('name')
 
         if attribute_to:
-            line.append(u'{ORANGE}{attribute_to}{RESET}'.format(
+            line.append(u'{TEAL}{attribute_to}{GREY}'.format(
                 attribute_to=attribute_to,
                 **HookService.colors
             ))
 
-        line.append(u'{GREEN}{sha}{RESET}'.format(
+        line.append(u'{TEAL}{sha}{GREY}'.format(
             sha=commit['id'][:7],
             **HookService.colors
         ))
@@ -222,7 +222,7 @@ def _create_push_final_summary(project_name, j, config):
 
     line = []
 
-    line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+    line.append(u'{GREY}[{BLUE}{name}{GREY}]'.format(
         name=project_name,
         **HookService.colors
     ))
@@ -288,7 +288,7 @@ class GithubHook(HookService):
 
     @classmethod
     def _handle_ping(cls, user, request, hook, json):
-        yield u'{RESET}[{BLUE}GitHub{RESET}] {zen}'.format(
+        yield u'{GREY}[{BLUE}GitHub{GREY}] {zen}'.format(
             zen=json['zen'],
             **HookService.colors
         )
@@ -296,8 +296,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_issues(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
-            'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} {action} '
+            'issue {TEAL}#{num}{GREY}: {title} - {LIGHT_GREY}{url}{GREY}'
         )
 
         yield fmt_string.format(
@@ -313,8 +313,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_issue_comment(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} commented on '
-            'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} commented on '
+            'issue {TEAL}#{num}{GREY}: {title} - {LIGHT_GREY}{url}{GREY}'
         )
 
         yield fmt_string.format(
@@ -330,8 +330,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_commit_comment(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} commented on '
-            'commit {GREEN}{commit}{RESET} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} commented on '
+            'commit {TEAL}{commit}{GREY} - {LIGHT_GREY}{url}{GREY}'
         )
 
         yield fmt_string.format(
@@ -345,11 +345,11 @@ class GithubHook(HookService):
     @classmethod
     def _handle_create(cls, user, request, hook, json):
         fmt_string = u' '.join([
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} '
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} '
             'created {ref_type}',
             # null/None if repository was created
-            u'{GREEN}{ref}{RESET}' if json['ref'] else u'',
-            u'- {PINK}{url}{RESET}'
+            u'{TEAL}{ref}{GREY}' if json['ref'] else u'',
+            u'- {LIGHT_GREY}{url}{GREY}'
         ])
 
         # URL points to repo, no other url available
@@ -365,8 +365,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_delete(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} deleted '
-            '{ref_type} {GREEN}{ref}{RESET} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} deleted '
+            '{ref_type} {TEAL}{ref}{GREY} - {LIGHT_GREY}{url}{GREY}'
         )
 
         # URL points to repo, no other url available
@@ -382,8 +382,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_pull_request(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} pull '
-            'request {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} {action} pull '
+            'request {TEAL}#{num}{GREY}: {title} - {LIGHT_GREY}{url}{GREY}'
         )
 
         yield fmt_string.format(
@@ -399,8 +399,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_pull_request_review_comment(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} reviewed pull '
-            'request {GREEN}#{num}{RESET} commit - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} reviewed pull '
+            'request {TEAL}#{num}{GREY} commit - {LIGHT_GREY}{url}{GREY}'
         )
 
         num = json['comment']['pull_request_url'].split('/')[-1]
@@ -420,7 +420,7 @@ class GithubHook(HookService):
         if len(json['pages']) > 1:
             # Multiple pages changed
             fmt_string = (
-                u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} '
+                u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} '
                 'updated the Wiki'
             )
 
@@ -431,8 +431,8 @@ class GithubHook(HookService):
             )
 
             fmt_string_page = (
-                u'{RESET}[{BLUE}{name}{RESET}] Page {GREEN}{pname}{RESET}'
-                ' {action} - {PINK}{url}{RESET}'
+                u'{GREY}[{BLUE}{name}{GREY}] Page {TEAL}{pname}{GREY}'
+                ' {action} - {LIGHT_GREY}{url}{GREY}'
             )
 
             for page in json['pages']:
@@ -446,8 +446,8 @@ class GithubHook(HookService):
         else:
             # Only one page
             fmt_string = (
-                u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
-                'page {GREEN}{pname}{RESET} - {PINK}{url}{RESET}'
+                u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} {action} '
+                'page {TEAL}{pname}{GREY} - {LIGHT_GREY}{url}{GREY}'
             )
 
             yield fmt_string.format(
@@ -462,8 +462,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_watch(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} starred '
-            '{GREEN}{name}{RESET} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} starred '
+            '{TEAL}{name}{GREY} - {LIGHT_GREY}{url}{GREY}'
         )
 
         yield fmt_string.format(
@@ -476,8 +476,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_release(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
-            '{GREEN}{tag_name} | {title}{RESET} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} {action} '
+            '{TEAL}{tag_name} | {title}{GREY} - {LIGHT_GREY}{url}{GREY}'
         )
 
         yield fmt_string.format(
@@ -493,8 +493,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_fork(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} forked '
-            'the repository - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} forked '
+            'the repository - {LIGHT_GREY}{url}{GREY}'
         )
 
         # URL points to repo, no other url available
@@ -508,8 +508,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_member(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
-            'user {GREEN}{whom}{RESET} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} {action} '
+            'user {TEAL}{whom}{GREY} - {LIGHT_GREY}{url}{GREY}'
         )
 
         yield fmt_string.format(
@@ -524,7 +524,7 @@ class GithubHook(HookService):
     @classmethod
     def _handle_public(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} made the '
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} made the '
             'repository public!'
         )
 
@@ -537,8 +537,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_team_add(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} added the'
-            ' team {GREEN}{tname}{RESET} to the repository!'
+            u'{GREY}[{BLUE}{name}{GREY}] {TEAL}{who}{GREY} added the'
+            ' team {TEAL}{tname}{GREY} to the repository!'
         )
 
         yield fmt_string.format(
@@ -551,8 +551,8 @@ class GithubHook(HookService):
     @classmethod
     def _handle_status(cls, user, request, hook, json):
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {status_color}{status}{RESET}. '
-            '{description} - {PINK}{url}{RESET}'
+            u'{GREY}[{BLUE}{name}{GREY}] {status_color}{status}{GREY}. '
+            '{description} - {LIGHT_GREY}{url}{GREY}'
         )
 
         status_color = HookService.colors['GREEN']
@@ -667,14 +667,14 @@ class GithubHook(HookService):
                 project_Name=project_name
             )
 
-        line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+        line.append(u'{GREY}[{BLUE}{name}{GREY}]'.format(
             name=project_name,
             **HookService.colors
         ))
 
         # The user doing the push, if available.
         if j['pusher']:
-            line.append(u'{ORANGE}{pusher}{RESET}'.format(
+            line.append(u'{TEAL}{pusher}{GREY}'.format(
                 pusher=j['pusher'],
                 **HookService.colors
             ))
@@ -688,13 +688,13 @@ class GithubHook(HookService):
                 line.append(u'tagged' if j['pusher'] else u'Tagged')
 
                 # The sha1 hash of the head (tagged) commit.
-                line.append(u'{GREEN}{sha}{RESET} as'.format(
+                line.append(u'{TEAL}{sha}{GREY} as'.format(
                     sha=original['head_commit']['id'][:7],
                     **HookService.colors
                 ))
 
             # The tag itself.
-            line.append(u'{GREEN}{tag}{RESET}'.format(
+            line.append(u'{TEAL}{tag}{GREY}'.format(
                 tag=j['tag'],
                 **HookService.colors
             ))
@@ -710,14 +710,14 @@ class GithubHook(HookService):
                 )
 
             # The branch name
-            line.append(u'{GREEN}{branch}{RESET}'.format(
+            line.append(u'{TEAL}{branch}{GREY}'.format(
                 branch=j['branch'],
                 **HookService.colors
             ))
 
         if original['head_commit']:
             # The shortened URL linking to the head commit.
-            line.append(u'{PINK}{link}{RESET}'.format(
+            line.append(u'{LIGHT_GREY}{link}{GREY}'.format(
                 link=GithubHook.shorten(original['head_commit']['url']),
                 **HookService.colors
             ))

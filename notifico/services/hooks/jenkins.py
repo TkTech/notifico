@@ -84,7 +84,7 @@ class JenkinsHook(HookService):
         """
         Prefixes lines with [JobName] and adds colours
         """
-        prefix = u'{RESET}[{BLUE}{name}{RESET}] '.format(
+        prefix = u'{GREY}[{BLUE}{name}{GREY}] '.format(
             name=payload['name'],
             **HookService.colors
         )
@@ -114,7 +114,7 @@ class JenkinsHook(HookService):
         if status:
             # make sure this string starts with a space or
             # the formatting won't look good (see fmt_string)
-            status = ': {status_colour}{status}{RESET}'.format(
+            status = ': {status_colour}{status}{GREY}'.format(
                 status_colour=status_colour,
                 status=status,
                 **HookService.colors
@@ -124,14 +124,14 @@ class JenkinsHook(HookService):
         scm = payload['build'].get('scm', {})
         if scm.get('commit'):
             # space is important again
-            commit = '({GREEN}{commit}{RESET}) '.format(
+            commit = '({TEAL}{commit}{GREY}) '.format(
                 commit=scm.get('commit')[:7],
                 **HookService.colors
             )
 
         fmt_string = (
-            '{ORANGE}jenkins{RESET} build {status_colour}#{number}{RESET} '
-            '{commit}{phase}{status} {PINK}{url}{RESET}'
+            '{TEAL}jenkins{GREY} build {status_colour}#{number}{GREY} '
+            '{commit}{phase}{status} {LIGHT_GREY}{url}{GREY}'
         )
 
         line = fmt_string.format(

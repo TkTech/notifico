@@ -80,26 +80,26 @@ def _make_summary_line(hook, j, config):
     line = []
 
     # Project name
-    line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+    line.append(u'{GREY}[{BLUE}{name}{GREY}]'.format(
         name=original['repository']['name'],
         **HookService.colors
     ))
 
     if j['pusher']:
-        line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
+        line.append(u'{TEAL}{pusher}{GREY} pushed'.format(
             pusher=j['pusher'],
             **HookService.colors
         ))
 
     # Commit count
-    line.append(u'{GREEN}{count}{RESET} {commits}'.format(
+    line.append(u'{TEAL}{count}{GREY} {commits}'.format(
         count=len(original['commits']),
         commits='commit' if len(original['commits']) == 1 else 'commits',
         **HookService.colors
     ))
 
     if show_branch and j['branch']:
-        line.append(u'to {GREEN}{branch}{RESET}'.format(
+        line.append(u'to {TEAL}{branch}{GREY}'.format(
             branch=j['branch'],
             **HookService.colors
         ))
@@ -120,7 +120,7 @@ def _make_summary_line(hook, j, config):
         original['repository']['absolute_url'],
         original['commits'][-1]['node']
     )
-    line.append(u'{PINK}{0}{RESET}'.format(
+    line.append(u'{LIGHT_GREY}{0}{GREY}'.format(
         BitbucketHook.shorten(link),
         **HookService.colors
     ))
@@ -138,17 +138,17 @@ def _make_commit_line(hook, j, commit):
     config = hook.config or {}
     show_raw_author = config.get('show_raw_author', False)
 
-    line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
+    line.append(u'{GREY}[{BLUE}{name}{GREY}]'.format(
         name=original['repository']['name'],
         **HookService.colors
     ))
 
-    line.append(u'{ORANGE}{0}{RESET}'.format(
+    line.append(u'{TEAL}{0}{GREY}'.format(
         commit['raw_author'] if show_raw_author else commit['author'],
         **HookService.colors
     ))
 
-    line.append(u'{GREEN}{0}{RESET}'.format(
+    line.append(u'{TEAL}{0}{GREY}'.format(
         commit['node'][:7],
         **HookService.colors
     ))
