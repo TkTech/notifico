@@ -6,6 +6,8 @@ import json
 import requests
 
 from flask.ext import wtf
+from functools import wraps
+from wtforms.fields import SelectMultipleField
 
 from notifico.services.hooks import HookService
 
@@ -54,15 +56,83 @@ def simplify_payload(payload):
 
     return result
 
+def is_event_allowed(config, category, event):
+    if not config['events']:
+        # not whitelisting events, show everything
+        return True
+
+    # build a name like pr_opened or issue_assigned
+    event_name = '{0}_{1}'.format(category, event) if event else category
+
+    return event_name in config['events']
+
+def action_filter(category, action_key='action'):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(cls, user, request, hook, json):
+            event = json[action_key] if action_key else None
+            if is_event_allowed(hook.config, category, event):
+                return f(cls, user, request, hook, json)
+
+        return wrapper
+    return decorator
+
+class EventSelectField(SelectMultipleField):
+    def __call__(self, *args, **kwargs):
+        kwargs['style'] = 'height: 25em; width: auto;'
+        return SelectMultipleField.__call__(self, *args, **kwargs)
 
 class GithubConfigForm(wtf.Form):
     branches = wtf.TextField('Branches', validators=[
         wtf.Optional(),
         wtf.Length(max=1024)
     ], description=(
-        'A comma-seperated list of branches to forward, or blank for all.'
+        'A comma-separated list of branches to forward, or blank for all.'
         ' Ex: "master, dev"'
     ))
+    events = EventSelectField('Events', choices=[
+        ('commit_comment_created',     'Commit comment'),
+        ('status_error',               'Commit status: error'),
+        ('status_failure',             'Commit status: failure'),
+        ('status_pending',             'Commit status: pending'),
+        ('status_success',             'Commit status: success'),
+        ('create_branch',              'Create branch'),
+        ('create_tag',                 'Create tag'),
+        ('delete_branch',              'Delete branch'),
+        ('delete_tag',                 'Delete tag'),
+        ('issue_comment_created',      'Issue comment'),
+        ('issue_comment_deleted',      'Issue comment: deleted'),
+        ('issue_comment_edited',       'Issue comment: edited'),
+        ('issue_assigned',             'Issue: assigned'),
+        ('issue_closed',               'Issue: closed'),
+        ('issue_edited',               'Issue: edited'),
+        ('issue_labeled',              'Issue: labeled'),
+        ('issue_opened',               'Issue: opened'),
+        ('issue_reopened',             'Issue: reopened'),
+        ('issue_unassigned',           'Issue: unassigned'),
+        ('issue_unlabeled',            'Issue: unlabeled'),
+        ('pr_review_created',          'Pull request review comment'),
+        ('pr_review_deleted',          'Pull request review comment: deleted'),
+        ('pr_review_edited',           'Pull request review comment: edited'),
+        ('pr_assigned',                'Pull request: assigned'),
+        ('pr_closed',                  'Pull request: closed'),
+        ('pr_edited',                  'Pull request: edited'),
+        ('pr_labeled',                 'Pull request: labeled'),
+        ('pr_opened',                  'Pull request: opened'),
+        ('pr_reopened',                'Pull request: reopened'),
+        ('pr_synchronize',             'Pull request: synchronize'),
+        ('pr_unassigned',              'Pull request: unassigned'),
+        ('pr_unlabeled',               'Pull request: unlabeled'),
+        ('push',                       'Push'),
+        ('release_published',          'Release published'),
+        ('member_added',               'Repo: added collaborator'),
+        ('team_add',                   'Repo: added to a team'),
+        ('fork',                       'Repo: forked'),
+        ('public',                     'Repo: made public'),
+        ('watch_started',              'Repo: starred'),
+        ('gollum_created',             'Wiki: created page'),
+        ('gollum_edited',              'Wiki: edited page'),
+    ])
     use_colors = wtf.BooleanField('Use Colors', validators=[
         wtf.Optional()
     ], default=True, description=(
@@ -294,6 +364,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('issue')
     def _handle_issues(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
@@ -311,6 +382,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('issue_comment')
     def _handle_issue_comment(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} commented on '
@@ -328,6 +400,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('commit_comment')
     def _handle_commit_comment(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} commented on '
@@ -343,6 +416,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('create', 'ref_type')
     def _handle_create(cls, user, request, hook, json):
         fmt_string = u' '.join([
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} '
@@ -363,6 +437,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('delete', 'ref_type')
     def _handle_delete(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} deleted '
@@ -380,6 +455,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('pr')
     def _handle_pull_request(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} pull '
@@ -397,6 +473,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('pr_review')
     def _handle_pull_request_review_comment(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} reviewed pull '
@@ -414,6 +491,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('gollum')
     def _handle_gollum(cls, user, request, hook, json):
         name = json['repository']['name']
 
@@ -460,6 +538,7 @@ class GithubHook(HookService):
             )
 
     @classmethod
+    @action_filter('watch')
     def _handle_watch(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} starred '
@@ -474,6 +553,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('release')
     def _handle_release(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
@@ -491,6 +571,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('fork', None)
     def _handle_fork(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} forked '
@@ -506,6 +587,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('member')
     def _handle_member(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
@@ -522,6 +604,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('public', None)
     def _handle_public(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} made the '
@@ -535,6 +618,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('team_add', None)
     def _handle_team_add(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} added the'
@@ -549,6 +633,7 @@ class GithubHook(HookService):
         )
 
     @classmethod
+    @action_filter('status', 'state')
     def _handle_status(cls, user, request, hook, json):
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {status_color}{status}{RESET}. '
@@ -625,6 +710,9 @@ class GithubHook(HookService):
                 project_Name=project_name
             )
 
+        if not is_event_allowed(config, 'push', None):
+            return
+
         # A short summarization of the commits in the push.
         yield cls.message(
             _create_push_summary(project_name, j, config),
@@ -681,9 +769,13 @@ class GithubHook(HookService):
 
         if j['tag']:
             if not original.get('head_commit'):
+                if not is_event_allowed(config, 'delete', 'tag'):
+                    return ''
                 line.append(u'deleted' if j['pusher'] else u'Deleted')
                 line.append(u'tag')
             else:
+                if not is_event_allowed(config, 'create', 'tag'):
+                    return ''
                 # Verb with proper capitalization
                 line.append(u'tagged' if j['pusher'] else u'Tagged')
 
@@ -701,10 +793,14 @@ class GithubHook(HookService):
         elif j['branch']:
             # Verb with proper capitalization
             if original['deleted']:
+                if not is_event_allowed(config, 'delete', 'branch'):
+                    return ''
                 line.append(
                     u'deleted branch' if j['pusher'] else u'Deleted branch'
                 )
             else:
+                if not is_event_allowed(config, 'create', 'branch'):
+                    return ''
                 line.append(
                     u'created branch' if j['pusher'] else u'Created branch'
                 )
