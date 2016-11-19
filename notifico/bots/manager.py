@@ -91,8 +91,8 @@ class BotManager(object):
         bot = self._bot_class(
             Identity(
                 nickname,
-                user=u"notifico",
-                real=u"Notifico! - https://n.tkte.ch/",
+                user=u"inexors_noti",
+                real=u"Inexors notifico bot http://inexor.org",
                 password=network.password
             ),
             network.host,
@@ -137,9 +137,12 @@ class BotManager(object):
         :param suffix_length: The maximum length for the randomly generated
                               nickname suffix.
         """
+        primary_nick = 'CandyMan'
+        if primary_nick not in self._nick_stack:
+            return primary_nick
         # Keep trying until we get a nickname that's not already in use.
         while True:
-            new_nick = 'Not-{random_suffix:x}'.format(
+            new_nick = 'CandyMan_{random_suffix:x}'.format(
                 # By far the fastest pure-python method for a short hex
                 # identifier.
                 random_suffix=random.randrange(

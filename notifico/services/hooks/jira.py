@@ -103,7 +103,7 @@ class JIRAHook(HookService):
         # Build our message output.
         # What project was the change made on?
         if simplified['project_key']:
-            line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
+            line.append('{GREY}[{BLUE}{name}{GREY}]'.format(
                 name=simplified['project_key'],
                 **HookService.colors
             ))
@@ -115,14 +115,14 @@ class JIRAHook(HookService):
             attribute_to = simplified['who_name']
 
         if attribute_to:
-            line.append('{LIGHT_CYAN}{attribute_to}{RESET} created'.format(
+            line.append('{LIGHT_CYAN}{attribute_to}{GREY} created'.format(
                 attribute_to=attribute_to,
                 **HookService.colors
             ))
 
         # What was changed?
         if simplified['issue_key']:
-            line.append('{PINK}{key}{RESET}'.format(
+            line.append('{LIGHT_GREY}{key}{GREY}'.format(
                 key=simplified['issue_key'],
                 **HookService.colors
             ))
@@ -135,7 +135,7 @@ class JIRAHook(HookService):
         if simplified['link']:
             line = []
             if simplified['project_key']:
-                line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
+                line.append('{GREY}[{BLUE}{name}{GREY}]'.format(
                     name=simplified['project_key'],
                     **HookService.colors
                 ))
@@ -152,7 +152,7 @@ class JIRAHook(HookService):
         # Build our message output.
         # What project was the change made on?
         if simplified['project_key']:
-            line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
+            line.append('{GREY}[{BLUE}{name}{GREY}]'.format(
                 name=simplified['project_key'],
                 **HookService.colors
             ))
@@ -164,14 +164,14 @@ class JIRAHook(HookService):
             attribute_to = simplified['who_name']
 
         if attribute_to:
-            line.append('{LIGHT_CYAN}{attribute_to}{RESET} updated'.format(
+            line.append('{LIGHT_CYAN}{attribute_to}{GREY} updated'.format(
                 attribute_to=attribute_to,
                 **HookService.colors
             ))
 
         # What was changed?
         if simplified['issue_key']:
-            line.append('{PINK}{key}{RESET}'.format(
+            line.append('{LIGHT_GREY}{key}{GREY}'.format(
                 key=simplified['issue_key'],
                 **HookService.colors
             ))
@@ -187,7 +187,7 @@ class JIRAHook(HookService):
         if simplified['comment']:
             line = []
             if simplified['project_key']:
-                line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
+                line.append('{GREY}[{BLUE}{name}{GREY}]'.format(
                     name=simplified['project_key'],
                     **HookService.colors
                 ))
@@ -198,7 +198,7 @@ class JIRAHook(HookService):
         if simplified['link']:
             line = []
             if simplified['project_key']:
-                line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
+                line.append('{GREY}[{BLUE}{name}{GREY}]'.format(
                     name=simplified['project_key'],
                     **HookService.colors
                 ))

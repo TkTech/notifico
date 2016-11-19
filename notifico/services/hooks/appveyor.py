@@ -50,7 +50,7 @@ class AppVeyorHook(HookService):
         Prefixes lines with [RepoName] and adds colours
         """
 
-        prefix = u'{RESET}[{BLUE}{name}{RESET}] '.format(
+        prefix = u'{GREY}[{BLUE}{name}{GREY}] '.format(
             name=event_data['projectName'],
             **HookService.colors
         )
@@ -74,7 +74,7 @@ class AppVeyorHook(HookService):
         ))
 
         # Status and correct colours
-        lines.append(u'{status}{message}{RESET}.'.format(
+        lines.append(u'{status}{message}{GREY}.'.format(
             status=status_colour,
             message=payload['status'],
             **HookService.colors

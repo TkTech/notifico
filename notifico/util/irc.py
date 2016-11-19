@@ -24,7 +24,9 @@ _colors = dict(
     TEAL='\x03' + '10',
     LIGHT_CYAN='\x03' + '11',
     LIGHT_BLUE='\x03' + '12',
-    PINK='\x03' + '13'
+    PINK='\x03' + '13',
+    GREY='\x03' + '14',
+    LIGHT_GREY='\x03' + '15'
 )
 
 
