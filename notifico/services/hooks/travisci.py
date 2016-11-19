@@ -87,7 +87,7 @@ class TravisHook(HookService):
         Prefixes lines with [RepoName] and adds colours
         """
 
-        prefix = u'{RESET}[{BLUE}{name}{RESET}] '.format(
+        prefix = u'{GREY}[{BLUE}{name}{GREY}] '.format(
             name=payload['repository']['name'],
             **HookService.colors
         )
@@ -110,7 +110,7 @@ class TravisHook(HookService):
         ))
 
         # Status and correct colours
-        lines.append(u'{status}{message}{RESET}.'.format(
+        lines.append(u'{status}{message}{GREY}.'.format(
             status=status_colour,
             message=payload['result_message'].lower(),
             **HookService.colors
@@ -125,7 +125,7 @@ class TravisHook(HookService):
         ))
 
         # Short URL to changes on GH
-        lines.append(u'{PINK}{url}{RESET}'.format(
+        lines.append(u'{LIGHT_GREY}{url}{GREY}'.format(
             url=GithubHook.shorten(payload['compare_url']),
             **HookService.colors
         ))

@@ -56,19 +56,19 @@ class CIAHook(HookService):
 
         line = []
 
-        line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
+        line.append('{GREY}[{BLUE}{name}{GREY}]'.format(
             name=project,
             **HookService.colors
         ))
 
         if author:
-            line.append('{GREEN}{author}{RESET}'.format(
+            line.append('{TEAL}{author}{GREY}'.format(
                 author=author,
                 **HookService.colors
             ))
 
         if branch:
-            line.append('{YELLOW}{branch}{RESET}'.format(
+            line.append('{YELLOW}{branch}{GREY}'.format(
                 branch=branch,
                 **HookService.colors
             ))
