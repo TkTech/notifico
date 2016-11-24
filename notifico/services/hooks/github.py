@@ -384,15 +384,20 @@ class GithubHook(HookService):
     @classmethod
     @action_filter('issue_comment')
     def _handle_issue_comment(cls, user, request, hook, json):
+        action_dict = {
+            'edited': 'edited a comment',
+            'deleted': 'deleted a comment'
+        }
+        action = action_dict.get(json['action'], 'commented')
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} commented on '
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} on '
             'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
         )
 
         yield fmt_string.format(
             name=json['repository']['name'],
             who=json['sender']['login'],
-            action=json['action'],
+            action=action,
             num=json['issue']['number'],
             title=json['issue']['title'],
             url=GithubHook.shorten(json['comment']['html_url']),
@@ -402,14 +407,20 @@ class GithubHook(HookService):
     @classmethod
     @action_filter('commit_comment')
     def _handle_commit_comment(cls, user, request, hook, json):
+        action_dict = {
+            'edited': 'edited a comment',
+            'deleted': 'deleted a comment'
+        }
+        action = action_dict.get(json['action'], 'commented')
         fmt_string = (
-            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} commented on '
+            u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} on '
             'commit {GREEN}{commit}{RESET} - {PINK}{url}{RESET}'
         )
 
         yield fmt_string.format(
             name=json['repository']['name'],
             who=json['comment']['user']['login'],
+            action=action,
             commit=json['comment']['commit_id'],
             url=GithubHook.shorten(json['comment']['html_url']),
             **HookService.colors
