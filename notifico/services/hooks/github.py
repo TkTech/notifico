@@ -848,7 +848,7 @@ class GithubHook(HookService):
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             # Ignore these errors since we can't do anything about them.
             return url
-        except:
+        except Exception:
             # Send the others to Sentry.
             from notifico import sentry
             if sentry.client:
