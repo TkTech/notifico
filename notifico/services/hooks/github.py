@@ -845,7 +845,7 @@ class GithubHook(HookService):
             r = requests.post('https://git.io', data={
                 'url': url
             }, timeout=4.0)
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.SSLError, requests.exceptions.Timeout):
             return url
 
         # Something went wrong, usually means we're being throttled.
