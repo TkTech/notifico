@@ -845,7 +845,14 @@ class GithubHook(HookService):
             r = requests.post('https://git.io', data={
                 'url': url
             }, timeout=4.0)
-        except (requests.exceptions.SSLError, requests.exceptions.Timeout):
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            # Ignore these errors since we can't do anything about them.
+            return url
+        except Exception:
+            # Send the others to Sentry.
+            from notifico import sentry
+            if sentry.client:
+                sentry.client.captureException()
             return url
 
         # Something went wrong, usually means we're being throttled.
