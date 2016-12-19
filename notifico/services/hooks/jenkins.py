@@ -2,6 +2,7 @@
 __all__ = ('JenkinsHook',)
 
 import json
+import urllib
 
 from flask.ext import wtf
 
@@ -85,7 +86,9 @@ class JenkinsHook(HookService):
         Prefixes lines with [JobName] and adds colours
         """
         prefix = u'{RESET}[{BLUE}{name}{RESET}] '.format(
-            name=payload['name'],
+            # Project names may be encoded depending on the version of
+            # jekins being used.
+            name=urllib.unquote(payload['name']),
             **HookService.colors
         )
         return prefix + line
