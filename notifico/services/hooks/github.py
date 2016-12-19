@@ -57,7 +57,7 @@ def simplify_payload(payload):
     return result
 
 def is_event_allowed(config, category, event):
-    if not config.get('events'):
+    if not config or not config.get('events'):
         # not whitelisting events, show everything
         return True
 
