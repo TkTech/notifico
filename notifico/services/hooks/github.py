@@ -391,13 +391,14 @@ class GithubHook(HookService):
         action = action_dict.get(json['action'], 'commented')
         fmt_string = (
             u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} on '
-            'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
+            '{issue_type} {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
         )
 
         yield fmt_string.format(
             name=json['repository']['name'],
             who=json['sender']['login'],
             action=action,
+            issue_type='pull request' if 'pull_request' in json['issue'] else 'issue',
             num=json['issue']['number'],
             title=json['issue']['title'],
             url=GithubHook.shorten(json['comment']['html_url']),
