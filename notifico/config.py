@@ -44,6 +44,14 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 
 # ---
+# IRC configuration
+# ---
+# If the nickname is taken a random string will get appended
+IRC_NICKNAME = 'Not'
+IRC_USERNAME = u'notifico'
+IRC_REALNAME = u"Notifico! - https://github.com/notifico"
+
+# ---
 # Service integration configuration.
 # ---
 # Your Github OAuth CLIENT_ID and CLIENT_SECRET tokens, as given
