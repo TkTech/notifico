@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 __all__ = ('PlainTextHook',)
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico.services.hooks import HookService
 

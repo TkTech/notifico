@@ -4,7 +4,7 @@ __all__ = ('GitlabHook',)
 import re
 import json
 
-from flask.ext import wtf
+import flask_wtf as wtf
 from functools import wraps
 from wtforms.fields import SelectMultipleField
 

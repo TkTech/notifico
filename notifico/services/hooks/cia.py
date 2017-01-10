@@ -3,8 +3,10 @@ __all__ = ('CIAHook',)
 import xmltodict
 
 from flask import url_for, request, abort
-from flask.ext import wtf
-from flask.ext.xmlrpc import XMLRPCHandler
+import flask_wtf as wtf
+# Continue using old flask ext naming convention for XML-RPC 
+# since XML-RPC doesn't support new one
+from flaskext.xmlrpc import XMLRPCHandler
 
 from notifico import db
 from notifico.services.hooks import HookService

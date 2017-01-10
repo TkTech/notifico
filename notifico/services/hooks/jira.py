@@ -2,7 +2,7 @@
 __all__ = ('JIRAHook',)
 from urlparse import urlsplit
 
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico.services.hooks import HookService
 

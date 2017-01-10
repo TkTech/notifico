@@ -4,7 +4,7 @@ __all__ = ('AppVeyorHook',)
 import json
 from hashlib import sha256
 
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico.services.hooks import HookService
 

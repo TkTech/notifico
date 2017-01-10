@@ -25,7 +25,7 @@ if __name__ == '__main__':
         include_package_data=True,
         zip_safe=False,
         install_requires=[
-            'Flask>=0.10.1',
+            'Flask>=0.12.0',
             'Flask-WTF==0.8.4',
             'Flask-Gravatar',
             'Flask-SQLAlchemy',

@@ -4,7 +4,7 @@ __all__ = ('JenkinsHook',)
 import json
 import urllib
 
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico.services.hooks import HookService
 

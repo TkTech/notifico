@@ -9,9 +9,9 @@ from flask import (
     redirect,
     url_for
 )
-from flask.ext.cache import Cache
-from flask.ext.mail import Mail
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_cache import Cache
+from flask_mail import Mail
+from flask_sqlalchemy import SQLAlchemy
 from raven.contrib.flask import Sentry
 
 from notifico.util import pretty

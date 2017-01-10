@@ -3,7 +3,7 @@ __all__ = ('BitbucketHook',)
 
 import json
 
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico.services.hooks import HookService
 
