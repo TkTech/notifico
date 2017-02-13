@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import g
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico.models import User
 from notifico.services import reset

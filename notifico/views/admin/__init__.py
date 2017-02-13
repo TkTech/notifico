@@ -8,7 +8,7 @@ from flask import (
     render_template,
     abort
 )
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico import db, user_required, group_required
 from notifico.models import Group, Project, Channel, Hook, User

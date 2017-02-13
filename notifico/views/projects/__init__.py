@@ -15,7 +15,7 @@ from flask import (
     abort,
     request
 )
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico import db, user_required
 from notifico.models import User, Project, Hook, Channel

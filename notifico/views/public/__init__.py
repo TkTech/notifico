@@ -5,7 +5,7 @@ from flask import (
     g,
     request
 )
-from flask.ext.sqlalchemy import Pagination
+from flask_sqlalchemy import Pagination
 from sqlalchemy import func
 
 from notifico import db

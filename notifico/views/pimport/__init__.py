@@ -12,7 +12,7 @@ from flask import (
     request,
     current_app
 )
-from flask.ext import wtf
+import flask_wtf as wtf
 from github import Github, GithubException
 
 from notifico import db, user_required

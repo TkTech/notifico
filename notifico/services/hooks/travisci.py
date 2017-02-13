@@ -4,7 +4,7 @@ __all__ = ('TravisHook',)
 import json
 from hashlib import sha256
 
-from flask.ext import wtf
+import flask_wtf as wtf
 
 from notifico.services.hooks import HookService
 from notifico.services.hooks.github import GithubHook
