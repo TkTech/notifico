@@ -371,8 +371,12 @@ class GithubHook(HookService):
             'issue {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             action=json['action'],
             num=json['issue']['number'],
@@ -394,8 +398,12 @@ class GithubHook(HookService):
             '{issue_type} {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             action=action,
             issue_type='pull request' if 'pull_request' in json['issue'] else 'issue',
@@ -418,8 +426,12 @@ class GithubHook(HookService):
             'commit {GREEN}{commit}{RESET} - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['comment']['user']['login'],
             action=action,
             commit=json['comment']['commit_id'],
@@ -438,9 +450,13 @@ class GithubHook(HookService):
             u'- {PINK}{url}{RESET}'
         ])
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         # URL points to repo, no other url available
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             ref_type=json['ref_type'],
             ref=json['ref'],
@@ -456,9 +472,13 @@ class GithubHook(HookService):
             '{ref_type} {GREEN}{ref}{RESET} - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         # URL points to repo, no other url available
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             ref_type=json['ref_type'],
             ref=json['ref'],
@@ -474,8 +494,12 @@ class GithubHook(HookService):
             'request {GREEN}#{num}{RESET}: {title} - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             action=json['action'],
             num=json['number'],
@@ -494,8 +518,12 @@ class GithubHook(HookService):
 
         num = json['comment']['pull_request_url'].split('/')[-1]
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['comment']['user']['login'],
             num=num,
             url=GithubHook.shorten(json['comment']['html_url']),
@@ -557,8 +585,12 @@ class GithubHook(HookService):
             '{GREEN}{name}{RESET} - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             url=GithubHook.shorten(json['sender']['html_url']),
             **HookService.colors
@@ -572,8 +604,12 @@ class GithubHook(HookService):
             '{GREEN}{tag_name} | {title}{RESET} - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             action=json['action'],
             tag_name=json['release']['tag_name'],
@@ -590,9 +626,13 @@ class GithubHook(HookService):
             'the repository - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         # URL points to repo, no other url available
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['forkee']['owner']['login'],
             url=GithubHook.shorten(json['forkee']['owner']['html_url']),
             **HookService.colors
@@ -606,8 +646,12 @@ class GithubHook(HookService):
             'user {GREEN}{whom}{RESET} - {PINK}{url}{RESET}'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             action=json['action'],
             whom=json['member']['login'],
@@ -623,8 +667,12 @@ class GithubHook(HookService):
             'repository public!'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             **HookService.colors
         )
@@ -637,8 +685,12 @@ class GithubHook(HookService):
             ' team {GREEN}{tname}{RESET} to the repository!'
         )
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             who=json['sender']['login'],
             tname=json['team']['name'],
             **HookService.colors
@@ -656,8 +708,12 @@ class GithubHook(HookService):
         if not json['state'].lower() == 'success':
             status_color = HookService.colors['RED']
 
+        project_name = json['repository']['name']
+        if hook.config.get("full_project_name"):
+            project_name = json['repository']['full_name']
+
         yield fmt_string.format(
-            name=json['repository']['name'],
+            name=project_name,
             status_color=status_color,
             status=json['state'].capitalize(),
             description=json['description'],
