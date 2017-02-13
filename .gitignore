@@ -57,6 +57,5 @@ nosetests.xml
 .idea
 
 # Project-specific
-notifico-env/
 testing.db
 local_config.py
