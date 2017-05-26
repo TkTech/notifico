@@ -70,7 +70,15 @@ def action_filter(category, action_key='action'):
     def decorator(f):
         @wraps(f)
         def wrapper(cls, user, request, hook, json):
-            event = json[action_key] if action_key else None
+            # Wiki events put their action key into [pages][action]
+            # Also the action name doesn't have the gollumn_ prefix
+            if category == "gollum":
+                for page in json['pages']:
+                    event = page[action_key]
+                event = "gollum_" + event
+            else:
+                event = json[action_key] if action_key else None
+
             if is_event_allowed(hook.config, category, event):
                 return f(cls, user, request, hook, json)
 
@@ -157,7 +165,7 @@ class GithubConfigForm(wtf.Form):
     full_project_name = wtf.BooleanField('Full Project Name', validators=[
         wtf.Optional()
     ], default=False, description=(
-        'If checked, show the full github project name (ex: tktech/notifico)'
+        'If checked, show the full GitHub project name (ex: notifico/notifico)'
         ' instead of the Notifico project name (ex: notifico)'
     ))
     title_only = wtf.BooleanField('Title Only', validators=[
@@ -511,7 +519,7 @@ class GithubHook(HookService):
             # Multiple pages changed
             fmt_string = (
                 u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} '
-                'updated the Wiki'
+                'updated the wiki'
             )
 
             yield fmt_string.format(
@@ -521,7 +529,7 @@ class GithubHook(HookService):
             )
 
             fmt_string_page = (
-                u'{RESET}[{BLUE}{name}{RESET}] Page {GREEN}{pname}{RESET}'
+                u'{RESET}[{BLUE}{name}{RESET}] wiki page {GREEN}{pname}{RESET}'
                 ' {action} - {PINK}{url}{RESET}'
             )
 
@@ -537,7 +545,7 @@ class GithubHook(HookService):
             # Only one page
             fmt_string = (
                 u'{RESET}[{BLUE}{name}{RESET}] {ORANGE}{who}{RESET} {action} '
-                'page {GREEN}{pname}{RESET} - {PINK}{url}{RESET}'
+                'wiki page {GREEN}{pname}{RESET} - {PINK}{url}{RESET}'
             )
 
             yield fmt_string.format(
