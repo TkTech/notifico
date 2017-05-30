@@ -714,7 +714,7 @@ class GithubHook(HookService):
                     cls._create_non_commit_summary(j, config),
                     strip=strip
                 )
-            if j['branch']:
+            if j['branch'] and is_allowed(hook.config, 'branches', j['branch']):
                 yield cls.message(
                     cls._create_non_commit_summary(j, config),
                     strip=strip
