@@ -2,7 +2,7 @@
 __all__ = ('Channel',)
 import datetime
 
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 from notifico import db
 from notifico.models.bot import BotEvent
@@ -41,7 +41,7 @@ class Channel(db.Model):
             )
             .filter_by(public=True)
             .group_by(Channel.host)
-            .order_by('-count')
+            .order_by(text('-count'))
         )
         for network, channel_count in q:
             yield network, channel_count
