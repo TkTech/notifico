@@ -12,6 +12,7 @@ class BotEvent(db.Model):
     channel = db.Column(db.String(80))
     host = db.Column(db.String(255), nullable=False)
     port = db.Column(db.Integer, default=6667)
+    password = db.Column(db.String(255), nullable=True)
     ssl = db.Column(db.Boolean, default=False)
 
     message = db.Column(db.Text())
@@ -19,10 +20,11 @@ class BotEvent(db.Model):
     event = db.Column(db.String(255))
 
     @classmethod
-    def new(cls, host, port, ssl, message, status, event, channel=None):
+    def new(cls, host, port, password, ssl, message, status, event, channel=None):
         c = cls()
         c.host = host
         c.port = port
+        c.password = password
         c.ssl = ssl
         c.message = message
         c.status = status

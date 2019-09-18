@@ -45,6 +45,7 @@ class MessageService(object):
                 'channel': channel.channel,
                 'host': channel.host,
                 'port': channel.port,
+                'password': channel.password,
                 'ssl': channel.ssl
             }
         }

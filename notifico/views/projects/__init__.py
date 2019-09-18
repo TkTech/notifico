@@ -70,6 +70,9 @@ class ChannelDetailsForm(wtf.Form):
     port = wtf.IntegerField('Port', validators=[
         wtf.NumberRange(1024, 66552)
     ], default=6667)
+    password = wtf.TextField('Network Password', validators=[
+        wtf.Length(max=255)
+    ])
     ssl = wtf.BooleanField('Use SSL', default=False)
     public = wtf.BooleanField('Public', default=True, description=(
         'Allow others to see that this channel exists.'
@@ -406,12 +409,14 @@ def new_channel(u, p):
     form = ChannelDetailsForm()
     if form.validate_on_submit():
         host = form.host.data.strip().lower()
+        password = form.password.data.strip()
         channel = form.channel.data.strip().lower()
 
         # Make sure this isn't a duplicate channel before we create it.
         c = Channel.query.filter_by(
             host=host,
             channel=channel,
+            password=password,
             project_id=p.id
         ).first()
         if not c:
@@ -419,6 +424,7 @@ def new_channel(u, p):
                 channel,
                 host,
                 port=form.port.data,
+                password=password,
                 ssl=form.ssl.data,
                 public=form.public.data
             )

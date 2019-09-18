@@ -15,6 +15,7 @@ class Channel(db.Model):
     channel = db.Column(db.String(80), nullable=False)
     host = db.Column(db.String(255), nullable=False)
     port = db.Column(db.Integer, default=6667)
+    password = db.Column(db.String(255), nullable=True)
     ssl = db.Column(db.Boolean, default=False)
     public = db.Column(db.Boolean, default=False)
 
@@ -24,11 +25,12 @@ class Channel(db.Model):
     ))
 
     @classmethod
-    def new(cls, channel, host, port=6667, ssl=False, public=False):
+    def new(cls, channel, host, port=6667, password=None, ssl=False, public=False):
         c = cls()
         c.channel = channel
         c.host = host
         c.port = port
+        c.password = password
         c.ssl = ssl
         c.public = public
         return c
@@ -53,6 +55,7 @@ class Channel(db.Model):
         return BotEvent.query.filter_by(
             host=self.host,
             port=self.port,
+            password=self.password,
             ssl=self.ssl,
             channel=self.channel
         ).order_by(BotEvent.created.desc()).first()
