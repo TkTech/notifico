@@ -5,6 +5,7 @@
   <style>
   .c-channel {}
   .c-port,
+  .c-password,
   .c-ssl {
     text-align: center !important;
   }
@@ -24,6 +25,7 @@
         <tr>
           <th class="c-channel">Channel</th>
           <th class="c-port">Port</th>
+          <th class="c-password">Network Password</th>
           <th class="c-ssl" nowrap>
             <abbr title="Secure Socket Layer">SSL</abbr>
           </th>
@@ -49,6 +51,9 @@
             </small>
           </td>
           <td class="c-port">{{ channel.port }}</td>
+          <td class="c-password">
+            <i class="icon-{% if channel.password %}ok{% else %}remove{% endif %}"></i>
+          </td>
           <td class="c-ssl">
             <i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i>
           </td>
