@@ -48,5 +48,5 @@ if __name__ == '__main__':
             'celery',
             'utopia @ https://github.com/notifico/utopia/tarball/master'
         ],
-        extras_require={"test": ["pytest", "coverage"]}
+        extras_require={"tests": ["pytest", "coverage"]}
     )
