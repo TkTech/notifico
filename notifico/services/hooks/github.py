@@ -76,6 +76,13 @@ def action_filter(category, action_key='action'):
                 for page in json['pages']:
                     event = page[action_key]
                 event = "gollum_" + event
+            elif category == "check_run":
+                status = json['check_run']['status']
+                conclusion = json['check_run']['conclusion']
+                if conclusion is not None:
+                    event = 'conclusion_' + conclusion
+                else:
+                    event = 'status_' + status
             else:
                 event = json[action_key] if action_key else None
 
@@ -104,6 +111,15 @@ class GithubConfigForm(wtf.Form):
         ('status_failure',             'Commit status: failure'),
         ('status_pending',             'Commit status: pending'),
         ('status_success',             'Commit status: success'),
+        ('check_run_status_queued',        'Check Run status: queued'),
+        ('check_run_status_in_progress',   'Check Run status: in progress'),
+        ('check_run_status_completed',     'Check Run status: completed'),
+        ('check_run_conclusion_success',   'Check Run conclusion: success'),
+        ('check_run_conclusion_failure',   'Check Run conclusion: failure'),
+        ('check_run_conclusion_neutral',   'Check Run conclusion: neutral'),
+        ('check_run_conclusion_cancelled', 'Check Run conclusion: cancelled'),
+        ('check_run_conclusion_timed_out', 'Check Run conclusion: timed out'),
+        ('check_run_conclusion_action_required',   'Check Run conclusion: action required'),
         ('create_branch',              'Create branch'),
         ('create_tag',                 'Create tag'),
         ('delete_branch',              'Delete branch'),
@@ -355,6 +371,7 @@ class GithubHook(HookService):
             'public': cls._handle_public,
             'team_add': cls._handle_team_add,
             'status': cls._handle_status,
+            'check_run': cls._handle_check_run,
             'deployment': cls._handle_deployment,
             'deployment_status': cls._handle_deployment_status
         }
@@ -670,6 +687,39 @@ class GithubHook(HookService):
             status=json['state'].capitalize(),
             description=json['description'],
             url=json['target_url'],
+            **HookService.colors
+        )
+
+    @classmethod
+    @action_filter('check_run')
+    def _handle_check_run(cls, user, request, hook, json):
+        conclusion_color = HookService.colors['GREEN']
+        conclusion = json['check_run']['conclusion']
+        if conclusion is not None:
+            if not conclusion == 'success':
+                conclusion_color = HookService.colors['RED']
+            conclusion = conclusion.capitalize()
+            fmt_string = (
+                u'{RESET}[{BLUE}{name}{RESET}] Check Run for '
+                '{ORANGE}{description}{RESET} {status}: '
+                '{conclusion_color}{conclusion}{RESET}. '
+                '{PINK}{url}{RESET}'
+            )
+        else:
+            fmt_string = (
+                u'{RESET}[{BLUE}{name}{RESET}] Check Run for '
+                '{ORANGE}{description}{RESET} {status}. '
+                '{PINK}{url}{RESET}'
+            )
+
+
+        yield fmt_string.format(
+            name=json['repository']['name'],
+            status=json['check_run']['status'],
+            conclusion=conclusion,
+            conclusion_color=conclusion_color,
+            description=json['check_run']['name'],
+            url=json['check_run']['details_url'],
             **HookService.colors
         )
 
