@@ -12,6 +12,9 @@ from wtforms.fields import SelectMultipleField
 from notifico.services.hooks import HookService
 
 
+COMMIT_MESSAGE_LENGTH_LIMIT = 1000
+
+
 def simplify_payload(payload):
     """
     Massage the github webhook payload into something a little more
@@ -300,11 +303,14 @@ def _create_commit_summary(project_name, j, config):
         line.append(u'-')
 
         message = commit['message']
-        if title_only:
-            message_lines = message.split('\n')
-            line.append(message_lines[0] if message_lines else message)
-        else:
-            line.append(message)
+        message_lines = message.split('\n')
+        if title_only and len(message_lines) > 0:
+            message = message_lines[0]
+        # Cap the commit message to 1000 characters, this should be around two
+        # lines on IRC and stops really long messages from spamming channels.
+        if len(message) > COMMIT_MESSAGE_LENGTH_LIMIT:
+            message = message[:COMMIT_MESSAGE_LENGTH_LIMIT] + '...'
+        line.append(message)
 
         yield u' '.join(line)
 

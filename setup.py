@@ -48,6 +48,7 @@ if __name__ == '__main__':
             'docopt',
             'celery'
         ],
+        extras_require={"test": ["pytest", "coverage"]},
         dependency_links=[
             'https://github.com/notifico/utopia/tarball/master#egg=utopia'
         ]
