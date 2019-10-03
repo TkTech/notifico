@@ -74,6 +74,16 @@ supervisor config in `misc/deploy/supervisord.conf`.
 You can now go to `your-server:5000` with a web browser, register and set up
 webhooks if you wish, or do the next step to access through port 80.
 
+### Testing
+
+Install the test dependencies with:
+
+    pip install -e .[extra]
+
+and then run the tests with:
+
+    pytest
+
 ### Nginx proxying
 
 Use the following nginx config to have notifico in a subdomain and have it
