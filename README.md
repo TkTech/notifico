@@ -78,7 +78,7 @@ webhooks if you wish, or do the next step to access through port 80.
 
 Install the test dependencies with:
 
-    pip install -e .[extra]
+    pip install -e ".[tests]"
 
 and then run the tests with:
 

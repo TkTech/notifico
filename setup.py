@@ -34,7 +34,6 @@ if __name__ == '__main__':
             'Flask-Caching',
             'fabric',
             'sqlalchemy',
-            'utopia',
             'gevent',
             'oauth2',
             'redis',
@@ -46,10 +45,8 @@ if __name__ == '__main__':
             'raven',
             'blinker',
             'docopt',
-            'celery'
+            'celery',
+            'utopia @ https://github.com/notifico/utopia/tarball/master'
         ],
-        extras_require={"test": ["pytest", "coverage"]},
-        dependency_links=[
-            'https://github.com/notifico/utopia/tarball/master#egg=utopia'
-        ]
+        extras_require={"test": ["pytest", "coverage"]}
     )
