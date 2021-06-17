@@ -1,4 +1,3 @@
-# -*- coding: utf8 -*-
 from functools import wraps
 
 from redis import Redis
@@ -12,6 +11,7 @@ from flask import (
 from flask_caching import Cache
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.middleware.shared_data import SharedDataMiddleware
 from raven.contrib.flask import Sentry
 
 from notifico.util import pretty
@@ -62,9 +62,6 @@ def create_app():
     if app.config.get('NOTIFICO_ROUTE_STATIC'):
         # We should handle routing for static assets ourself (handy for
         # small and quick deployments).
-        import os.path
-        from werkzeug import SharedDataMiddleware
-
         app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
             '/': os.path.join(os.path.dirname(__file__), 'static')
         })
