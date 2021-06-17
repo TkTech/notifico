@@ -10,7 +10,7 @@ from wtforms import fields, validators
 from notifico.services.hooks import HookService
 
 
-class JenkinsConfigForm(wtf.Form):
+class JenkinsConfigForm(wtf.FlaskForm):
     phase = fields.SelectMultipleField(
         'Phase',
         default=['finalized'],

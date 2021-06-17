@@ -50,7 +50,7 @@ REDIS_DB = 0
 # If the nickname is taken a random string will get appended
 IRC_NICKNAME = 'Not'
 IRC_USERNAME = u'notifico'
-IRC_REALNAME = u"Notifico! - https://github.com/notifico"
+IRC_REALNAME = u"Notifico! - https://github.com/tktech"
 
 # ---
 # Service integration configuration.
@@ -99,8 +99,3 @@ NOTIFICO_PASSWORD_RESET = False
 NOTIFICO_PASSWORD_RESET_EXPIRY = 60 * 60 * 24
 # The address or (name, address) to use when sending an email.
 NOTIFICO_MAIL_SENDER = None
-
-try:
-    from local_config import *
-except ImportError:
-    pass

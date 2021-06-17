@@ -7,7 +7,7 @@ from notifico.models import User
 from notifico.services import reset
 
 
-class UserRegisterForm(wtf.Form):
+class UserRegisterForm(wtf.FlaskForm):
     username = fields.StringField('Username', validators=[
         validators.DataRequired(),
         validators.Length(min=2, max=50),
@@ -38,7 +38,7 @@ class UserRegisterForm(wtf.Form):
             )
 
 
-class UserLoginForm(wtf.Form):
+class UserLoginForm(wtf.FlaskForm):
     username = fields.StringField('Username', validators=[
         validators.DataRequired()
     ])
@@ -53,7 +53,7 @@ class UserLoginForm(wtf.Form):
             )
 
 
-class UserPasswordForm(wtf.Form):
+class UserPasswordForm(wtf.FlaskForm):
     old = fields.PasswordField('Old Password', validators=[
         validators.DataRequired()
     ])
@@ -69,7 +69,7 @@ class UserPasswordForm(wtf.Form):
             raise validators.ValidationError('Old Password is incorrect.')
 
 
-class UserDeleteForm(wtf.Form):
+class UserDeleteForm(wtf.FlaskForm):
     password = fields.PasswordField('Password', validators=[
         validators.DataRequired(),
         validators.Length(5),
@@ -82,7 +82,7 @@ class UserDeleteForm(wtf.Form):
             raise validators.ValidationError('Password is incorrect.')
 
 
-class UserForgotForm(wtf.Form):
+class UserForgotForm(wtf.FlaskForm):
     username = fields.StringField('Username', validators=[
         validators.DataRequired()
     ])
@@ -99,7 +99,7 @@ class UserForgotForm(wtf.Form):
             )
 
 
-class UserResetForm(wtf.Form):
+class UserResetForm(wtf.FlaskForm):
     password = fields.PasswordField('New Password', validators=[
         validators.DataRequired(),
         validators.Length(5),

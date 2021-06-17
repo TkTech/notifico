@@ -58,20 +58,20 @@ def create_app():
 
     app = Flask(__name__)
     app.config.from_object('notifico.config')
+    app.config.from_envvar('NOTIFICO_CONFIG', silent=True)
 
+    # We should handle routing for static assets ourself (handy for small and
+    # quick deployments).
     if app.config.get('NOTIFICO_ROUTE_STATIC'):
-        # We should handle routing for static assets ourself (handy for
-        # small and quick deployments).
         app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
             '/': os.path.join(os.path.dirname(__file__), 'static')
         })
 
-    if not app.debug:
-        # If sentry (http://getsentry.com) is configured for
-        # error collection we should use it.
-        if app.config.get('SENTRY_DSN'):
-            sentry.dsn = app.config.get('SENTRY_DSN')
-            sentry.init_app(app)
+    # If sentry (http://getsentry.com) is configured for
+    # error collection we should use it.
+    if not app.debug and app.config.get('SENTRY_DSN'):
+        sentry.dsn = app.config.get('SENTRY_DSN')
+        sentry.init_app(app)
 
     # Setup our redis connection (which is already thread safe)
     app.redis = Redis(

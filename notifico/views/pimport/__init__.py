@@ -22,7 +22,7 @@ from notifico.models import AuthToken, Project, Hook, Channel
 pimport = Blueprint('pimport', __name__, template_folder='templates')
 
 
-class GithubForm(wtf.Form):
+class GithubForm(wtf.FlaskForm):
     update_projects = fields.BooleanField(
         'Update Projects',
         default=True,

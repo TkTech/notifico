@@ -104,7 +104,7 @@ class EventSelectField(fields.SelectMultipleField):
         return super().__call__(*args, **kwargs)
 
 
-class GithubConfigForm(wtf.Form):
+class GithubConfigForm(wtf.FlaskForm):
     branches = fields.StringField('Branches', validators=[
         validators.Optional(),
         validators.Length(max=1024)

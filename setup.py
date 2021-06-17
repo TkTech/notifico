@@ -23,26 +23,27 @@ if __name__ == '__main__':
         url='http://github.com/TkTech/notifico',
         zip_safe=False,
         install_requires=[
-            'flask',
             'flask-wtf',
             'flask-gravatar',
             'flask-sqlalchemy',
             'flask-mail',
             'flask-caching',
             'sqlalchemy',
-            'gevent',
             'email_validator',
             'oauth2',
             'redis',
-            'gunicorn',
             'requests',
             'pygithub',
             'xmltodict',
             'unidecode',
             'raven',
-            'blinker',
-            'docopt',
+            # Click >=8 is broken on Celery 5.1.0. See:
+            # https://github.com/celery/celery/issues/6768
+            'click<8.0.0',
             'celery',
+            # This must be installed at the end to fix a dependency issue
+            # with pip.
+            'flask'
         ],
         extras_require={
             'tests': [

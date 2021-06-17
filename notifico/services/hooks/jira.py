@@ -47,7 +47,7 @@ def _simplify(j):
     return simplified
 
 
-class JIRAConfigForm(wtf.Form):
+class JIRAConfigForm(wtf.FlaskForm):
     use_colors = fields.BooleanField('Use Colors', validators=[
         validators.Optional()
     ], default=True, description=(

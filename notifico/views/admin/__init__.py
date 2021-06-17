@@ -15,7 +15,7 @@ from notifico.models import Project, Channel, Hook, User
 admin = Blueprint('admin', __name__, template_folder='templates')
 
 
-class UserPasswordForm(wtf.Form):
+class UserPasswordForm(wtf.FlaskForm):
     password = fields.PasswordField('Password', validators=[
         validators.DataRequired(),
         validators.Length(5),

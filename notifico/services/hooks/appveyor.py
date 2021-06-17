@@ -4,7 +4,7 @@ from wtforms import fields, validators
 from notifico.services.hooks import HookService
 
 
-class AppVeyorConfigForm(wtf.Form):
+class AppVeyorConfigForm(wtf.FlaskForm):
     use_colors = fields.BooleanField('Use Colors', validators=[
         validators.Optional()
     ], default=True, description=(

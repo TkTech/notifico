@@ -69,7 +69,7 @@ class EventSelectField(fields.SelectMultipleField):
         return super().__call__(*args, **kwargs)
 
 
-class GitlabConfigForm(wtf.Form):
+class GitlabConfigForm(wtf.FlaskForm):
     branches = fields.StringField('Branches', validators=[
         validators.Optional(),
         validators.Length(max=1024)

@@ -19,7 +19,7 @@ from notifico.services.hooks import HookService
 projects = Blueprint('projects', __name__, template_folder='templates')
 
 
-class ProjectDetailsForm(wtf.Form):
+class ProjectDetailsForm(wtf.FlaskForm):
     name = fields.StringField('Project Name', validators=[
         validators.DataRequired(),
         validators.Length(1, 50),
@@ -37,13 +37,13 @@ class ProjectDetailsForm(wtf.Form):
     ])
 
 
-class HookDetailsForm(wtf.Form):
+class HookDetailsForm(wtf.FlaskForm):
     service_id = fields.SelectField('Service', validators=[
         validators.DataRequired()
     ], coerce=int)
 
 
-class PasswordConfirmForm(wtf.Form):
+class PasswordConfirmForm(wtf.FlaskForm):
     password = fields.PasswordField('Password', validators=[
         validators.DataRequired()
     ])
@@ -53,7 +53,7 @@ class PasswordConfirmForm(wtf.Form):
             raise validators.ValidationError('Your password is incorrect.')
 
 
-class ChannelDetailsForm(wtf.Form):
+class ChannelDetailsForm(wtf.FlaskForm):
     channel = fields.StringField('Channel', validators=[
         validators.DataRequired(),
         validators.Length(min=1, max=80)

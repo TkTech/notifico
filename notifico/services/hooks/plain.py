@@ -6,7 +6,7 @@ from wtforms import fields, validators
 from notifico.services.hooks import HookService
 
 
-class PlainTextConfigForm(wtf.Form):
+class PlainTextConfigForm(wtf.FlaskForm):
     use_colours = fields.BooleanField('Use Colors', validators=[
         validators.Optional()
     ], default=False, description=(
