@@ -15,6 +15,7 @@ SECRET_KEY = 'YouReallyShouldChangeThisYouKnow'
 # ---
 db_path = os.path.abspath(os.path.join(os.getcwd(), 'testing.db'))
 SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(db_path)
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # ---
 # Flask-WTF

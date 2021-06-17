@@ -31,6 +31,7 @@ if __name__ == '__main__':
             'flask-caching',
             'sqlalchemy',
             'gevent',
+            'email_validator',
             'oauth2',
             'redis',
             'gunicorn',

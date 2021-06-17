@@ -1,19 +1,16 @@
-# -*- coding: utf8 -*-
-__all__ = ('AppVeyorHook',)
-
-import json
-from hashlib import sha256
-
 import flask_wtf as wtf
+from wtforms import fields, validators
 
 from notifico.services.hooks import HookService
 
+
 class AppVeyorConfigForm(wtf.Form):
-    use_colors = wtf.BooleanField('Use Colors', validators=[
-        wtf.Optional()
+    use_colors = fields.BooleanField('Use Colors', validators=[
+        validators.Optional()
     ], default=True, description=(
         'If checked, commit messages will include minor mIRC coloring.'
     ))
+
 
 class AppVeyorHook(HookService):
     """
@@ -31,10 +28,10 @@ class AppVeyorHook(HookService):
         payload = request.get_json()
         if not payload:
             return
-        
+
         # event_name = payload['eventName']
         event_data = payload['eventData']
-        
+
         strip = not hook.config.get('use_colors', True)
 
         summary = cls._create_summary(event_data)
@@ -61,9 +58,9 @@ class AppVeyorHook(HookService):
         """
         Create and return a one-line summary of the build
         """
-        if payload['failed'] == True:
+        if payload['failed'] is True:
             status_colour = HookService.colors['RED']
-        elif payload['passed'] == True:
+        elif payload['passed'] is True:
             status_colour = HookService.colors['GREEN']
 
         lines = []

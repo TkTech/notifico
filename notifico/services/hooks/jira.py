@@ -1,8 +1,7 @@
-# -*- coding: utf8 -*-
-__all__ = ('JIRAHook',)
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 
 import flask_wtf as wtf
+from wtforms import fields, validators
 
 from notifico.services.hooks import HookService
 
@@ -49,13 +48,13 @@ def _simplify(j):
 
 
 class JIRAConfigForm(wtf.Form):
-    use_colors = wtf.BooleanField('Use Colors', validators=[
-        wtf.Optional()
+    use_colors = fields.BooleanField('Use Colors', validators=[
+        validators.Optional()
     ], default=True, description=(
         'If checked, messages will include minor mIRC coloring.'
     ))
-    prefer_username = wtf.BooleanField('Prefer Usernames', validators=[
-        wtf.Optional()
+    prefer_username = fields.BooleanField('Prefer Usernames', validators=[
+        validators.Optional()
     ], default=True, description=(
         'If checked, prefer displaying JIRA account names instead of'
         ' full names.'

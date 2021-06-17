@@ -1,5 +1,3 @@
-# -*- coding: utf8 -*-
-__all__ = ('User', 'Group')
 import os
 import base64
 import hashlib
@@ -47,10 +45,16 @@ class User(db.Model):
         return base64.b64encode(os.urandom(8))[:8]
 
     @staticmethod
-    def _hash_password(password, salt):
+    def _hash_password(password, salt) -> str:
         """
         Returns a hashed password from `password` and `salt`.
         """
+        if isinstance(salt, str):
+            salt = salt.encode('utf-8')
+
+        if isinstance(password, str):
+            password = password.encode('utf-8')
+
         return hashlib.sha256(salt + password.strip()).hexdigest()
 
     def set_password(self, new_password):

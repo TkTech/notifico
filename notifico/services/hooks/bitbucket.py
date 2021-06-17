@@ -4,30 +4,31 @@ __all__ = ('BitbucketHook',)
 import json
 
 import flask_wtf as wtf
+from wtforms import fields, validators
 
 from notifico.services.hooks import HookService
 
 
 class BitbucketConfigForm(wtf.Form):
-    branches = wtf.TextField('Branches', validators=[
-        wtf.Optional(),
-        wtf.Length(max=1024)
+    branches = fields.StringField('Branches', validators=[
+        validators.Optional(),
+        validators.Length(max=1024)
     ], description=(
         'A comma-seperated list of branches to forward, or blank for all.'
         ' Ex: "master, dev"'
     ))
-    use_colors = wtf.BooleanField('Use Colors', validators=[
-        wtf.Optional()
+    use_colors = fields.BooleanField('Use Colors', validators=[
+        validators.Optional()
     ], default=True, description=(
         'If checked, commit messages will include minor mIRC coloring.'
     ))
-    show_branch = wtf.BooleanField('Show Branch Names', validators=[
-        wtf.Optional()
+    show_branch = fields.BooleanField('Show Branch Names', validators=[
+        validators.Optional()
     ], default=True, description=(
         'If checked, show the branch for a commit.'
     ))
-    show_raw_author = wtf.BooleanField('Show Raw Author', validators=[
-        wtf.Optional()
+    show_raw_author = fields.BooleanField('Show Raw Author', validators=[
+        validators.Optional()
     ], default=False, description=(
         'If checked, shows the raw author for a commit. For example,'
         ' <code>Tyler Kennedy &lt;tk@tkte.ch&gt;</code> instead of'

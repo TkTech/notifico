@@ -13,6 +13,7 @@ from flask import (
     current_app
 )
 import flask_wtf as wtf
+from wtforms import fields
 from github import Github, GithubException
 
 from notifico import db, user_required
@@ -22,15 +23,20 @@ pimport = Blueprint('pimport', __name__, template_folder='templates')
 
 
 class GithubForm(wtf.Form):
-    update_projects = wtf.BooleanField('Update Projects', default=True,
+    update_projects = fields.BooleanField(
+        'Update Projects',
+        default=True,
         description=(
             'If a project already exists, update it instead of skipping it.'
-    ))
-    set_hooks = wtf.BooleanField('Set Hooks', default=False, description=(
+        )
+    )
+    set_hooks = fields.BooleanField('Set Hooks', default=False, description=(
         'Sets up each project you select with Github web hooks, so that they'
         ' start recieving commits immediately.'
     ))
-    set_commits = wtf.BooleanField('Add to #commits', default=True,
+    set_commits = fields.BooleanField(
+        'Add to #commits',
+        default=True,
         description=(
             'Sets up public projects you select to broadcast to #commits'
             ' on chat.freenode.net as a default channel (you can always remove'
