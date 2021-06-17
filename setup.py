@@ -1,38 +1,34 @@
 #!/usr/bin/env python
-# -*- coding: utf8 -*-
-"""
-Notifico is my personal open source MIT replacement to the
-now-defunct http://cia.vc service with my own little spin on things.
-"""
+import os
+import os.path
+
 from setuptools import setup, find_packages
 
 
-def get_version():
-    """
-    Load and return the current Notifico version.
-    """
-    local_results = {}
-    execfile('notifico/version.py', {}, local_results)
-    return local_results['__version__']
+root = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(root, 'README.md'), 'rb') as readme:
+    long_description = readme.read().decode('utf-8')
 
 
 if __name__ == '__main__':
     setup(
         name='Notifico',
-        version=get_version(),
-        long_description=__doc__,
+        version='2.0.0',
         packages=find_packages(),
         include_package_data=True,
+        long_description=long_description,
+        long_description_content_type='text/markdown',
+        author='Tyler Kennedy',
+        author_email='tk@tkte.ch',
+        url='http://github.com/TkTech/notifico',
         zip_safe=False,
         install_requires=[
-            'Flask>=0.12.0',
-            'Flask-WTF==0.8.4',
-            'Flask-Gravatar',
-            'Flask-SQLAlchemy',
-            'Flask-XML-RPC',
-            'Flask-Mail',
-            'Flask-Caching==1.7.2',
-            'fabric',
+            'flask',
+            'flask-wtf',
+            'flask-gravatar',
+            'flask-sqlalchemy',
+            'flask-mail',
+            'flask-caching',
             'sqlalchemy',
             'gevent',
             'oauth2',
@@ -46,7 +42,11 @@ if __name__ == '__main__':
             'blinker',
             'docopt',
             'celery',
-            'utopia @ https://github.com/notifico/utopia/tarball/master'
         ],
-        extras_require={"tests": ["pytest", "coverage"]}
+        extras_require={
+            'tests': [
+                'pytest',
+                'coverage'
+            ]
+        }
     )
