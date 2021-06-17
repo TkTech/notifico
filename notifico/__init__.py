@@ -50,7 +50,7 @@ def group_required(name):
     return _wrap
 
 
-def create_instance():
+def create_app():
     """
     Construct a new Flask instance and return it.
     """

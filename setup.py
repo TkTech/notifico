@@ -48,5 +48,10 @@ if __name__ == '__main__':
                 'pytest',
                 'coverage'
             ]
+        },
+        entry_points={
+            'console_scripts': [
+                'notifico=notifico.cli:cli'
+            ]
         }
     )
