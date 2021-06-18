@@ -2,28 +2,32 @@
 {% from 'ui/page.html' import render_pagination %}
 
 {% block content_page %}
-  <h3>Networks</h3>
-  <div class="section-content">
-    <table class="table table-striped table-vertical table-bordered">
-      <thead>
-        <tr>
-          <th>Host</th>
-          <th style="text-align: center;">Channels</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for network, di_count, count in pagination.items %}
-        <tr>
-          <td style="width: 100%;">{{ network }}</td>
-          <td nowrap style="text-align: center;">
-            <a href="{{ url_for('.network', network=network) }}">
-              {{ di_count }}
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {{ render_pagination(pagination, '.networks') }}
-  </div>
+  <h3>{{ _("Networks") }}</h3>
+  <p>
+    {% trans total=pagination.total %}
+    You can see all of the IRC networks on Notifico for which at least one
+    public channel exists. There are currently {{ total }} public networks.
+    {% endtrans %}
+  </p>
+  <table class="table table-striped table-vertical table-bordered">
+    <thead>
+      <tr>
+        <th>{{ _("Host") }}</th>
+        <th class="text-center">{{ _("Channels") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for network, di_count, count in pagination.items %}
+      <tr>
+        <td class="w-100">{{ network }}</td>
+        <td nowrap class="text-center">
+          <a href="{{ url_for('.network', network=network) }}">
+            {{ di_count }}
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {{ render_pagination(pagination, '.networks') }}
 {% endblock %}
