@@ -3,6 +3,7 @@ import base64
 import hashlib
 import datetime
 
+from flask import url_for
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from notifico import db
@@ -122,45 +123,9 @@ class User(db.Model):
 
         self.groups.append(Group.get_or_create(name=name))
 
-    def export(self):
-        """
-        Exports the user, his projects, and his hooks for use in a
-        private-ly hosted Notifico instance.
-        """
-        j = {
-            'user': {
-                'username': self.username,
-                'email': self.email,
-                'joined': self.joined.isoformat(),
-                'company': self.company,
-                'website': self.website,
-                'location': self.location
-            },
-            'projects': [{
-                'name': p.name,
-                'created': p.created.isoformat(),
-                'public': p.public,
-                'website': p.website,
-                'message_count': p.message_count,
-                'channels': [{
-                    'created': c.created.isoformat(),
-                    'channel': c.channel,
-                    'host': c.host,
-                    'port': c.port,
-                    'ssl': c.ssl,
-                    'public': c.public
-                } for c in p.channels],
-                'hooks': [{
-                    'created': h.created.isoformat(),
-                    'key': h.key,
-                    'service_id': h.service_id,
-                    'message_count': h.message_count,
-                    'config': h.config
-                } for h in p.hooks]
-            } for p in self.projects]
-        }
-
-        return j
+    @property
+    def dashboard_url(self):
+        return url_for('projects.dashboard', u=self.username)
 
 
 class Group(db.Model):

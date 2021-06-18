@@ -28,6 +28,7 @@ if __name__ == '__main__':
             'flask-sqlalchemy',
             'flask-mail',
             'flask-caching',
+            'flask-babel',
             'sqlalchemy',
             'email_validator',
             'oauth2',

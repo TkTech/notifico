@@ -11,6 +11,7 @@ from flask import (
 from flask_caching import Cache
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
+from flask_babel import Babel
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from raven.contrib.flask import Sentry
 
@@ -21,6 +22,7 @@ sentry = Sentry()
 cache = Cache()
 mail = Mail()
 celery = Celery()
+babel = Babel()
 
 
 def user_required(f):
@@ -59,6 +61,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('notifico.config')
     app.config.from_envvar('NOTIFICO_CONFIG', silent=True)
+
+    # We want translations as early as possible, since we'll ideally use them
+    # even for startup errors.
+    babel.init_app(app)
 
     # We should handle routing for static assets ourself (handy for small and
     # quick deployments).

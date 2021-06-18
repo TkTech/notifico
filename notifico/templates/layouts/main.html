@@ -1,23 +1,62 @@
 {% extends "body.html" %}
+{# Template used for typical content that should be centered on the screen, and
+should flash messages. #}
 
 {% block content %}
-<div class="row-fluid content_main">
-  <div class="span12 content_page">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-    <div class="contents">
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
-          {{ message }}
-        </div>
-        {% endfor %}
+<div class="container mb-3">
+  <div class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for("public.landing") }}">
+        {{ _("Notifico") }}
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto">
+          {% if g.user %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ g.user.dashboard_url }}">
+              {{ _("Projects") }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for("account.logout") }}">
+              {{ _("Logout") }}
+            </a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for("account.login") }}">
+              {{ _("Login") }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for("account.register") }}">
+              {{ _("Register") }}
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
     </div>
-      {% endif %}
-    {% endwith %}
-    <div class="contents">
+  </div>
+</div>
+
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }}">
+    {{ message }}
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <div class="contents">
     {% block content_page %}
     {% endblock content_page %}
-    </div>
   </div>
 </div>
 {% endblock content %}

@@ -1,2 +1,1 @@
 recursive-include notifico *
-prune notifico/static/less

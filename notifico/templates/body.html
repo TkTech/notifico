@@ -15,19 +15,11 @@
   <head>
     <meta charset="utf-8">
     <title>{{ page_title|default('Notifico!') }}</title>
-    <meta name="description" content="">
-    <meta name="author" content="">
 
-    <link href="/css/bootstrap.css?v=3" rel="stylesheet">
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
     {% block style %}
     {% endblock style %}
-    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
 
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
     {% if config.GOOGLE %}
     <script type="text/javascript">
       var _gaq = _gaq || [];
@@ -45,93 +37,8 @@
   </head>
 
   <body>
-    <div class="wrapper">
-      <div class="nav-container">
-        <div class="container">
-          <div class="navbar nav-top">
-            <div class="navbar-inner">
-              <a class="brand" href="/">Notifico</a>
-              <ul class="nav pull-right">
-                <li class="{{ active('public.landing') }}">
-                  <a href="/"><i class="icon-home"></i> Home</a>
-                </li>
-                {% if g.user %}
-                <li class="{{ active('projects.') }}">
-                  <a href="{{ url_for('projects.dashboard', u=g.user.username) }}">
-                    <i class="icon-th"></i> Projects
-                  </a>
-                </li>
-                <!-- User settings and actions  -->
-                <li class="dropdown {{ active('account.') }}">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                      <i class="icon-user"></i> {{ g.user.username }} <i class="icon-angle-down"></i> 
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li>
-                      <a href="{{ url_for('account.settings') }}">
-                        <i class="icon-cog"></i> Settings
-                      </a>
-                    </li>
-                    <li>
-                      <a href="{{ url_for('account.tokens') }}">
-                        <i class="icon-key"></i> OAuth Tokens
-                      </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href="{{ url_for('account.logout') }}">
-                            <i class="icon-signout"></i> Logout
-                        </a>
-                    </li>
-                  </ul>
-                </li>
-                {% else %}
-                <li>
-                  <a href="{{ url_for('account.login') }}">
-                    <i class="icon-signin"></i> Login
-                  </a>
-                </li>
-                <li>
-                  <a href="{{ url_for('account.register') }}">
-                    <i class="icon-plus"></i> Register
-                  </a>
-                </li>
-                {% endif %}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="container content">
-        {% block content %}
-        {% endblock content %}
-      </div>
-    </div>
-    <div class="footer">
-      <div class="container">
-        <div class="row-fluid">
-          <div class="span12 footer-copyright">
-            Copyright &copy; <span class="current_year">2013</span> Tyler Kennedy
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="/js/jquery.min.js"><\/script>')</script>
-    <script src="/js/bootstrap.js"></script>
-    {% block script %}
-    <script>
-      $(function(){
-          // Focus on the username box, but only if
-          // the user hasn't already focused on something else.
-          if($(document.activeElement).is('body')) {
-              $('.focus').focus();
-          }
-
-          $('.current_year').text(new Date().getFullYear());
-      });
-    </script>
-    {% endblock %}
+    {% block content %}
+    {% endblock content %}
+    <script src="/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
