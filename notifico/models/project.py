@@ -2,6 +2,7 @@
 __all__ = ('Project',)
 import datetime
 
+from flask import url_for
 from sqlalchemy import or_
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -23,6 +24,14 @@ class Project(db.Model):
 
     full_name = db.Column(db.String(101), nullable=False, unique=True)
     message_count = db.Column(db.Integer, default=0)
+
+    #: The last time a message was received for this project, from any
+    #: source.
+    last_message_recieved = db.Column(db.DateTime, nullable=True)
+
+    #: An indicator of health on this project. If hooks (to or from) are
+    #: erroring, this will be set to 0. A healthy project will be 1.
+    health = db.Column(db.Integer, default=1, server_default='1')
 
     @classmethod
     def new(cls, name, public=True, website=None):
@@ -65,10 +74,10 @@ class Project(db.Model):
             # or are owned by `user`.
             q = q.filter(or_(
                 Project.owner_id == user.id,
-                Project.public == True
+                Project.public.is_(True)
             ))
         else:
-            q = q.filter(Project.public == True)
+            q = q.filter(Project.public.is_(True))
 
         return q
 
@@ -102,3 +111,35 @@ class Project(db.Model):
             return True
 
         return False
+
+    @property
+    def details_url(self):
+        return url_for(
+            'projects.details',
+            u=self.owner.username,
+            p=self.name
+        )
+
+    @property
+    def edit_url(self):
+        return url_for(
+            'projects.edit_project',
+            u=self.owner.username,
+            p=self.name
+        )
+
+    @property
+    def delete_url(self):
+        return url_for(
+            'projects.delete_project',
+            u=self.owner.username,
+            p=self.name
+        )
+
+    @property
+    def new_channel_url(self):
+        return url_for(
+            'projects.new_channel',
+            u=self.owner.username,
+            p=self.name
+        )

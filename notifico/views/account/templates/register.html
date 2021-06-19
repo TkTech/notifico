@@ -2,22 +2,26 @@
 {% import "ui/forms.html" as forms %}
 
 {% block content_page %}
-  <h2>Register</h2>
-  <div class="section-content">
-    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-      {{ form.hidden_tag() }}
-      {{ forms.render_field(form.username) }}
-      {{ forms.render_field(form.email) }}
-      {{ forms.render_field(form.password) }}
-      {{ forms.render_field(form.confirm) }}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-success">
-          <i class="icon-plus"></i> Create Account
-        </button>
-        <a href="{{ url_for('public.landing') }}" class="btn btn-danger">
-          <i class="icon-remove"></i> Cancel
-        </a>
-      </div>
-    </form>
+<div class="ex-header mb-3">
+  <div class="container">
+    <h1>{{ _("Register") }}</h1>
   </div>
+</div>
+<div class="container">
+  <form method="POST" action="{{ request.url }}">
+    {{ form.hidden_tag() }}
+    {{ forms.render_field(form.username) }}
+    {{ forms.render_field(form.email) }}
+    {{ forms.render_field(form.password) }}
+    {{ forms.render_field(form.confirm) }}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {{ _("Register") }}
+      </button>
+      <a href="{{ url_for('public.landing') }}" class="btn btn-secondary">
+        {{ _("Cancel") }}
+      </a>
+    </div>
+  </form>
+</div>
 {% endblock %}

@@ -2,17 +2,26 @@
 {% import "ui/forms.html" as forms %}
 
 {% block content_page %}
-  <h2>New Project</h2>
+<div class="ex-header mb-3">
+  <div class="container">
+    <h1>{{ _("New Project") }}</h1>
+  </div>
+</div>
+
+<div class="container">
   <div class="section-content">
-    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+    <form method="POST" action="{{ request.url }}">
       {{ form.hidden_tag() }}
       {{ forms.render_field(form.name) }}
       {{ forms.render_field(form.website ) }}
       {{ forms.render_field(form.public) }}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Create Project</button>
-        <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn">Cancel</a>
-      </div>
+      <button type="submit" class="btn btn-primary">
+        {{ _("Create Project") }}
+      </button>
+      <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-secondary">
+        {{ _("Cancel") }}
+      </a>
     </form>
   </div>
+</div>
 {% endblock %}

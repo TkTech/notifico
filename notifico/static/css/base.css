@@ -1,0 +1,21 @@
+:root {
+    --light-accent: #9e59f7;
+    --divider-bg-color: #5710b2;
+}
+
+body {
+    background-color: #FAFBFE;
+}
+
+.zebra-section {
+    background-color: #FFF;
+    border: 1px solid var(--light-accent);
+}
+
+.ex-header {
+    border-bottom: 3px solid var(--divider-bg-color); 
+}
+
+.lead-container > main {
+    max-width: 40em;
+}

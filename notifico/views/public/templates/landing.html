@@ -2,70 +2,65 @@
 
 {% block content_page %}
 
-<main class="bg-light p-5 rounded mb-3">
-  <h1>Notifico</h1>
-  <p>
-    {% trans %}
-    Notifico is a developer-focused tool that bridges all your favorite tools
-    (Github, JIRA, Gitlab, Jenkins, and more) to your favorite chat service (IRC,
-    Matrix).
-    {% endtrans %}
-  </p>
-  {% if not g.user %}
-  <p>
-    <a class="btn btn-success btn-large" href="{{ url_for('account.register') }}">
-      <i class="icon-plus"></i> {{ _("Sign Up") }}
-    </a>
-  </p>
-  <p>
-    <small class="muted">
-      {% trans login_url=url_for("account.login") %}
-      Already have an account? <a href="{{ login_url }}">Login</a> instead.
+<div class="lead-container d-flex w-100 mb-3 text-center">
+  <main class="mx-auto">
+    <h1>{{ _("Notifico") }}</h1>
+    <p>
+      {% trans %}
+      Notifico is a developer-focused tool that bridges all your favorite tools
+      (Github, JIRA, Gitlab, Jenkins, and more) to your favorite chat service.
       {% endtrans %}
-    </small>
-  </p>
-  {% endif %}
-</main>
+    </p>
+    {% if not g.user %}
+    <p>
+      <a class="btn btn-success btn-large" href="{{ url_for('account.register') }}">
+        <i class="icon-plus"></i> {{ _("Sign Up") }}
+      </a>
+    </p>
+    <p>
+      <small class="muted">
+        {% trans login_url=url_for("account.login") %}
+        Already have an account? <a href="{{ login_url }}">Login</a> instead.
+        {% endtrans %}
+      </small>
+    </p>
+    {% endif %}
+  </main>
+</div>
 
-{# Short "sell points" #}
-<div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
-  <div class="col">
-    <div class="card h-100">
-      <div class="card-body">
-        <h5 class="card-title">
-          {{ _("100%% Open Source") }}
-        </h5>
-        <p class="card-text">
-          {% trans %}
-          Notifico is available under the MIT license, and is very easy to
-          self-host. Notifico has been open source for 8+ years and isn't going
-          anywhere.
-          {% endtrans %}
+<div class="zebra-section">
+  <div class="container p-3">
+    <div class="row row-cols-1 row-cols-md-3">
+      <div class="col">
+        <h5>{{ _("100%% Open Source") }}</h5>
+        <p class="lead">
+          {{ _("Forever available under the MIT license.") }}
         </p>
       </div>
-    </div>
-  </div>
 
-  <div class="col">
-    <div class="card h-100">
-      <div class="card-body">
-        <h5 class="card-title">
-          {{ _("GitHub, GitLab, Bitbucket, and more") }}
-        </h5>
-        <p class="card-text">
-          {% trans %}
-          Notifico supports the most common tools out of the box.
-          {% endtrans %}
+      <div class="col">
+        <h5>{{ _("8+ million messages") }}</h5>
+        <p class="lead">
+          {{ _("Over 8 million messages delivered and counting.") }}
+        </p>
+      </div>
+
+      <div class="col">
+        <h5>{{ _("4000+ projects") }}</h5>
+        <p class="lead">
+          {{ _("Over 4000 projects, from NASA to CPython.") }}
         </p>
       </div>
     </div>
   </div>
 </div>
 
+
+{#
 <div class="row">
   <div class="col">
     <h3>{{ _("Newest Projects") }}</h3>
-    <table class="table table-striped table-vertical table-bordered">
+    <table class="table table-striped">
       <thead>
         <tr>
           <th>{{ _("Created") }}</th>
@@ -91,7 +86,7 @@
   </div>
   <div class="col">
     <h3>{{ _("Top IRC Networks") }}</h3>
-    <table class="table table-striped table-vertical table-bordered">
+    <table class="table table-striped">
       <thead>
         <tr>
           <th>{{ _("Host") }}</th>
@@ -116,4 +111,5 @@
     </a>
   </div>
 </div>
+#}
 {% endblock %}

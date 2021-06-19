@@ -12,6 +12,7 @@ from flask_caching import Cache
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel
+from flask_migrate import Migrate
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from raven.contrib.flask import Sentry
 
@@ -23,6 +24,7 @@ cache = Cache()
 mail = Mail()
 celery = Celery()
 babel = Babel()
+migrate = Migrate()
 
 
 def user_required(f):
@@ -95,10 +97,10 @@ def create_app():
             'key_prefix': 'cache_'
         }
     })
-    # Attach Flask-Mail to our application instance.
+
     mail.init_app(app)
-    # Attach Flask-SQLAlchemy to our application instance.
     db.init_app(app)
+    migrate.init_app(app, db)
 
     # Update celery's configuration with our application config.
     celery.config_from_object(app.config)
@@ -107,14 +109,10 @@ def create_app():
     from notifico.views.account import account
     from notifico.views.public import public
     from notifico.views.projects import projects
-    from notifico.views.pimport import pimport
-    from notifico.views.admin import admin
 
     app.register_blueprint(account, url_prefix='/u')
     app.register_blueprint(projects)
     app.register_blueprint(public)
-    app.register_blueprint(pimport, url_prefix='/i')
-    app.register_blueprint(admin, url_prefix='/_')
 
     # Register our custom error handlers.
     from notifico.views import errors

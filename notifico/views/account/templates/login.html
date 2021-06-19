@@ -2,27 +2,34 @@
 {% import "ui/forms.html" as forms %}
 
 {% block content_page %}
-  <h2>Login</h2>
-  <div class="section-content">
-    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-      {{ form.hidden_tag() }}
-      {{ forms.render_field(form.username) }}
-      {{ forms.render_field(form.password) }}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-success">
-          <i class="icon-signin"></i> Login
-        </button>
-        &nbsp;
-        <a href="{{ url_for('.register') }}" class="btn btn-primary">
-          <i class="icon-plus"></i> Sign Up
-        </a>
-        {% if config.NOTIFICO_PASSWORD_RESET %}
-        <br />
-        <small class="muted">
-          <a href="{{ url_for('.forgot_password') }}">Lost your password?</a>
-        </small>
-        {% endif %}
-      </div>
-    </form>
+<div class="ex-header mb-3">
+  <div class="container">
+    <h1>{{ _("Login") }}</h1>
   </div>
+</div>
+
+<div class="container">
+  <form method="POST" action="{{ request.url }}">
+    {{ form.hidden_tag() }}
+    {{ forms.render_field(form.username) }}
+    {{ forms.render_field(form.password) }}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {{ _("Login") }}
+      </button>
+      &nbsp;
+      <a href="{{ url_for('.register') }}" class="btn btn-secondary">
+        {{ _("Register") }}
+      </a>
+      {% if config.NOTIFICO_PASSWORD_RESET %}
+      <br />
+      <small class="muted">
+        <a href="{{ url_for('.forgot_password') }}">
+          {{ _("Lost your password?") }}
+        </a>
+      </small>
+      {% endif %}
+    </div>
+  </form>
+</div>
 {% endblock %}

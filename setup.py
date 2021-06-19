@@ -29,6 +29,7 @@ if __name__ == '__main__':
             'flask-mail',
             'flask-caching',
             'flask-babel',
+            'flask-migrate',
             'sqlalchemy',
             'email_validator',
             'oauth2',
@@ -55,6 +56,10 @@ if __name__ == '__main__':
         entry_points={
             'console_scripts': [
                 'notifico=notifico.cli:cli'
+            ],
+            'notifico.providers': [
+                'plain=notifico.providers.plain:PlainProvider'
+                # 'github=notifico.providers.github:GithubProvider'
             ]
         }
     )

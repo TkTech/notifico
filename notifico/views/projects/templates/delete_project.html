@@ -2,14 +2,30 @@
 {% import "ui/forms.html" as forms %}
 
 {% block content_page %}
-  <h2>Delete Project</h2>
+<div class="ex-header mb-3">
+  <div class="container">
+    <h1>{{ _("Delete Project") }}</h1>
+  </div>
+</div>
+
+<div class="container">
   <div class="section-content">
     <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-      <p>Are you sure you want to delete the project <strong>{{ project.name }}</strong>?</p>
+      <p>
+      {% trans name=project.name %}
+      Are you sure you want to delete the project <strong>{{ name }}</strong>?
+      This cannot be undone!
+      {% endtrans %}
+      </p>
       <div class="form-actions">
-        <button type="submit" class="btn btn-danger" value="d" name="do">Delete Project</button>
-        <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-success">Cancel</a>
+        <button type="submit" class="btn btn-danger" value="d" name="do">
+          {{ _("Delete Project") }}
+        </button>
+        <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-secondary">
+          {{ _("Cancel") }}
+        </a>
       </div>
     </form>
   </div>
+</div>
 {% endblock %}

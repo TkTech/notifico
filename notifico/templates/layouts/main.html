@@ -3,8 +3,8 @@
 should flash messages. #}
 
 {% block content %}
-<div class="container mb-3">
-  <div class="navbar navbar-expand-lg navbar-light bg-light">
+<div class="container mb-3 mt-3">
+  <div class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for("public.landing") }}">
         {{ _("Notifico") }}
@@ -53,10 +53,10 @@ should flash messages. #}
   {% endfor %}
   {% endif %}
   {% endwith %}
+</div>
 
-  <div class="contents">
-    {% block content_page %}
-    {% endblock content_page %}
-  </div>
+<div class="contents pb-3">
+  {% block content_page %}
+  {% endblock content_page %}
 </div>
 {% endblock content %}
