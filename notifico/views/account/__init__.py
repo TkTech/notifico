@@ -20,7 +20,7 @@ from notifico.views.account.forms import (
 account = Blueprint('account', __name__, template_folder='templates')
 # Usernames that cannot be registered because they clash with internal
 # routes.
-_reserved = ('new',)
+_reserved = ('new', 'api', 'settings')
 
 
 @account.before_app_request

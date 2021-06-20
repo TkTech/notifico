@@ -1,12 +1,13 @@
 import enum
-import inspect
 import functools
 from typing import Dict, Any
 from importlib.metadata import entry_points
 
+from flask import url_for
+
 
 @functools.cache
-def get_providers() -> Dict[int, 'Provider']:
+def get_providers() -> Dict[int, 'BaseProvider']:
     """
     Returns a cached dictionary of all known Provider plugins, keyed by
     PROVIDER_ID.
@@ -23,12 +24,9 @@ class ProviderTypes(enum.Enum):
     WEBHOOK = 1
     #: Type for providers that want a chance to poll for events.
     POLLING = 2
-    #: Type for providers that may be polling or evented, but will handle it
-    #: Themselves.
-    SELF_GENERATED = 3
 
 
-class Provider:
+class BaseProvider:
     """
     A Provider generates payloads for processing and eventual delivery to a
     :class:~`notifico.target.Target`.
@@ -46,6 +44,9 @@ class Provider:
     PROVIDER_NAME: str = None
     #: The type of the provider, such as a webhook or a poller.
     PROVIDER_TYPE: ProviderTypes = None
+    #: A short description of this provider. Should be a lazy_gettext-wrapped
+    #: string.
+    PROVIDER_DESCRIPTION: str = None
 
     #: The minimum period between polling events for polling-type providers.
     #: Note this only guarantees it won't be polled *before* this duration
@@ -53,64 +54,49 @@ class Provider:
     POLLING_PERIOD: int = None
 
     @classmethod
-    def description(cls, locale: str = 'en_US') -> str:
+    def form(cls):
         """
-        A description of this provider as an HTML string.
+        An optional Form class that will be presented to the user when
+        initially configuring and when editing the Provider.
         """
-        raise NotImplementedError()
 
     @classmethod
-    def form(cls) -> dict:
+    def config_from_form(cls, form) -> Dict[int, Any]:
         """
-        Returns a form layout, which will be used to generate a wtforms
-        Form object.
+        Pack a configuration form into a dictionary. The dictionary must
+        be safe to serialize as JSON.
         """
-        raise NotImplementedError()
+        return dict((field.id, field.data) for field in form)
 
     @classmethod
-    def load_config(cls, config: Dict[str, Any]):
+    def update_form_with_config(cls, form, config):
         """
-        Deserialize the provider's configuration.
+        Update the provided form instance using the stored configuration
+        in `config`.
         """
-        raise NotImplementedError()
+        if config is None or not isinstance(config, dict):
+            return
 
-    @classmethod
-    def store_config(cls) -> Dict[str, Any]:
-        """
-        Serialize the provider's configuration.
-        """
-        raise NotImplementedError()
+        for field in form:
+            if field.id in config:
+                field.data = config[field.id]
 
 
-class WebhookProvider(Provider):
+class WebhookProvider(BaseProvider):
     PROVIDER_TYPE = ProviderTypes.WEBHOOK
 
     @classmethod
-    def dispatch_incoming_webhook(cls, request):
-        # Guess which Provider should be responding to this request.
-        for provider_id, provider in get_providers().items():
-            sig = inspect.signature(provider.is_our_webhook)
-
-            kwargs = {}
-            if 'request' in sig.parameters:
-                kwargs['request'] = request
-
-            if provider.is_our_webhook(**kwargs):
-                break
-
-        # TODO: What do we do when no provider matches? Log it on the project,
-        # at least.
-
-    @classmethod
-    def is_our_webhook(cls, json: Dict[str, Any], request) -> bool:
+    def external_url(cls, hook) -> str:
         """
-        Attempt to identify if we are the correct handler for the given
-        request.
-
-        Both the `json` and the `request` arguments are optional. For
-        performance, don't include them unless you need them.
-
-        This function is used to guess the correct provider for universal
-        webhooks.
+        Returns an absolute, externally-accessible URL to trigger the given
+        webhook.
         """
-        raise NotImplementedError()
+        return url_for(
+            'webhooks.trigger',
+            project=hook.project_id,
+            key=hook.key
+        )
+
+
+class PollingProvider(BaseProvider):
+    PROVIDER_TYPE = ProviderTypes.POLLING

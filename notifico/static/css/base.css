@@ -1,6 +1,7 @@
 :root {
     --light-accent: #9e59f7;
     --divider-bg-color: #5710b2;
+    --bs-breadcrumb-divider: '>';
 }
 
 body {

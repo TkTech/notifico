@@ -1,0 +1,25 @@
+{% extends "layouts/main.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block content_page %}
+<div class="ex-header mb-3">
+  <div class="container">
+    <h1>{{ _("New Provider") }}</h1>
+  </div>
+</div>
+
+<div class="container">
+  {% include "ui/crumbs.html" %}
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    {% for field in form if field.widget.input_type != "hidden" %}
+      {{ forms.render_field(field) }}
+    {% endfor %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {{ _("Add") }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

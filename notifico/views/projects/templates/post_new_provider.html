@@ -1,0 +1,33 @@
+{% extends "layouts/main.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block content_page %}
+<div class="ex-header mb-3">
+  <div class="container">
+    <h1>{{ _("Install Webhook") }}</h1>
+  </div>
+</div>
+
+<div class="container h-100">
+  {% include "ui/crumbs.html" %}
+</div>
+
+<div class="lead-container d-flex w-100 p-3 text-center">
+  <main class="mx-auto">
+    <h2>{{ _("Your webhook is ready") }}</h2>
+    <p>
+    {% trans %}
+    You'll need to configure the service to use the webhook URL provided below:
+    {% endtrans %}
+    </p>
+    <div class="mb-3">
+      <input type="text" class="form-control" id="webhook" readonly value="{{ 
+        provider.external_url(stored_provider)
+      }}">
+    </div>
+    <a class="btn btn-primary" href="{{ project.details_url }}">
+      {{ _("Back to project") }}
+    </a>
+  </main>
+</div>
+{% endblock %}

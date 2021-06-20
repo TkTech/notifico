@@ -1,0 +1,46 @@
+{% extends "layouts/main.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block content_page %}
+<div class="ex-header mb-3">
+  <div class="container">
+    <h1>{{ _("Choose A Provider") }}</h1>
+  </div>
+</div>
+
+<div class="container">
+  {% include "ui/crumbs.html" %}
+  <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
+    {% for provider in providers %}
+    <div class="col">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="card-title">
+            <h5>{{ provider.PROVIDER_NAME }}</h5>
+          </div>
+          <div class="card-text">
+            {{ provider.PROVIDER_DESCRIPTION }}
+            <div class="pt-3">
+              <a class="btn btn-primary" href="{{ url_for('.new_provider',
+                  u=user.username,
+                  p=project.name,
+                  provider=provider.PROVIDER_ID) }}">
+                {{ _("Add") }}
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer text-muted">
+          {% set provider_type = provider.PROVIDER_TYPE.value %}
+          {% if provider_type == 1 %}
+          <small>{{ _("This provider is a webhook.") }}</small>
+          {% elif provider_type == 2 %}
+          <small>{{ _("This provider polls for changes.") }}</small>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

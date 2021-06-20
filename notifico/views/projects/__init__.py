@@ -7,76 +7,22 @@ from flask import (
     redirect,
     url_for,
     abort,
-    request
+    request,
+    flash
 )
 import flask_wtf as wtf
 from flask_babel import lazy_gettext as _
-from wtforms import fields, validators
 
 from notifico import db, user_required
+from notifico.provider import get_providers, ProviderTypes
 from notifico.models.user import User
 from notifico.models.project import Project
+from notifico.models.provider import Provider
+from notifico.views.projects.forms import (
+    ProjectDetailsForm
+)
 
 projects = Blueprint('projects', __name__, template_folder='templates')
-
-
-class ProjectDetailsForm(wtf.FlaskForm):
-    name = fields.StringField('Project Name', validators=[
-        validators.DataRequired(),
-        validators.Length(1, 50),
-        validators.Regexp(r'^[a-zA-Z0-9_\-\.]*$', message=(
-            'Project name must only contain a to z, 0 to 9, dashes'
-            ' and underscores.'
-        ))
-    ])
-    public = fields.BooleanField(
-        'Public',
-        default=True,
-        description=_(
-            'If your project is public, other users will be able to see it'
-            ' exists. However, you can still make your channels individually'
-            ' public or private.'
-        )
-    )
-    website = fields.StringField('Project URL', validators=[
-        validators.Optional(),
-        validators.Length(max=1024),
-        validators.URL()
-    ])
-
-
-class HookDetailsForm(wtf.FlaskForm):
-    service_id = fields.SelectField('Service', validators=[
-        validators.DataRequired()
-    ], coerce=int)
-
-
-class PasswordConfirmForm(wtf.FlaskForm):
-    password = fields.PasswordField('Password', validators=[
-        validators.DataRequired()
-    ])
-
-    def validate_password(form, field):
-        if not User.login(g.user.username, field.data):
-            raise validators.ValidationError('Your password is incorrect.')
-
-
-class ChannelDetailsForm(wtf.FlaskForm):
-    channel = fields.StringField('Channel', validators=[
-        validators.DataRequired(),
-        validators.Length(min=1, max=80)
-    ])
-    host = fields.StringField('Host', validators=[
-        validators.DataRequired(),
-        validators.Length(min=1, max=255)
-    ], default='chat.freenode.net')
-    port = fields.IntegerField('Port', validators=[
-        validators.NumberRange(1024, 66552)
-    ], default=6667)
-    ssl = fields.BooleanField('Use SSL', default=False)
-    public = fields.BooleanField('Public', default=True, description=(
-        'Allow others to see that this channel exists.'
-    ))
 
 
 def project_action(f):
@@ -133,10 +79,7 @@ def dashboard(u):
         'dashboard.html',
         user=u,
         is_owner=is_owner,
-        projects=projects,
-        page_title='Notifico! - {u.username}\'s Projects'.format(
-            u=u
-        )
+        projects=projects
     )
 
 
@@ -230,12 +173,107 @@ def details(u, p):
     """
     Show the details for an existing project.
     """
+    crumbs = (
+        (u.username, url_for('.dashboard', u=u.username)),
+        (p.name, None)
+    )
+
     return render_template(
         'project_details.html',
         project=p,
         user=u,
-        page_title='Notifico! - {u.username}/{p.name}'.format(
-            u=u,
-            p=p
-        )
+        breadcrumbs=crumbs
     )
+
+
+@projects.route('/<u>/<p>/provider/choose')
+@project_action
+def choose_provider(u, p):
+    """
+    Choose a new provider to add to a project.
+    """
+    crumbs = (
+        (u.username, url_for('.dashboard', u=u.username)),
+        (p.name, p.details_url),
+        (_('Choose A Provider'), None)
+    )
+
+    providers = get_providers()
+
+    return render_template(
+        'choose_provider.html',
+        project=p,
+        user=u,
+        breadcrumbs=crumbs,
+        providers=providers.values()
+    )
+
+
+@projects.route(
+    '/<u>/<p>/provider/choose/<int:provider>',
+    methods=['GET', 'POST']
+)
+@project_action
+def new_provider(u, p, provider):
+    """
+    Choose a new provider to add to a project.
+    """
+    provider = get_providers()[provider]
+
+    form = provider.form()
+    if form is None:
+        # Some providers may really not have any configuration. In such a
+        # case we need a dummy form.
+        form = wtf.FlaskForm()
+
+    if form.validate_on_submit():
+        stored_provider = Provider(
+            config=provider.config_from_form(form),
+            provider_id=provider.PROVIDER_ID,
+            project=p
+        )
+
+        db.session.add(stored_provider)
+        # TODO: Although incredibly unlikely, there's a chance for a conflict
+        # here if the randomly generated key collides. Should handle it.
+        db.session.commit()
+
+        # For webhook-type providers, we want the chance to present the
+        # hook front-and-center with instructions on how to use it.
+        if provider.PROVIDER_TYPE == ProviderTypes.WEBHOOK:
+            crumbs = (
+                (u.username, url_for('.dashboard', u=u.username)),
+                (p.name, p.details_url),
+                (_('Choose A Provider'), p.choose_provider_url),
+                (provider.PROVIDER_NAME, None),
+                (_('Install Webhook'), None)
+            )
+
+            return render_template(
+                'post_new_provider.html',
+                project=p,
+                user=u,
+                breadcrumbs=crumbs,
+                provider=provider,
+                stored_provider=stored_provider,
+                form=form
+            )
+
+        flash(_('Your provider has been created!'), category='success')
+        return redirect(p.details_url)
+    else:
+        crumbs = (
+            (u.username, url_for('.dashboard', u=u.username)),
+            (p.name, p.details_url),
+            (_('Choose A Provider'), p.choose_provider_url),
+            (provider.PROVIDER_NAME, None),
+        )
+
+        return render_template(
+            'new_provider.html',
+            project=p,
+            user=u,
+            breadcrumbs=crumbs,
+            provider=provider,
+            form=form
+        )

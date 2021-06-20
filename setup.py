@@ -58,8 +58,9 @@ if __name__ == '__main__':
                 'notifico=notifico.cli:cli'
             ],
             'notifico.providers': [
-                'plain=notifico.providers.plain:PlainProvider'
-                # 'github=notifico.providers.github:GithubProvider'
+                'plain=notifico.providers.plain:PlainProvider',
+                'github=notifico.providers.github:GithubProvider',
+                'mediawiki=notifico.providers.mediawiki:MediaWikiProvider'
             ]
         }
     )

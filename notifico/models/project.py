@@ -137,9 +137,9 @@ class Project(db.Model):
         )
 
     @property
-    def new_channel_url(self):
+    def choose_provider_url(self):
         return url_for(
-            'projects.new_channel',
+            'projects.choose_provider',
             u=self.owner.username,
             p=self.name
         )

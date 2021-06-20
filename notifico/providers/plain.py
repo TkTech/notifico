@@ -1,18 +1,15 @@
+from flask_babel import lazy_gettext as _
+
 from notifico.provider import WebhookProvider
 
 
 class PlainProvider(WebhookProvider):
     PROVIDER_NAME = 'Plain Text'
     PROVIDER_ID = 10
-
-    @classmethod
-    def description(cls, locale):
-        return {
-            'en_US': (
-                'An extremely basic service that accepts one argument,'
-                ' `payload`.'
-            )
-        }.get(locale, 'en_US')
+    PROVIDER_DESCRIPTION = _(
+        'An extremely basic webhook that accepts one argument, "payload".'
+        ' Good for simple embedded devices and shell scripts.'
+    )
 
     @classmethod
     def is_our_webhook(cls, payload, request):

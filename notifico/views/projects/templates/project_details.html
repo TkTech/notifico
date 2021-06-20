@@ -9,13 +9,14 @@
 </div>
 
 <div class="container p-3">
+  {% include "ui/crumbs.html" %}
   <h2>{{ _("Providers") }}</h2>
   <p>
     {% trans %}
     Providers are the sources of messages for your project.
     {% endtrans %}
   </p>
-  <a class="btn btn-success text-decoration-none mb-3" href="#">
+  <a class="btn btn-success text-decoration-none mb-3" href="{{ project.choose_provider_url }}">
     <i class="fas fa-plus"></i>
     {{ _("Add a new provider") }}
   </a>

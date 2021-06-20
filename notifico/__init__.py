@@ -109,8 +109,10 @@ def create_app():
     from notifico.views.account import account
     from notifico.views.public import public
     from notifico.views.projects import projects
+    from notifico.views.webhooks import webhooks
 
     app.register_blueprint(account, url_prefix='/u')
+    app.register_blueprint(webhooks, url_prefix='/h')
     app.register_blueprint(projects)
     app.register_blueprint(public)
 
