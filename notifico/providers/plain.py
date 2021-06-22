@@ -10,8 +10,3 @@ class PlainProvider(WebhookProvider):
         'An extremely basic webhook that accepts one argument, "payload".'
         ' Good for simple embedded devices and shell scripts.'
     )
-
-    @classmethod
-    def is_our_webhook(cls, payload, request):
-        # Our webhook payload is as simple as it gets.
-        return len(payload) == 1 and 'payload' in payload

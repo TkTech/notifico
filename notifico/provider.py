@@ -66,7 +66,10 @@ class BaseProvider:
         Pack a configuration form into a dictionary. The dictionary must
         be safe to serialize as JSON.
         """
-        return dict((field.id, field.data) for field in form)
+        return dict(
+            (field.id, field.data) for field in form
+            if field.id != 'csrf_token'
+        )
 
     @classmethod
     def update_form_with_config(cls, form, config):
@@ -94,7 +97,8 @@ class WebhookProvider(BaseProvider):
         return url_for(
             'webhooks.trigger',
             project=hook.project_id,
-            key=hook.key
+            key=hook.key,
+            _external=True
         )
 
 
