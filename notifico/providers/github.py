@@ -1,11 +1,10 @@
-from flask_wtf import FlaskForm
 from flask_babel import lazy_gettext as _
 from wtforms import fields, validators
 
-from notifico.provider import WebhookProvider
+from notifico.provider import WebhookProvider, ProviderForm
 
 
-class GithubProviderForm(FlaskForm):
+class GithubProviderForm(ProviderForm):
     branches = fields.StringField(
         _('Branches'),
         validators=[
@@ -30,3 +29,7 @@ class GithubProvider(WebhookProvider):
     @classmethod
     def form(cls):
         return GithubProviderForm()
+
+    @staticmethod
+    def icon() -> str:
+        return 'fab fa-github'

@@ -14,7 +14,7 @@ import flask_wtf as wtf
 from flask_babel import lazy_gettext as _
 
 from notifico import db, user_required
-from notifico.provider import get_providers, ProviderTypes
+from notifico.provider import get_providers, ProviderTypes, ProviderForm
 from notifico.models.user import User
 from notifico.models.project import Project
 from notifico.models.provider import Provider
@@ -224,7 +224,7 @@ def new_provider(u, p, provider):
     if form is None:
         # Some providers may really not have any configuration. In such a
         # case we need a dummy form.
-        form = wtf.FlaskForm()
+        form = ProviderForm()
 
     if form.validate_on_submit():
         stored_provider = Provider(
@@ -241,22 +241,13 @@ def new_provider(u, p, provider):
         # For webhook-type providers, we want the chance to present the
         # hook front-and-center with instructions on how to use it.
         if provider.PROVIDER_TYPE == ProviderTypes.WEBHOOK:
-            crumbs = (
-                (u.username, url_for('.dashboard', u=u.username)),
-                (p.name, p.details_url),
-                (_('Choose A Provider'), p.choose_provider_url),
-                (provider.PROVIDER_NAME, None),
-                (_('Install Webhook'), None)
-            )
-
-            return render_template(
-                'post_new_provider.html',
-                project=p,
-                user=u,
-                breadcrumbs=crumbs,
-                provider=provider,
-                stored_provider=stored_provider,
-                form=form
+            return redirect(
+                url_for(
+                    '.get_provider_url',
+                    p=p.name,
+                    u=u.username,
+                    provider=stored_provider.id
+                )
             )
 
         flash(_('Your provider has been created!'), category='success')
@@ -277,3 +268,18 @@ def new_provider(u, p, provider):
             provider=provider,
             form=form
         )
+
+
+@projects.route('/<u>/<p>/provider/<int:provider>')
+@project_action
+def get_provider_url(u, p, provider):
+    """Presents the user with the webhook URL for the given provider.
+    """
+    provider = Provider.query.get_or_404(provider)
+
+    return render_template(
+        'get_provider_url.html',
+        project=p,
+        user=u,
+        provider=provider
+    )

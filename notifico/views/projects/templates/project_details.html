@@ -1,44 +1,95 @@
 {% extends "layouts/main.html" %}
 {% import "ui/forms.html" as forms %}
+{% import "ui/components.html" as components %}
 
 {% block content_page %}
-<div class="ex-header">
-  <div class="container">
-    <h1>{{ project.owner.username }}/{{ project.name }}</h1>
-  </div>
-</div>
+{% call components.page_header() %}
+<a class="text-decoration-none" href="{{ project.owner.dashboard_url }}">
+{{ project.owner.username }}</a>/{{ project.name }}
+{% endcall %}
 
-<div class="container p-3">
-  {% include "ui/crumbs.html" %}
+<div class="container">
   <h2>{{ _("Providers") }}</h2>
   <p>
     {% trans %}
-    Providers are the sources of messages for your project.
+    Providers are the sources of messages and events for your project.
     {% endtrans %}
   </p>
   <a class="btn btn-success text-decoration-none mb-3" href="{{ project.choose_provider_url }}">
     <i class="fas fa-plus"></i>
     {{ _("Add a new provider") }}
   </a>
-</div>
-
-<div class="zebra-section">
-  <div class="container p-3">
-    <h2>{{ _("Channels") }}</h2>
-    <p>
-      {% trans %}
-      Channels are the destinations for your project's messages. They can be
-      IRC channels, Discord channels, and more.
-      {% endtrans %}
-    </p>
-    <a class="btn btn-success text-decoration-none mb-3" href="#">
-      <i class="fas fa-plus"></i>
-      {{ _("Add a new channel") }}
-    </a>
+  <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
+    {% for provider in project.providers %}
+    {% set icon = provider.p.icon() %}
+    {% set name = provider.p.PROVIDER_NAME %}
+    <div class="col">
+      <div class="card card-bite h-100 border-0">
+        {% if provider.health %}
+        <div class="health-card health-good"
+          title="{{ _("Provider is healthy.") }}"></div>
+        {% elif provider.health < 10 %}
+        <div class="health-card health-warn"
+          title="{{ _("Provider is occasionally failing") }}"></div>
+        {% else %}
+        <div class="health-card health-bad"
+          title="{{ _("Provider is failing.") }}"></div>
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">
+            {% if icon %}<i class="{{ icon }}" title="{{ name }}"></i>&nbsp;{% endif -%}
+            {{ name }}
+          </h5>
+          <h6 class="card-subtitle mb-2 text-muted">
+            {# nbsp here is to preserve spacing when no nickname is present. #}
+            {{ provider.description|default("&nbsp"|safe, True) }}
+          </h6>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item text-muted">
+            <i class="fas fa-calendar"></i>&nbsp;
+            {{ _("Created %(date)s", date=provider.created|pretty_date) }}
+          </li>
+          <li class="list-group-item text-muted">
+            <i class="fas fa-envelope"></i>&nbsp;
+            {% if provider.events_received %}
+            {{ _("%(count)s events.", count=provider.events_received) }}
+            {% else %}
+            {{ _("No events recieved yet.") }}
+            {% endif %}
+          </li>
+        </ul>
+        <div class="card-body">
+          {% if provider.p.PROVIDER_TYPE.value == 1 %}
+          <a class="card-link" href="{{ url_for(".get_provider_url", 
+            p=project.name,
+            u=user.username,
+            provider=provider.id) }}">{{ _("Get URL") }}</a>
+          {% endif %}
+          <a href="#" class="card-link">{{ _("Edit") }}</a>
+          <a href="#" class="card-link">{{ _("Delete") }}</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
   </div>
 </div>
 
-<div class="container p-3">
+<div class="container py-3">
+  <h2>{{ _("Channels") }}</h2>
+  <p>
+    {% trans %}
+    Channels are the destinations for your project's messages. They can be
+    IRC channels, Discord channels, and more.
+    {% endtrans %}
+  </p>
+  <a class="btn btn-success text-decoration-none mb-3" href="#">
+    <i class="fas fa-plus"></i>
+    {{ _("Add a new channel") }}
+  </a>
+</div>
+
+<div class="container py-3">
   <h2>{{ _("Logs") }}</h2>
   <p>
     {% trans %}

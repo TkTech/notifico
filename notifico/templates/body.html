@@ -11,7 +11,7 @@
 {% endmacro %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
   <head>
     <meta charset="utf-8">
     <title>{{ page_title|default('Notifico!') }}</title>
@@ -37,7 +37,7 @@
     {% endif %}
   </head>
 
-  <body>
+  <body class="h-100 p-3">
     {% block content %}
     {% endblock content %}
     <script src="/js/bootstrap.bundle.min.js"></script>

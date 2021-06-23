@@ -116,11 +116,6 @@ def create_app():
     app.register_blueprint(projects)
     app.register_blueprint(public)
 
-    # Register our custom error handlers.
-    from notifico.views import errors
-
-    app.register_error_handler(500, errors.error_500)
-
     # Setup some custom Jinja2 filters.
     app.jinja_env.filters['pretty_date'] = pretty.pretty_date
     app.jinja_env.filters['plural'] = pretty.plural

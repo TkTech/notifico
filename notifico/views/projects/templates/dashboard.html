@@ -1,11 +1,10 @@
 {% extends "layouts/main.html" %}
+{% import "ui/components.html" as components %}
 
 {% block content_page %}
-<div class="ex-header mb-3">
-  <div class="container">
-    <h1>{{ _("Projects") }}</h1>
-  </div>
-</div>
+{% call components.page_header(breadcrumbs) %}
+  {{ _("Projects") }}
+{% endcall %}
 
 <div class="container">
   <p>
@@ -24,30 +23,47 @@
   <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
     {% for project in projects %}
     <div class="col">
-      <div class="card h-100 {{ "border-success" if project.health else "border-warning" }}" >
+      <div class="card card-bite h-100 border-0">
+        {% if project.health %}
+        <div class="health-card health-good"
+          title="{{ _("Project is healthy.") }}"></div>
+        {% elif project.health < 10 %}
+        <div class="health-card health-warn"
+          title="{{ _("Project has occasional failures") }}"></div>
+        {% else %}
+        <div class="health-card health-bad"
+          title="{{ _("Project is failing.") }}"></div>
+        {% endif %}
         <div class="card-body">
           <h5 class="card-title d-flex justify-content-between">
             <a href="{{ project.details_url }}">
               {{ project.name|truncate(18, True) }}
             </a>
-        <div class="btn-group">
-          <a href="{{ project.edit_url }}" class="btn btn-sm btn-outline-secondary">
-            {{ _("Edit") }}
-          </a>
-          <a href="{{ project.delete_url }}" class="btn btn-sm btn-outline-secondary">
-            {{ _("Delete") }}
-          </a>
-        </div>
           </h5>
         </div>
-        <div class="card-footer">
-          {% if project.last_message_received %}
-          Last used {{ project.last_message_received|pretty_date }}
-          {% else %}
-          <small class="text-muted">
-            {{ _("No messages received.") }}
-          </small>
-          {% endif %}
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item text-muted">
+            <i class="fas fa-calendar"></i>&nbsp;
+            {{ _("Created %(date)s", date=project.created|pretty_date) }}
+          </li>
+          <li class="list-group-item text-muted">
+            <i class="fas fa-link"></i>&nbsp;
+            {{ _("%(count)s providers", count=project.providers.count()) }}
+          </li>
+          <li class="list-group-item text-muted">
+            <i class="fas fa-envelope"></i>&nbsp;
+            {{ _("%(count)s events received", count=project.message_count) }}
+          </li>
+          <li class="list-group-item text-muted">
+          </li>
+        </ul>
+        <div class="card-body">
+          <a href="{{ project.edit_url }}" class="card-link">
+            {{ _("Edit") }}
+          </a>
+          <a href="{{ project.delete_url }}" class="card-link">
+            {{ _("Delete") }}
+          </a>
         </div>
       </div>
     </div>

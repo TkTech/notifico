@@ -1,8 +1,7 @@
 import os
 import base64
 import datetime
-
-from sqlalchemy.schema import UniqueConstraint
+from typing import Optional
 
 from notifico import db
 from notifico.provider import get_providers, ProviderTypes
@@ -62,4 +61,23 @@ class Provider(db.Model):
 
     @property
     def provider(self):
-        return get_providers().get(self.provider_id)
+        # We want this to be a hard error, don't use get(). Migrates should
+        # be removing destroyed providers entirely, the usual case is to
+        # always keep providers and to just disable them.
+        return get_providers()[self.provider_id]
+
+    @property
+    def p(self):
+        """Shortcut for the `provider()` property."""
+        return self.provider
+
+    @property
+    def description(self) -> Optional[str]:
+        """A short, user-provided nickname or description for this provider,
+        to better help them identify it from a list of identical providers.
+
+        May also be set automatically from import/sync tools.
+        """
+        # By convention, every provider will have a description field in their
+        # configuration, although it is not required.
+        return self.config.get('description')

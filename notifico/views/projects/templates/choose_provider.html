@@ -1,19 +1,17 @@
 {% extends "layouts/main.html" %}
 {% import "ui/forms.html" as forms %}
+{% import "ui/components.html" as components %}
 
 {% block content_page %}
-<div class="ex-header mb-3">
-  <div class="container">
-    <h1>{{ _("Choose A Provider") }}</h1>
-  </div>
-</div>
+{% call components.page_header(breadcrumbs) %}
+  {{ _("Choose A Provider") }}
+{% endcall %}
 
 <div class="container">
-  {% include "ui/crumbs.html" %}
   <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
     {% for provider in providers %}
     <div class="col">
-      <div class="card h-100">
+      <div class="card card-bite h-100">
         <div class="card-body">
           <div class="card-title">
             <h5>{{ provider.PROVIDER_NAME }}</h5>

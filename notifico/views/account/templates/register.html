@@ -1,12 +1,12 @@
 {% extends "layouts/main.html" %}
 {% import "ui/forms.html" as forms %}
+{% import "ui/components.html" as components %}
 
 {% block content_page %}
-<div class="ex-header mb-3">
-  <div class="container">
-    <h1>{{ _("Register") }}</h1>
-  </div>
-</div>
+{% call components.page_header(breadcrumbs) %}
+  {{ _("Register") }}
+{% endcall %}
+
 <div class="container">
   <form method="POST" action="{{ request.url }}">
     {{ form.hidden_tag() }}

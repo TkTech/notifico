@@ -9,3 +9,7 @@ class MediaWikiProvider(PollingProvider):
     PROVIDER_DESCRIPTION = _(
         'Periodically checks a MediaWiki site for changes.'
     )
+
+    @staticmethod
+    def icon():
+        return 'fab fa-wikipedia-w'

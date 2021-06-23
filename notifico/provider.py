@@ -3,7 +3,10 @@ import functools
 from typing import Dict, Any
 from importlib.metadata import entry_points
 
+import flask_wtf
 from flask import url_for
+from wtforms import fields, validators
+from flask_babel import lazy_gettext as _
 
 
 @functools.cache
@@ -17,6 +20,23 @@ def get_providers() -> Dict[int, 'BaseProvider']:
         p.PROVIDER_ID: p()
         for p in (plugin.load() for plugin in plugins)
     }
+
+
+class ProviderForm(flask_wtf.FlaskForm):
+    """
+    A base form most providers should use for their configuration options.
+    """
+    description = fields.StringField(
+        _('Description'),
+        validators=[
+            validators.Optional()
+        ],
+        description=_(
+            'Optionally provide a short description to make it easier to'
+            ' recall what this provider is for. This helps when you have many'
+            ' providers on a single project.'
+        )
+    )
 
 
 class ProviderTypes(enum.Enum):
@@ -84,6 +104,12 @@ class BaseProvider:
             if field.id in config:
                 field.data = config[field.id]
 
+    @staticmethod
+    def icon() -> str:
+        """The Font-Awesome icon that should be used to identify this
+        provider, if any is suitable."""
+        return 'fas fa-question'
+
 
 class WebhookProvider(BaseProvider):
     PROVIDER_TYPE = ProviderTypes.WEBHOOK
@@ -101,6 +127,14 @@ class WebhookProvider(BaseProvider):
             _external=True
         )
 
+    @staticmethod
+    def icon() -> str:
+        return 'fas fa-link'
+
 
 class PollingProvider(BaseProvider):
     PROVIDER_TYPE = ProviderTypes.POLLING
+
+    @staticmethod
+    def icon() -> str:
+        return 'fas fa-clock'

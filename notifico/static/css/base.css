@@ -1,22 +1,39 @@
 :root {
-    --light-accent: #9e59f7;
-    --divider-bg-color: #5710b2;
+    --bg-body: #EDF2F9;
+    --card-bite-bg: #FFF;
     --bs-breadcrumb-divider: '>';
 }
 
 body {
-    background-color: #FAFBFE;
+    background-color: var(--bg-body);
 }
 
-.zebra-section {
-    background-color: #FFF;
-    border: 1px solid var(--light-accent);
-}
-
-.ex-header {
-    border-bottom: 3px solid var(--divider-bg-color); 
+.ex-header h1 {
+    border-bottom: 3px solid #181c32;
 }
 
 .lead-container > main {
-    max-width: 40em;
+    max-width: 40em; /* Need a max width for margin: auto to center this */
+}
+
+/* health-good, -warn, and -bad are used for indicators of overall health on
+ * providers, projects, and channels. */
+.health-good,
+.health-warn,
+.health-bad {
+    /* Make it large enough that it can be resonably hovered for title text. */
+    padding-bottom: 5px;
+}
+
+.health-good { background-color: green; }
+.health-warn { background-color: orange; }
+.health-bad { background-color: red; }
+
+.card-bite {
+    background-color: var(--card-bite-bg);
+    box-shadow: 0 7px 14px 0 rgba(65,69,88,.1),0 3px 6px 0 rgba(0,0,0,.07)
+}
+
+.card-bite .list-group-item {
+    background-color: var(--card-bite-bg);
 }

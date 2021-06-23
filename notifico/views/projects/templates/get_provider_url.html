@@ -1,16 +1,11 @@
 {% extends "layouts/main.html" %}
 {% import "ui/forms.html" as forms %}
+{% import "ui/components.html" as components %}
 
 {% block content_page %}
-<div class="ex-header mb-3">
-  <div class="container">
-    <h1>{{ _("Install Webhook") }}</h1>
-  </div>
-</div>
-
-<div class="container h-100">
-  {% include "ui/crumbs.html" %}
-</div>
+{% call components.page_header(breadcrumbs) %}
+  {{ _("Setup Webhook") }}
+{% endcall %}
 
 <div class="lead-container d-flex w-100 p-3 text-center">
   <main class="mx-auto">
@@ -22,7 +17,7 @@
     </p>
     <div class="mb-3">
       <input type="text" class="form-control" id="webhook" readonly value="{{ 
-        provider.external_url(stored_provider)
+        provider.p.external_url(provider)
       }}">
     </div>
     <a class="btn btn-primary" href="{{ project.details_url }}">
