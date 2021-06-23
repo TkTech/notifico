@@ -12,6 +12,12 @@ body {
     border-bottom: 3px solid #181c32;
 }
 
+.ex-header ol.breadcrumb {
+    padding: 0.50em;
+    background-color: #f5f5f5;
+    border: 1px solid #cad7e1;
+}
+
 .lead-container > main {
     max-width: 40em; /* Need a max width for margin: auto to center this */
 }
@@ -31,7 +37,7 @@ body {
 
 .card-bite {
     background-color: var(--card-bite-bg);
-    box-shadow: 0 7px 14px 0 rgba(65,69,88,.1),0 3px 6px 0 rgba(0,0,0,.07)
+    box-shadow: 0 7px 14px 0 rgba(65,69,88,.1),0 3px 6px 0 rgba(0,0,0,.07);
 }
 
 .card-bite .list-group-item {
