@@ -120,11 +120,6 @@ def edit_project(u, p):
     """
     Edit an existing project.
     """
-    if p.owner.id != g.user.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
-        return abort(403)
-
     form = ProjectDetailsForm(obj=p)
     if form.validate_on_submit():
         old_p = Project.by_name_and_owner(form.name.data, g.user)
@@ -154,11 +149,6 @@ def delete_project(u, p):
     """
     Delete an existing project.
     """
-    if p.owner.id != g.user.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
-        return abort(403)
-
     if request.method == 'POST' and request.form.get('do') == 'd':
         db.session.delete(p)
         db.session.commit()
