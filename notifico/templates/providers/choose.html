@@ -20,8 +20,7 @@
             {{ provider.PROVIDER_DESCRIPTION }}
             <div class="pt-3">
               <a class="btn btn-primary" href="{{ url_for('.new_provider',
-                  u=user.username,
-                  p=project.name,
+                  project=project,
                   provider_impl=provider.PROVIDER_ID) }}">
                 {{ _("Add") }}
               </a>

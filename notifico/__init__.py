@@ -88,6 +88,15 @@ def create_app():
     # Update celery's configuration with our application config.
     celery.config_from_object(app.config)
 
+    # Custom URL converters for convienience.
+    from notifico.converters import (
+        UserConverter,
+        ProjectConverter
+    )
+
+    app.url_map.converters['user'] = UserConverter
+    app.url_map.converters['project'] = ProjectConverter
+
     # Import and register all of our blueprints.
     from notifico.views import (
         public,

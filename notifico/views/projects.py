@@ -1,22 +1,18 @@
-from functools import wraps
-
 from flask import (
     Blueprint,
     render_template,
-    g,
     redirect,
     url_for,
     abort,
     request,
     flash
 )
-import flask_wtf as wtf
+from wtforms import ValidationError
 from flask_babel import lazy_gettext as _
 from flask_login import login_required, current_user
 
 from notifico import db
 from notifico.provider import get_providers, ProviderTypes, ProviderForm
-from notifico.models.user import User
 from notifico.models.project import Project
 from notifico.models.provider import Provider
 from notifico.forms.projects import ProjectDetailsForm
@@ -24,53 +20,22 @@ from notifico.forms.projects import ProjectDetailsForm
 projects = Blueprint('projects', __name__)
 
 
-def project_action(f):
-    """
-    A decorator for views which act on a project. The function
-    should take two kwargs, `u` (the username) and `p` (the project name),
-    which will be resolved and replaced, or a 404 will be raised if either
-    could not be found.
-    """
-    @wraps(f)
-    def _wrapped(*args, **kwargs):
-        u = User.by_username(kwargs.pop('u'))
-        if not u:
-            # No such user exists.
-            return abort(404)
-
-        p = Project.by_name_and_owner(kwargs.pop('p'), u)
-        if not p:
-            # Project doesn't exist (404 Not Found)
-            return abort(404)
-
-        kwargs['p'] = p
-        kwargs['u'] = u
-
-        return f(*args, **kwargs)
-    return _wrapped
-
-
-@projects.route('/<u>/')
-def dashboard(u):
+@projects.route('/<user:user>/')
+def dashboard(user):
     """
     Display an overview of all the user's projects with summary
     statistics.
     """
-    u = User.by_username(u)
-    if not u:
-        # No such user exists.
-        return abort(404)
-
     # Get all projects by decending creation date.
     projects = (
-        u.projects
+        user.projects
         .order_by(False)
         .order_by(Project.created.desc())
     )
 
     return render_template(
         'projects/dashboard.html',
-        user=u,
+        user=user,
         projects=projects
     )
 
@@ -83,110 +48,102 @@ def new():
     """
     form = ProjectDetailsForm()
     if form.validate_on_submit():
-        p = Project.by_name_and_owner(form.name.data, current_user)
-        if p:
+        exists = db.session.query(
+            Project.query.filter(
+                Project.name_i == form.name.data,
+                Project.owner == current_user
+            ).exists()
+        ).scalar()
+
+        if exists:
             form.name.errors = [
-                wtf.ValidationError('Project name must be unique.')
+                ValidationError('Project name must be unique.')
             ]
         else:
-            p = Project.new(
-                form.name.data,
-                public=form.public.data,
-                website=form.website.data
+            p = Project(
+                name=form.name.data,
+                website=form.website.data,
+                public=form.public.data
             )
-            p.full_name = '{0}/{1}'.format(current_user.username, p.name)
             current_user.projects.append(p)
 
             db.session.add(p)
             db.session.commit()
 
-            return redirect(
-                url_for(
-                    '.details',
-                    u=current_user.username,
-                    p=p.name
-                )
-            )
+            return redirect(p.details_url)
 
     return render_template('projects/new.html', form=form, user=current_user)
 
 
-@projects.route('/<u>/<p>/edit', methods=['GET', 'POST'])
+@projects.route('/<project:project>/edit', methods=['GET', 'POST'])
 @login_required
-@project_action
-def edit_project(u, p):
+def edit_project(project):
     """
     Edit an existing project.
     """
-    form = ProjectDetailsForm(obj=p)
+    form = ProjectDetailsForm(obj=project)
     if form.validate_on_submit():
-        old_p = Project.by_name_and_owner(form.name.data, current_user)
-        if old_p and old_p.id != p.id:
-            form.name.errors = [
-                wtf.ValidationError('Project name must be unique.')
-            ]
-        else:
-            p.name = form.name.data
-            p.website = form.website.data
-            p.public = form.public.data
-            p.full_name = '{0}/{1}'.format(current_user.username, p.name)
-            db.session.commit()
-            return redirect(url_for('.dashboard', u=u.username))
+        # FIXME: Check distinct
+        project.name = form.name.data
+        project.public = form.public.data
+
+        db.session.add(project)
+        db.session.commit()
+
+        return redirect(project.owner.dashboard_url)
 
     return render_template(
         'projects/edit.html',
-        project=p,
+        project=project,
         form=form
     )
 
 
-@projects.route('/<u>/<p>/delete', methods=['GET', 'POST'])
+@projects.route('/<project:project>/delete', methods=['GET', 'POST'])
 @login_required
-@project_action
-def delete_project(u, p):
+def delete_project(project):
     """
     Delete an existing project.
     """
-    if request.method == 'POST' and request.form.get('do') == 'd':
-        db.session.delete(p)
+    if request.method == 'POST':
+        redirect_to = project.owner.dashboard_url
+        db.session.delete(project)
         db.session.commit()
-        return redirect(u.dashboard_url)
+        return redirect(redirect_to)
 
     return render_template(
         'projects/delete.html',
-        project=p,
-        user=u
+        project=project,
+        user=project.owner
     )
 
 
-@projects.route('/<u>/<p>')
-@project_action
-def details(u, p):
+@projects.route('/<project:project>/')
+def details(project):
     """
     Show the details for an existing project.
     """
     crumbs = (
-        (u.username, url_for('.dashboard', u=u.username)),
-        (p.name, None)
+        (project.owner.username, project.owner.dashboard_url),
+        (project.name, None)
     )
 
     return render_template(
         'projects/get.html',
-        project=p,
-        user=u,
+        project=project,
+        user=project.owner,
         breadcrumbs=crumbs
     )
 
 
-@projects.route('/<u>/<p>/provider/choose')
-@project_action
-def choose_provider(u, p):
+@projects.route('/<project:project>/provider/choose')
+def choose_provider(project):
     """
     Choose a new provider to add to a project.
     """
     crumbs = (
-        (u.username, url_for('.dashboard', u=u.username)),
-        (p.name, p.details_url),
+        (project.owner.username, project.owner.dashboard_url),
+        (project.name, project.details_url),
         (_('Choose A Provider'), None)
     )
 
@@ -194,19 +151,18 @@ def choose_provider(u, p):
 
     return render_template(
         'providers/choose.html',
-        project=p,
-        user=u,
+        project=project,
+        user=project.owner,
         breadcrumbs=crumbs,
         providers=providers.values()
     )
 
 
 @projects.route(
-    '/<u>/<p>/provider/choose/<int:provider_impl>',
+    '/<project:project>/provider/choose/<int:provider_impl>',
     methods=['GET', 'POST']
 )
-@project_action
-def new_provider(u, p, provider_impl):
+def new_provider(project, provider_impl):
     """
     Choose a new provider to add to a project.
     """
@@ -225,7 +181,7 @@ def new_provider(u, p, provider_impl):
             config=provider_impl.config_from_form(form),
             provider_id=provider_impl.PROVIDER_ID,
             provider_type=provider_impl.PROVIDER_TYPE,
-            project=p
+            project=project
         )
 
         db.session.add(provider)
@@ -239,59 +195,56 @@ def new_provider(u, p, provider_impl):
             return redirect(
                 url_for(
                     '.get_provider_url',
-                    p=p.name,
-                    u=u.username,
+                    project=project,
                     provider=provider.id
                 )
             )
 
         flash(_('Your provider has been created.'), category='success')
-        return redirect(p.details_url)
+        return redirect(project.details_url)
     else:
         crumbs = (
-            (u.username, url_for('.dashboard', u=u.username)),
-            (p.name, p.details_url),
-            (_('Choose A Provider'), p.choose_provider_url),
+            (project.owner.username, project.owner.dashboard_url),
+            (project.name, project.details_url),
+            (_('Choose A Provider'), project.choose_provider_url),
             (provider_impl.PROVIDER_NAME, None),
         )
 
         return render_template(
             'providers/new.html',
-            project=p,
-            user=u,
+            project=project,
+            user=project.owner,
             breadcrumbs=crumbs,
             provider=provider_impl,
             form=form
         )
 
 
-@projects.route('/<u>/<p>/provider/<int:provider>')
-@project_action
-def get_provider_url(u, p, provider):
+@projects.route('/<project:project>/provider/<int:provider>')
+def get_provider_url(project, provider):
     """Presents the user with the webhook URL for the given provider.
     """
     provider = Provider.query.get_or_404(provider)
 
     return render_template(
         'providers/get_url.html',
-        project=p,
-        user=u,
+        project=project,
+        user=project.owner,
         provider=provider
     )
 
 
 @projects.route(
-    '/<u>/<p>/provider/<int:provider>/edit',
+    '/<project:project>/provider/<int:provider>/edit',
     methods=['GET', 'POST']
 )
-@project_action
-def edit_provider(u, p, provider):
+def edit_provider(project, provider):
     """Edit an existing provider."""
     provider = Provider.query.get_or_404(provider)
 
     crumbs = (
-        (u.username, url_for('.dashboard', u=u.username)),
-        (p.name, p.details_url),
+        (project.owner.username, project.owner.dashboard_url),
+        (project.name, project.details_url),
         (provider.p.PROVIDER_NAME, None),
     )
 
@@ -309,12 +262,12 @@ def edit_provider(u, p, provider):
         db.session.commit()
 
         flash(_('Your provider has been updated.'), category='success')
-        return redirect(p.details_url)
+        return redirect(project.details_url)
 
     return render_template(
         'providers/edit.html',
-        project=p,
-        user=u,
+        project=project,
+        user=project.owner,
         breadcrumbs=crumbs,
         provider=provider.p,
         form=form

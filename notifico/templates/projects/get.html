@@ -61,10 +61,9 @@
         </ul>
         <div class="card-body">
           {% if provider.p.PROVIDER_TYPE.value == 1 %}
-          <a class="card-link" href="{{ url_for(".get_provider_url", 
-            p=project.name,
-            u=user.username,
-            provider=provider.id) }}">{{ _("Get URL") }}</a>
+            <a class="card-link" href="{{ provider.get_webhook_url }}">
+              {{ _("Get URL") }}
+            </a>
           {% endif %}
           <a class="card-link" href="{{ provider.edit_url }}">
             {{ _("Edit") }}

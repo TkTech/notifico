@@ -1,9 +1,6 @@
-# -*- coding: utf8 -*-
-__all__ = ('Project',)
 import datetime
 
 from flask import url_for
-from sqlalchemy import or_
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from notifico import db
@@ -22,7 +19,6 @@ class Project(db.Model):
         'projects', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
     ))
 
-    full_name = db.Column(db.String(101), nullable=False, unique=True)
     message_count = db.Column(db.Integer, default=0)
 
     #: The last time a message was received for this project, from any
@@ -33,13 +29,9 @@ class Project(db.Model):
     #: erroring, this will be set to 0. A healthy project will be 1.
     health = db.Column(db.Integer, default=1, server_default='1')
 
-    @classmethod
-    def new(cls, name, public=True, website=None):
-        c = cls()
-        c.name = name.strip()
-        c.public = public
-        c.website = website.strip() if website else None
-        return c
+    __table_args__ = (
+        db.Index('uidx_name_owner', 'name', 'owner_id', unique=True),
+    )
 
     @hybrid_property
     def name_i(self):
@@ -49,97 +41,18 @@ class Project(db.Model):
     def name_i(cls):
         return CaseInsensitiveComparator(cls.name)
 
-    @classmethod
-    def by_name(cls, name):
-        return cls.query.filter_by(name_i=name).first()
-
-    @classmethod
-    def by_name_and_owner(cls, name, owner):
-        q = cls.query.filter(cls.owner_id == owner.id)
-        q = q.filter(cls.name_i == name)
-        return q.first()
-
-    @classmethod
-    def visible(cls, q, user=None):
-        """
-        Modifies the sqlalchemy query `q` to only show projects accessible
-        to `user`. If `user` is ``None``, only shows public projects.
-        """
-        if user and user.in_group('admin'):
-            # We don't do any filtering for admins,
-            # who should have full visibility.
-            pass
-        elif user:
-            # We only show the projects that are either public,
-            # or are owned by `user`.
-            q = q.filter(or_(
-                Project.owner_id == user.id,
-                Project.public.is_(True)
-            ))
-        else:
-            q = q.filter(Project.public.is_(True))
-
-        return q
-
-    def is_owner(self, user):
-        """
-        Returns ``True`` if `user` is the owner of this project.
-        """
-        return user and user.id == self.owner.id
-
-    def can_see(self, user):
-        if self.public:
-            # Public projects are always visible.
-            return True
-        if user and user.in_group('admin'):
-            # Admins can always see projects.
-            return True
-        elif self.is_owner(user):
-            # The owner of the project can always see it.
-            return True
-
-        return False
-
-    def can_modify(self, user):
-        """
-        Returns ``True`` if `user` can modify this project.
-        """
-        if user and user.in_group('admin'):
-            # Admins can always modify projects.
-            return True
-        elif self.is_owner(user):
-            return True
-
-        return False
-
     @property
     def details_url(self):
-        return url_for(
-            'projects.details',
-            u=self.owner.username,
-            p=self.name
-        )
+        return url_for('projects.details', project=self)
 
     @property
     def edit_url(self):
-        return url_for(
-            'projects.edit_project',
-            u=self.owner.username,
-            p=self.name
-        )
+        return url_for('projects.edit_project', project=self)
 
     @property
     def delete_url(self):
-        return url_for(
-            'projects.delete_project',
-            u=self.owner.username,
-            p=self.name
-        )
+        return url_for('projects.delete_project', project=self)
 
     @property
     def choose_provider_url(self):
-        return url_for(
-            'projects.choose_provider',
-            u=self.owner.username,
-            p=self.name
-        )
+        return url_for('projects.choose_provider', project=self)

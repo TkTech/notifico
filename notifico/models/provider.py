@@ -88,7 +88,14 @@ class Provider(db.Model):
     def edit_url(self):
         return url_for(
             'projects.edit_provider',
-            u=self.project.owner.username,
-            p=self.project.name,
+            project=self.project,
+            provider=self.id
+        )
+
+    @property
+    def get_webhook_url(self):
+        return url_for(
+            'projects.get_provider_url',
+            project=self.project,
             provider=self.id
         )

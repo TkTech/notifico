@@ -90,7 +90,7 @@ class User(db.Model, UserMixin):
 
     @property
     def dashboard_url(self):
-        return url_for('projects.dashboard', u=self.username)
+        return url_for('projects.dashboard', user=self)
 
     def get_id(self) -> str:
         # Part of the flask_login.UserMixin interface.
