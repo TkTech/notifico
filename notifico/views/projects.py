@@ -57,7 +57,7 @@ def new():
 
         if exists:
             form.name.errors = [
-                ValidationError('Project name must be unique.')
+                ValidationError(_('Project name must be unique.'))
             ]
         else:
             p = Project(
@@ -83,14 +83,28 @@ def edit_project(project):
     """
     form = ProjectDetailsForm(obj=project)
     if form.validate_on_submit():
-        # FIXME: Check distinct
-        project.name = form.name.data
-        project.public = form.public.data
+        exists = db.session.query(
+            Project.query.filter(
+                Project.name_i == form.name.data,
+                Project.owner == current_user,
+                # We want to see if were taking the name from another project,
+                # not ourselves.
+                Project.id != project.id,
+            ).exists()
+        ).scalar()
 
-        db.session.add(project)
-        db.session.commit()
+        if exists:
+            form.name.errors = [
+                ValidationError(_('Project name must be unique.'))
+            ]
+        else:
+            project.name = form.name.data
+            project.public = form.public.data
 
-        return redirect(project.owner.dashboard_url)
+            db.session.add(project)
+            db.session.commit()
+
+            return redirect(project.owner.dashboard_url)
 
     return render_template(
         'projects/edit.html',
