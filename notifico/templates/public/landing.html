@@ -11,7 +11,7 @@
       (Github, JIRA, Gitlab, Jenkins, and more) to your favorite chat service.
       {% endtrans %}
     </p>
-    {% if not g.user %}
+    {% if not current_user.is_authenticated %}
     <p>
       <a class="btn btn-success btn-large" href="{{ url_for('users.register') }}">
         <i class="icon-plus"></i> {{ _("Sign Up") }}

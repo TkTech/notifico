@@ -5,12 +5,12 @@ from flask import (
     redirect,
     current_app,
     url_for,
-    session,
     flash
 )
 from flask_babel import lazy_gettext as _
+from flask_login import login_user, logout_user, login_required, current_user
 
-from notifico import db, user_required
+from notifico import db
 from notifico.models.user import User
 from notifico.forms.users import (
     UserLoginForm,
@@ -18,19 +18,16 @@ from notifico.forms.users import (
 )
 
 users = Blueprint('users', __name__)
-# Usernames that cannot be registered because they clash with internal
-# routes.
-_reserved = ('new', 'api', 'settings')
-
-
-@users.before_app_request
-def set_user():
-    g.user = None
-    if '_u' in session and '_uu' in session:
-        g.user = User.query.filter_by(
-            id=session['_u'],
-            username=session['_uu']
-        ).first()
+# Usernames that cannot be registered because they clash with existing or
+# planned internal routes.
+_reserved = (
+    'new',
+    'api',
+    'settings',
+    'login',
+    'logout',
+    'stats',
+)
 
 
 @users.route('/login', methods=['GET', 'POST'])
@@ -38,31 +35,26 @@ def login():
     """
     Standard login form.
     """
-    if g.user:
+    if current_user.is_active:
         return redirect(url_for('public.landing'))
 
     form = UserLoginForm()
     if form.validate_on_submit():
         u = User.by_username(form.username.data)
-        session['_u'] = u.id
-        session['_uu'] = u.username
+        login_user(u)
+
         return redirect(url_for('projects.dashboard', u=u.username))
 
     return render_template('users/login.html', form=form)
 
 
 @users.route('/logout')
-@user_required
+@login_required
 def logout():
     """
     Logout the current user.
     """
-    if '_u' in session:
-        del session['_u']
-
-    if '_uu' in session:
-        del session['_uu']
-
+    logout_user()
     return redirect(url_for('.login'))
 
 
@@ -72,11 +64,7 @@ def register():
     If new user registrations are enabled, provides a registration form
     and validation.
     """
-    if g.user:
-        return redirect(url_for('public.landing'))
-
-    # Make sure this instance is allowing new users.
-    if not current_app.config.get('NOTIFICO_NEW_USERS', True):
+    if current_user.is_active:
         return redirect(url_for('public.landing'))
 
     form = UserRegisterForm()

@@ -1,18 +1,12 @@
-from functools import wraps
-
 from redis import Redis
 from celery import Celery
-from flask import (
-    Flask,
-    g,
-    redirect,
-    url_for
-)
+from flask import Flask
 from flask_caching import Cache
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel
 from flask_migrate import Migrate
+from flask_login import LoginManager
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from raven.contrib.flask import Sentry
 
@@ -26,32 +20,20 @@ celery = Celery()
 babel = Babel()
 migrate = Migrate()
 
-
-def user_required(f):
-    """
-    A decorator for views which required a logged in user.
-    """
-    @wraps(f)
-    def _wrapped(*args, **kwargs):
-        if g.user is None:
-            return redirect(url_for('account.login'))
-        return f(*args, **kwargs)
-    return _wrapped
+login_manager = LoginManager()
+login_manager.login_view = 'users.login'
 
 
-def group_required(name):
-    """
-    A decorator for views which required a user to be member
-    to a particular group.
-    """
-    def _wrap(f):
-        @wraps(f)
-        def _wrapped(*args, **kwargs):
-            if g.user is None or not g.user.in_group(name):
-                return redirect(url_for('account.login'))
-            return f(*args, **kwargs)
-        return _wrapped
-    return _wrap
+@login_manager.user_loader
+def user_loader(user_id):
+    from notifico.models.user import User
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return
+
+    return User.query.get(user_id)
 
 
 def create_app():
@@ -101,6 +83,7 @@ def create_app():
     mail.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
+    login_manager.init_app(app)
 
     # Update celery's configuration with our application config.
     celery.config_from_object(app.config)

@@ -4,30 +4,21 @@ import hashlib
 import datetime
 
 from flask import url_for
+from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from notifico import db
 from notifico.models import CaseInsensitiveComparator
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
 
-    # ---
-    # Required Fields
-    # ---
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     salt = db.Column(db.String(8), nullable=False)
     joined = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
-
-    # ---
-    # Public Profile Fields
-    # ---
-    company = db.Column(db.String(255))
-    website = db.Column(db.String(255))
-    location = db.Column(db.String(255))
 
     @classmethod
     def new(cls, username, email, password):
@@ -97,59 +88,10 @@ class User(db.Model):
     def username_i(cls):
         return CaseInsensitiveComparator(cls.username)
 
-    def active_projects(self, limit=5):
-        """
-        Return this users most active projets (by descending message count).
-        """
-        q = self.projects.order_by(False).order_by('-message_count')
-        q = q.limit(limit)
-        return q
-
-    def in_group(self, name):
-        """
-        Returns ``True`` if this user is in the group `name`, otherwise
-        ``False``.
-        """
-        return any(g.name == name.lower() for g in self.groups)
-
-    def add_group(self, name):
-        """
-        Adds this user to the group `name` if not already in it. The group
-        will be created if needed.
-        """
-        if self.in_group(name):
-            # We're already in this group.
-            return
-
-        self.groups.append(Group.get_or_create(name=name))
-
     @property
     def dashboard_url(self):
         return url_for('projects.dashboard', u=self.username)
 
-
-class Group(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-
-    name = db.Column(db.String(255), unique=True, nullable=False)
-
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    owner = db.relationship('User', backref=db.backref(
-        'groups', order_by=id, lazy='joined'
-    ))
-
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return '<Group({name!r})>'.format(name=self.name)
-
-    @classmethod
-    def get_or_create(cls, name):
-        name = name.lower()
-
-        g = cls.query.filter_by(name=name).first()
-        if not g:
-            g = Group(name=name)
-
-        return g
+    def get_id(self) -> str:
+        # Part of the flask_login.UserMixin interface.
+        return str(self.id)

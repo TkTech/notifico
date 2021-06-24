@@ -14,9 +14,9 @@ should flash messages. #}
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto">
-          {% if g.user %}
+          {% if current_user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ g.user.dashboard_url }}">
+            <a class="nav-link" href="{{ current_user.dashboard_url }}">
               {{ _("Projects") }}
             </a>
           </li>

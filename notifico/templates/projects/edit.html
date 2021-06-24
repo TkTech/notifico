@@ -16,7 +16,7 @@
       {{ forms.render_field(form.public) }}
       <div class="form-actions">
         <button type="submit" class="btn btn-success">{{ _("Save Changes") }}</button>
-        <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn btn-secondary">
+        <a href="{{ project.details_url }}" class="btn btn-secondary">
           {{ _("Cancel") }}
         </a>
       </div>

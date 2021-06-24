@@ -20,7 +20,7 @@
         <button type="submit" class="btn btn-danger" value="d" name="do">
           {{ _("Delete Project") }}
         </button>
-        <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-secondary">
+        <a href="{{ user.dashboard_url }}" class="btn btn-secondary">
           {{ _("Cancel") }}
         </a>
       </div>

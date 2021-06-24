@@ -12,8 +12,9 @@ from flask import (
 )
 import flask_wtf as wtf
 from flask_babel import lazy_gettext as _
+from flask_login import login_required, current_user
 
-from notifico import db, user_required
+from notifico import db
 from notifico.provider import get_providers, ProviderTypes, ProviderForm
 from notifico.models.user import User
 from notifico.models.project import Project
@@ -60,36 +61,29 @@ def dashboard(u):
         # No such user exists.
         return abort(404)
 
-    is_owner = (g.user and g.user.id == u.id)
-
     # Get all projects by decending creation date.
     projects = (
         u.projects
         .order_by(False)
         .order_by(Project.created.desc())
     )
-    if not is_owner:
-        # If this isn't the users own page, only
-        # display public projects.
-        projects = projects.filter_by(public=True)
 
     return render_template(
         'projects/dashboard.html',
         user=u,
-        is_owner=is_owner,
         projects=projects
     )
 
 
 @projects.route('/new', methods=['GET', 'POST'])
-@user_required
+@login_required
 def new():
     """
     Create a new project.
     """
     form = ProjectDetailsForm()
     if form.validate_on_submit():
-        p = Project.by_name_and_owner(form.name.data, g.user)
+        p = Project.by_name_and_owner(form.name.data, current_user)
         if p:
             form.name.errors = [
                 wtf.ValidationError('Project name must be unique.')
@@ -100,19 +94,25 @@ def new():
                 public=form.public.data,
                 website=form.website.data
             )
-            p.full_name = '{0}/{1}'.format(g.user.username, p.name)
-            g.user.projects.append(p)
-            db.session.add(p)
+            p.full_name = '{0}/{1}'.format(current_user.username, p.name)
+            current_user.projects.append(p)
 
+            db.session.add(p)
             db.session.commit()
 
-            return redirect(url_for('.details', u=g.user.username, p=p.name))
+            return redirect(
+                url_for(
+                    '.details',
+                    u=current_user.username,
+                    p=p.name
+                )
+            )
 
-    return render_template('projects/new.html', form=form)
+    return render_template('projects/new.html', form=form, user=current_user)
 
 
 @projects.route('/<u>/<p>/edit', methods=['GET', 'POST'])
-@user_required
+@login_required
 @project_action
 def edit_project(u, p):
     """
@@ -120,7 +120,7 @@ def edit_project(u, p):
     """
     form = ProjectDetailsForm(obj=p)
     if form.validate_on_submit():
-        old_p = Project.by_name_and_owner(form.name.data, g.user)
+        old_p = Project.by_name_and_owner(form.name.data, current_user)
         if old_p and old_p.id != p.id:
             form.name.errors = [
                 wtf.ValidationError('Project name must be unique.')
@@ -129,7 +129,7 @@ def edit_project(u, p):
             p.name = form.name.data
             p.website = form.website.data
             p.public = form.public.data
-            p.full_name = '{0}/{1}'.format(g.user.username, p.name)
+            p.full_name = '{0}/{1}'.format(current_user.username, p.name)
             db.session.commit()
             return redirect(url_for('.dashboard', u=u.username))
 
@@ -141,7 +141,7 @@ def edit_project(u, p):
 
 
 @projects.route('/<u>/<p>/delete', methods=['GET', 'POST'])
-@user_required
+@login_required
 @project_action
 def delete_project(u, p):
     """
@@ -150,9 +150,13 @@ def delete_project(u, p):
     if request.method == 'POST' and request.form.get('do') == 'd':
         db.session.delete(p)
         db.session.commit()
-        return redirect(url_for('.dashboard', u=u.username))
+        return redirect(u.dashboard_url)
 
-    return render_template('projects/delete.html', project=p)
+    return render_template(
+        'projects/delete.html',
+        project=p,
+        user=u
+    )
 
 
 @projects.route('/<u>/<p>')
@@ -220,6 +224,7 @@ def new_provider(u, p, provider_impl):
         provider = Provider(
             config=provider_impl.config_from_form(form),
             provider_id=provider_impl.PROVIDER_ID,
+            provider_type=provider_impl.PROVIDER_TYPE,
             project=p
         )
 

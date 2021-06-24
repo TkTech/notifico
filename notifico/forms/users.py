@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from flask import g
 import flask_wtf as wtf
 from flask_babel import lazy_gettext as _
 from wtforms import fields, validators
@@ -39,7 +37,7 @@ class UserRegisterForm(wtf.FlaskForm):
     confirm = fields.PasswordField(_('Confirm Password'))
 
     def validate_username(form, field):
-        from notifico.views.account import _reserved
+        from notifico.views.users import _reserved
 
         username = field.data.strip().lower()
         if username in _reserved or User.username_exists(username):
@@ -67,41 +65,3 @@ class UserLoginForm(wtf.FlaskForm):
             raise validators.ValidationError(
                 _('Incorrect username and/or password.')
             )
-
-
-class UserPasswordForm(wtf.FlaskForm):
-    old = fields.PasswordField(
-        _('Old Password'),
-        validators=[
-            validators.DataRequired()
-        ]
-    )
-    password = fields.PasswordField(
-        _('Password'),
-        validators=[
-            validators.DataRequired(),
-            validators.Length(5),
-            validators.EqualTo('confirm', _('Passwords do not match.')),
-        ]
-    )
-    confirm = fields.PasswordField(_('Confirm Password'))
-
-    def validate_old(form, field):
-        if not User.login(g.user.username, field.data):
-            raise validators.ValidationError(_('Old Password is incorrect.'))
-
-
-class UserDeleteForm(wtf.FlaskForm):
-    password = fields.PasswordField(
-        _('Password'),
-        validators=[
-            validators.DataRequired(),
-            validators.Length(5),
-            validators.EqualTo('confirm', _('Passwords do not match.')),
-        ]
-    )
-    confirm = fields.PasswordField(_('Confirm Password'))
-
-    def validate_password(form, field):
-        if not User.login(g.user.username, field.data):
-            raise validators.ValidationError(_('Password is incorrect.'))

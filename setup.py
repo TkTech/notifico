@@ -30,6 +30,7 @@ if __name__ == '__main__':
             'flask-caching',
             'flask-babel',
             'flask-migrate',
+            'flask-login',
             'sqlalchemy',
             'email_validator',
             'oauth2',
