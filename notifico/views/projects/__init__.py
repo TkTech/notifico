@@ -200,54 +200,56 @@ def choose_provider(u, p):
 
 
 @projects.route(
-    '/<u>/<p>/provider/choose/<int:provider>',
+    '/<u>/<p>/provider/choose/<int:provider_impl>',
     methods=['GET', 'POST']
 )
 @project_action
-def new_provider(u, p, provider):
+def new_provider(u, p, provider_impl):
     """
     Choose a new provider to add to a project.
     """
-    provider = get_providers()[provider]
+    provider_impl = get_providers().get(provider_impl)
+    if not provider_impl:
+        abort(404)
 
-    form = provider.form()
+    form = provider_impl.form()
     if form is None:
         # Some providers may really not have any configuration. In such a
         # case we need a dummy form.
         form = ProviderForm()
 
     if form.validate_on_submit():
-        stored_provider = Provider(
-            config=provider.config_from_form(form),
-            provider_id=provider.PROVIDER_ID,
+        provider = Provider(
+            config=provider_impl.config_from_form(form),
+            provider_id=provider_impl.PROVIDER_ID,
             project=p
         )
 
-        db.session.add(stored_provider)
+        db.session.add(provider)
         # TODO: Although incredibly unlikely, there's a chance for a conflict
         # here if the randomly generated key collides. Should handle it.
         db.session.commit()
 
         # For webhook-type providers, we want the chance to present the
         # hook front-and-center with instructions on how to use it.
-        if provider.PROVIDER_TYPE == ProviderTypes.WEBHOOK:
+        if provider_impl.PROVIDER_TYPE == ProviderTypes.WEBHOOK:
             return redirect(
                 url_for(
                     '.get_provider_url',
                     p=p.name,
                     u=u.username,
-                    provider=stored_provider.id
+                    provider=provider.id
                 )
             )
 
-        flash(_('Your provider has been created!'), category='success')
+        flash(_('Your provider has been created.'), category='success')
         return redirect(p.details_url)
     else:
         crumbs = (
             (u.username, url_for('.dashboard', u=u.username)),
             (p.name, p.details_url),
             (_('Choose A Provider'), p.choose_provider_url),
-            (provider.PROVIDER_NAME, None),
+            (provider_impl.PROVIDER_NAME, None),
         )
 
         return render_template(
@@ -255,7 +257,7 @@ def new_provider(u, p, provider):
             project=p,
             user=u,
             breadcrumbs=crumbs,
-            provider=provider,
+            provider=provider_impl,
             form=form
         )
 
@@ -272,4 +274,45 @@ def get_provider_url(u, p, provider):
         project=p,
         user=u,
         provider=provider
+    )
+
+
+@projects.route(
+    '/<u>/<p>/provider/<int:provider>/edit',
+    methods=['GET', 'POST']
+)
+@project_action
+def edit_provider(u, p, provider):
+    """Edit an existing provider."""
+    provider = Provider.query.get_or_404(provider)
+
+    crumbs = (
+        (u.username, url_for('.dashboard', u=u.username)),
+        (p.name, p.details_url),
+        (provider.p.PROVIDER_NAME, None),
+    )
+
+    form = provider.p.form()
+    if form is None:
+        # Some providers may really not have any configuration. In such a
+        # case we need a dummy form.
+        form = ProviderForm()
+
+    provider.p.update_form_with_config(form, provider.config)
+
+    if form.validate_on_submit():
+        provider.config = provider.p.config_from_form(form)
+        db.session.add(provider)
+        db.session.commit()
+
+        flash(_('Your provider has been updated.'), category='success')
+        return redirect(p.details_url)
+
+    return render_template(
+        'edit_provider.html',
+        project=p,
+        user=u,
+        breadcrumbs=crumbs,
+        provider=provider.p,
+        form=form
     )

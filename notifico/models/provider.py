@@ -3,6 +3,8 @@ import base64
 import datetime
 from typing import Optional
 
+from flask import url_for
+
 from notifico import db
 from notifico.provider import get_providers, ProviderTypes
 
@@ -81,3 +83,12 @@ class Provider(db.Model):
         # By convention, every provider will have a description field in their
         # configuration, although it is not required.
         return self.config.get('description')
+
+    @property
+    def edit_url(self):
+        return url_for(
+            'projects.edit_provider',
+            u=self.project.owner.username,
+            p=self.project.name,
+            provider=self.id
+        )

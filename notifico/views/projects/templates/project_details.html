@@ -66,7 +66,9 @@
             u=user.username,
             provider=provider.id) }}">{{ _("Get URL") }}</a>
           {% endif %}
-          <a href="#" class="card-link">{{ _("Edit") }}</a>
+          <a class="card-link" href="{{ provider.edit_url }}">
+            {{ _("Edit") }}
+          </a>
           <a href="#" class="card-link">{{ _("Delete") }}</a>
         </div>
       </div>
