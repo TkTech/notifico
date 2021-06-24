@@ -268,10 +268,12 @@ def edit_provider(project, provider):
         # case we need a dummy form.
         form = ProviderForm()
 
-    provider.p.update_form_with_config(form, provider.config)
+    if request.method == 'GET':
+        provider.p.update_form_with_config(form, provider.config)
 
     if form.validate_on_submit():
         provider.config = provider.p.config_from_form(form)
+
         db.session.add(provider)
         db.session.commit()
 
