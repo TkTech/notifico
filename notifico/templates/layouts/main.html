@@ -21,18 +21,18 @@ should flash messages. #}
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for("account.logout") }}">
+            <a class="nav-link" href="{{ url_for("users.logout") }}">
               {{ _("Logout") }}
             </a>
           </li>
           {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for("account.login") }}">
+            <a class="nav-link" href="{{ url_for("users.login") }}">
               {{ _("Login") }}
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for("account.register") }}">
+            <a class="nav-link" href="{{ url_for("users.register") }}">
               {{ _("Register") }}
             </a>
           </li>

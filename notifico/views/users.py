@@ -12,18 +12,18 @@ from flask_babel import lazy_gettext as _
 
 from notifico import db, user_required
 from notifico.models.user import User
-from notifico.views.account.forms import (
+from notifico.forms.users import (
     UserLoginForm,
     UserRegisterForm
 )
 
-account = Blueprint('account', __name__, template_folder='templates')
+users = Blueprint('users', __name__)
 # Usernames that cannot be registered because they clash with internal
 # routes.
 _reserved = ('new', 'api', 'settings')
 
 
-@account.before_app_request
+@users.before_app_request
 def set_user():
     g.user = None
     if '_u' in session and '_uu' in session:
@@ -33,7 +33,7 @@ def set_user():
         ).first()
 
 
-@account.route('/login', methods=['GET', 'POST'])
+@users.route('/login', methods=['GET', 'POST'])
 def login():
     """
     Standard login form.
@@ -48,10 +48,10 @@ def login():
         session['_uu'] = u.username
         return redirect(url_for('projects.dashboard', u=u.username))
 
-    return render_template('login.html', form=form)
+    return render_template('users/login.html', form=form)
 
 
-@account.route('/logout')
+@users.route('/logout')
 @user_required
 def logout():
     """
@@ -66,7 +66,7 @@ def logout():
     return redirect(url_for('.login'))
 
 
-@account.route('/register', methods=['GET', 'POST'])
+@users.route('/register', methods=['GET', 'POST'])
 def register():
     """
     If new user registrations are enabled, provides a registration form
@@ -92,4 +92,4 @@ def register():
         )
         return redirect(url_for('.login'))
 
-    return render_template('register.html', form=form)
+    return render_template('users/register.html', form=form)

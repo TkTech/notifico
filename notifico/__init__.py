@@ -106,15 +106,17 @@ def create_app():
     celery.config_from_object(app.config)
 
     # Import and register all of our blueprints.
-    from notifico.views.account import account
-    from notifico.views.public import public
-    from notifico.views.projects import projects
-    from notifico.views.webhooks import webhooks
+    from notifico.views import (
+        public,
+        users,
+        projects,
+        webhooks
+    )
 
-    app.register_blueprint(account, url_prefix='/u')
-    app.register_blueprint(webhooks, url_prefix='/h')
-    app.register_blueprint(projects)
-    app.register_blueprint(public)
+    app.register_blueprint(users.users, url_prefix='/u')
+    app.register_blueprint(webhooks.webhooks, url_prefix='/h')
+    app.register_blueprint(projects.projects)
+    app.register_blueprint(public.public)
 
     # Setup some custom Jinja2 filters.
     app.jinja_env.filters['pretty_date'] = pretty.pretty_date

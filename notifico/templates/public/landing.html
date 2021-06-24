@@ -13,13 +13,13 @@
     </p>
     {% if not g.user %}
     <p>
-      <a class="btn btn-success btn-large" href="{{ url_for('account.register') }}">
+      <a class="btn btn-success btn-large" href="{{ url_for('users.register') }}">
         <i class="icon-plus"></i> {{ _("Sign Up") }}
       </a>
     </p>
     <p>
       <small class="muted">
-        {% trans login_url=url_for("account.login") %}
+        {% trans login_url=url_for("users.login") %}
         Already have an account? <a href="{{ login_url }}">Login</a> instead.
         {% endtrans %}
       </small>
