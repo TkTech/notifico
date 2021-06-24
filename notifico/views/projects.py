@@ -20,7 +20,7 @@ from notifico.models.project import Project
 from notifico.models.provider import Provider
 from notifico.forms.projects import ProjectDetailsForm
 
-projects = Blueprint('projects', __name__, template_folder='templates')
+projects = Blueprint('projects', __name__)
 
 
 def project_action(f):
@@ -108,7 +108,7 @@ def new():
 
             return redirect(url_for('.details', u=g.user.username, p=p.name))
 
-    return render_template('projects/new_project.html', form=form)
+    return render_template('projects/new.html', form=form)
 
 
 @projects.route('/<u>/<p>/edit', methods=['GET', 'POST'])
@@ -134,7 +134,7 @@ def edit_project(u, p):
             return redirect(url_for('.dashboard', u=u.username))
 
     return render_template(
-        'projects/edit_project.html',
+        'projects/edit.html',
         project=p,
         form=form
     )
@@ -152,7 +152,7 @@ def delete_project(u, p):
         db.session.commit()
         return redirect(url_for('.dashboard', u=u.username))
 
-    return render_template('projects/delete_project.html', project=p)
+    return render_template('projects/delete.html', project=p)
 
 
 @projects.route('/<u>/<p>')
@@ -167,7 +167,7 @@ def details(u, p):
     )
 
     return render_template(
-        'projects/project_details.html',
+        'projects/get.html',
         project=p,
         user=u,
         breadcrumbs=crumbs
@@ -189,7 +189,7 @@ def choose_provider(u, p):
     providers = get_providers()
 
     return render_template(
-        'projects/choose_provider.html',
+        'providers/choose.html',
         project=p,
         user=u,
         breadcrumbs=crumbs,
@@ -251,7 +251,7 @@ def new_provider(u, p, provider_impl):
         )
 
         return render_template(
-            'projects/new_provider.html',
+            'providers/new.html',
             project=p,
             user=u,
             breadcrumbs=crumbs,
@@ -268,7 +268,7 @@ def get_provider_url(u, p, provider):
     provider = Provider.query.get_or_404(provider)
 
     return render_template(
-        'projects/get_provider_url.html',
+        'providers/get_url.html',
         project=p,
         user=u,
         provider=provider
@@ -307,7 +307,7 @@ def edit_provider(u, p, provider):
         return redirect(p.details_url)
 
     return render_template(
-        'projects/edit_provider.html',
+        'providers/edit.html',
         project=p,
         user=u,
         breadcrumbs=crumbs,
