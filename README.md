@@ -1,7 +1,11 @@
 # Notifico!
 
-Notifico is an open source ([MIT][]) replacement to the now-defunct
-http://cia.vc service with my own little spin on things.
+Notifico takes webhooks from "Providers" (such as Github, JIRA, Gitlab, etc),
+filters them based off some configuration, and sends them along to chat
+networks like IRC.
+
+Notifico is permissively licensed under the [MIT][] license, and is trivial
+to self-host.
 
 ## Development
 
