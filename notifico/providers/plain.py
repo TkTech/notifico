@@ -23,7 +23,6 @@ class PlainProvider(WebhookProvider):
 
             return msg
 
-        # No need for a size check, we globally don't allow URLs that large.
         try:
             msg = request.args['payload']
         except KeyError:

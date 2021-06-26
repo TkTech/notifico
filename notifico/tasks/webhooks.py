@@ -1,6 +1,9 @@
 import inspect
 
+from notifico import db, errors
 from notifico.tasks import celery
+from notifico.models.log import Log
+from notifico.models.project import Project
 from notifico.models.provider import Provider
 
 OPTIONAL_KWARGS = (
@@ -28,6 +31,25 @@ def dispatch_webhook(provider_id, **kwargs):
 
     try:
         provider.p.handle_request(provider, **optionals)
-    except Exception:
-        # FIXME: Update provider health and log.
+    except Exception as e:
+        provider.health = Provider.health - 1
+        provider.project.health = Project.health - 1
+
+        try:
+            raise e
+        except errors.ProviderError as ee:
+            msg = str(ee)
+            payload = ee.payload or {}
+        else:
+            msg = 'An unspecified error occured when processing a webhook.'
+            payload = {}
+
+        log = Log.error(summary=msg, payload=payload)
+
+        provider.project.logs.append(log)
+        provider.logs.append(log)
+
+        db.session.add(provider)
+        db.session.commit()
+
         raise

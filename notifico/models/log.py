@@ -37,7 +37,7 @@ class Log(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     #: The severity of the issued message.
-    severity = db.Column(db.Enum(LogSeverity))
+    severity = db.Column(db.Enum(LogSeverity), nullable=False)
 
     #: The time this log event was *saved*, not emitted..
     created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
