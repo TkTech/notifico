@@ -131,6 +131,26 @@ class WebhookProvider(BaseProvider):
     def icon() -> str:
         return 'fas fa-link'
 
+    @classmethod
+    def pack_payload(cls, provider, request) -> bytes:
+        """
+        Turn the payload of the given request into a `bytes` object that will
+        be sent to the background worker for this webhook.
+
+        You do not need to handle headers or other metadata like IPs, this
+        will be handled for you. You *do* need to handle the body, URL
+        parameters, or anything else of interest to your webhook.
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def handle_request(cls, request):
+        """
+        Handle the given incoming request, emitting 0 or more Messages for
+        destination channels.
+        """
+        raise NotImplementedError()
+
 
 class PollingProvider(BaseProvider):
     PROVIDER_TYPE = ProviderTypes.POLLING

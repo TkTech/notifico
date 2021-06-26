@@ -15,6 +15,7 @@ from notifico import db
 from notifico.provider import get_providers, ProviderTypes, ProviderForm
 from notifico.models.project import Project
 from notifico.models.provider import Provider
+from notifico.models.log import Log
 from notifico.forms.projects import ProjectDetailsForm
 
 projects = Blueprint('projects', __name__)
@@ -142,11 +143,20 @@ def details(project):
         (project.name, None)
     )
 
+    # This will become a performanc pain point very quickly. Needs to be
+    # moved to sort-pagination off of the timestamp.
+    logs = project.logs.order_by(Log.created.desc()).paginate(
+        page=1,
+        per_page=25,
+        max_per_page=25
+    )
+
     return render_template(
         'projects/get.html',
         project=project,
         user=project.owner,
-        breadcrumbs=crumbs
+        breadcrumbs=crumbs,
+        project_logs=logs
     )
 
 
@@ -197,6 +207,17 @@ def new_provider(project, provider_impl):
             provider_type=provider_impl.PROVIDER_TYPE,
             project=project
         )
+
+        project.logs.append(Log.info(
+            summary=(
+                'A new %(provider_name)s provider was created by %(user)s.'
+            ),
+            payload={
+                'provider_name': provider_impl.PROVIDER_NAME,
+                'user': current_user.username,
+                'user_id': current_user.id
+            }
+        ))
 
         db.session.add(provider)
         # TODO: Although incredibly unlikely, there's a chance for a conflict

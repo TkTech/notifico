@@ -1,9 +1,7 @@
 from flask import (
     Blueprint,
     render_template,
-    g,
     redirect,
-    current_app,
     url_for,
     flash
 )
@@ -40,10 +38,10 @@ def login():
 
     form = UserLoginForm()
     if form.validate_on_submit():
-        u = User.by_username(form.username.data)
-        login_user(u)
+        user = User.by_username(form.username.data)
+        login_user(user)
 
-        return redirect(url_for('projects.dashboard', u=u.username))
+        return redirect(user.dashboard_url)
 
     return render_template('users/login.html', form=form)
 

@@ -4,5 +4,9 @@
 # Reconfigure caching and workers to point to the service instance of redis,
 # which is under the literal hostname "redis".
 REDIS_HOST = "redis"
-BROKER_URL = 'redis://redis:6379'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+
+class CELERY:
+    broker_url = 'redis://redis:6379'
+    celer_result_backend = 'redis://redis:6379/0'
+    celery_task_serializer = 'json'

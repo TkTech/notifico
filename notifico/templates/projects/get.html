@@ -97,51 +97,27 @@
     See everything that has happened recently with your project.
     {% endtrans %}
   </p>
+  {% if project_logs.total %}
+  <table class="table table-striped table-small">
+    <thead>
+      <tr>
+        <th>{{ _("When") }}</th>
+        <th>{{ _("Summary") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in project_logs.items %}
+      <tr class="table-{{ components.log_to_suffix(log) }}">
+        <td>{{ log.created|pretty_date|capitalize }}</td>
+        <td>
+          {{ _(log.summary, **log.payload) }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
   <small class="text-info">{{ _("Nothing has happened yet.") }}</small>
+  {% endif %}
 </div>
-
-{#
-<h2>{{ _("Channels") }}</h2>
-<p>
-  {% trans %}
-  Any messages received by this project will be forwarded to all of the
-  channels that have been added to it.
-  {% endtrans %}
-</p>
-<a class="btn btn-success text-decoration-none mb-3" href="{{ project.new_channel_url }}">
-  <i class="fas fa-plus"></i>
-  {{ _("Add a new channel") }}
-</a>
-<div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
-  {% for channel in project.channels %}
-  <div class="col">
-    <div class="card h-100">
-      <div class="card-header">
-        <i class="fas fa-comment-alt"></i> IRC
-      </div>
-      <div class="card-body">
-        <h5 class="card-title d-flex justify-content-between">
-          <span>
-            {{ channel.channel|truncate(18, True) }}
-          </span>
-          <div class="btn-group">
-            <a href="{{ channel.delete_url }}" class="btn btn-sm btn-outline-secondary">
-              {{ _("Delete") }}
-            </a>
-          </div>
-        </h5>
-        <div class="card-text">
-          {{ channel.channel }}@{{ channel.host }}:{{ channel.port }}.
-        </div>
-      </div>
-      <div class="card-footer">
-        <small class="text-muted">
-          {{ _("No messages sent.") }}
-        </small>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-#}
 {% endblock %}

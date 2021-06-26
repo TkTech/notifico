@@ -14,4 +14,3 @@ COPY . .
 RUN python setup.py develop
 # Purge build time dependencies.
 RUN apk del .deps
-CMD ["notifico", "run", "--reload"]

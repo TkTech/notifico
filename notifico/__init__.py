@@ -1,5 +1,4 @@
 from redis import Redis
-from celery import Celery
 from flask import Flask
 from flask_caching import Cache
 from flask_mail import Mail
@@ -16,7 +15,6 @@ db = SQLAlchemy()
 sentry = Sentry()
 cache = Cache()
 mail = Mail()
-celery = Celery()
 babel = Babel()
 migrate = Migrate()
 
@@ -84,9 +82,6 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-
-    # Update celery's configuration with our application config.
-    celery.config_from_object(app.config)
 
     # Custom URL converters for convienience.
     from notifico.converters import (

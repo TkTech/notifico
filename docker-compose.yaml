@@ -1,7 +1,20 @@
 version: "3.9"
 services:
+  # We build the base image just once, then depend on it in the workers and
+  # frontend. Prevents docker-compose from being stupid and rebuilding "."
+  # multiple times.
+  build:
+    image: notifico_base_image
+    build:
+      context: .
+
+  redis:
+    image: "redis:alpine"
+
   app:
-    build: .
+    image: notifico_base_image
+    depends_on: [build, redis]
+
     ports:
       - "5000:5000"
     volumes:
@@ -9,5 +22,17 @@ services:
     environment:
       FLASK_ENV: "development"
       NOTIFICO_CONFIG: "/app/misc/docker_config.py"
-  redis:
-    image: "redis:alpine"
+
+    entrypoint: ["notifico", "run", "--reload"]
+
+  worker:
+    image: notifico_base_image
+    depends_on: [build, redis]
+
+    volumes:
+      - .:/app
+    environment:
+      FLASK_ENV: "development"
+      NOTIFICO_CONFIG: "/app/misc/docker_config.py"
+
+    entrypoint: ["celery", "-A", "notifico.tasks.celery", "worker"]

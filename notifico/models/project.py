@@ -5,9 +5,16 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from notifico import db
 from notifico.models import CaseInsensitiveComparator
+from notifico.models.log import HasLogs
 
 
-class Project(db.Model):
+class Project(db.Model, HasLogs):
+    """
+    A project is a collection of Providers (which emit events) and Channels
+    (which receives processed events).
+    """
+    __tablename__ = 'project'
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
@@ -15,9 +22,15 @@ class Project(db.Model):
     website = db.Column(db.String(1024))
 
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    owner = db.relationship('User', backref=db.backref(
-        'projects', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
-    ))
+    owner = db.relationship(
+        'User',
+        backref=db.backref(
+            'projects',
+            order_by=id,
+            lazy='dynamic',
+            cascade='all, delete-orphan'
+        )
+    )
 
     message_count = db.Column(db.Integer, default=0)
 

@@ -26,3 +26,12 @@
     </ol>
 </nav>
 {% endmacro %}
+
+{# Convert a Log severity level to a bootstrap class suffix. #}
+{%- macro log_to_suffix(log) -%}
+  {%- set level = log.severity.value -%}
+  {% if level >= 0 and level < 30 %}info
+  {% elif level == 30 %}warning
+  {% elif level == 40 or level == 50 %}danger
+  {% endif %}
+{%- endmacro -%}

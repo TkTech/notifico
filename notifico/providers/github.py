@@ -33,3 +33,11 @@ class GithubProvider(WebhookProvider):
     @staticmethod
     def icon() -> str:
         return 'fab fa-github'
+
+    @classmethod
+    def pack_payload(cls, provider, request):
+        return request.get_data(cache=False)
+
+    @classmethod
+    def handle_request(cls, request):
+        pass
