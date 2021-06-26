@@ -7,7 +7,7 @@ from flask import url_for
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from notifico import db
+from notifico.extensions import db
 from notifico.models import CaseInsensitiveComparator
 
 

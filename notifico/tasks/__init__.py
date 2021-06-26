@@ -1,6 +1,6 @@
 from celery import Celery
 
-from notifico import create_app
+from notifico.app import create_app
 
 
 def make_celery():

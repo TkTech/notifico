@@ -5,7 +5,7 @@ from typing import Optional
 
 from flask import url_for
 
-from notifico import db
+from notifico.extensions import db
 from notifico.models.log import HasLogs
 from notifico.provider import get_providers, ProviderTypes
 

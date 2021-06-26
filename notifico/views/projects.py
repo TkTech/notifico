@@ -11,7 +11,7 @@ from wtforms import ValidationError
 from flask_babel import lazy_gettext as _
 from flask_login import login_required, current_user
 
-from notifico import db
+from notifico.extensions import db
 from notifico.provider import get_providers, ProviderTypes, ProviderForm
 from notifico.models.log import Log
 from notifico.models.project import Project

@@ -3,7 +3,7 @@ import datetime
 from flask import url_for
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from notifico import db
+from notifico.extensions import db
 from notifico.models import CaseInsensitiveComparator
 from notifico.models.log import HasLogs
 

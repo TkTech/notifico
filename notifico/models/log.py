@@ -5,7 +5,7 @@ import traceback
 
 from sqlalchemy.ext.declarative import declared_attr
 
-from notifico import db
+from notifico.extensions import db
 
 
 class LogSeverity(enum.Enum):

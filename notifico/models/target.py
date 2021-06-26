@@ -1,6 +1,6 @@
 import datetime
 
-from notifico import db
+from notifico.extensions import db
 
 
 class Target(db.Model):

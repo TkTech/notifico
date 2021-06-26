@@ -8,7 +8,7 @@ from flask import (
 from flask_babel import lazy_gettext as _
 from flask_login import login_user, logout_user, login_required, current_user
 
-from notifico import db
+from notifico.extensions import db
 from notifico.models.user import User
 from notifico.forms.users import (
     UserLoginForm,

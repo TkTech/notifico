@@ -7,7 +7,8 @@ from flask import (
     jsonify
 )
 
-from notifico import errors, db
+from notifico import errors
+from notifico.extensions import db
 from notifico.models.log import Log
 from notifico.models.provider import Provider, ProviderTypes
 from notifico.models.project import Project
