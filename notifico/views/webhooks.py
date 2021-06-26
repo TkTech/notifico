@@ -71,7 +71,7 @@ def trigger(project, key):
                 )
             )
 
-    celery.send_task(
+    task = celery.send_task(
         'dispatch_webhook',
         (provider.id,),
         {
@@ -82,7 +82,8 @@ def trigger(project, key):
 
     return make_response(
         jsonify({
-            'msg': 'Webhook accepted for processing.'
+            'msg': 'Webhook accepted for processing.',
+            'task_id': task.id
         }),
         200
     )
