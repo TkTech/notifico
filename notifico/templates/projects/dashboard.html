@@ -24,7 +24,7 @@
     {% for project in projects %}
     <div class="col">
       <div class="card card-bite h-100 border-0">
-        {% if project.health %}
+        {% if project.health >= 1 %}
         <div class="health-card health-good"
           title="{{ _("Project is healthy.") }}"></div>
         {% elif project.health < 10 %}

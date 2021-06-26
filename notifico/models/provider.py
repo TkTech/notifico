@@ -6,6 +6,7 @@ from typing import Optional
 from flask import url_for
 
 from notifico import db
+from notifico.models.log import HasLogs
 from notifico.provider import get_providers, ProviderTypes
 
 
@@ -13,7 +14,7 @@ def _new_random_key():
     return base64.urlsafe_b64encode(os.urandom(24))[:24].decode('ascii')
 
 
-class Provider(db.Model):
+class Provider(db.Model, HasLogs):
     id = db.Column(db.Integer, primary_key=True)
 
     #: The time this provider was first created.

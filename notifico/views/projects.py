@@ -13,9 +13,9 @@ from flask_login import login_required, current_user
 
 from notifico import db
 from notifico.provider import get_providers, ProviderTypes, ProviderForm
+from notifico.models.log import Log
 from notifico.models.project import Project
 from notifico.models.provider import Provider
-from notifico.models.log import Log
 from notifico.forms.projects import ProjectDetailsForm
 
 projects = Blueprint('projects', __name__)
@@ -145,7 +145,8 @@ def details(project):
 
     # This will become a performanc pain point very quickly. Needs to be
     # moved to sort-pagination off of the timestamp.
-    logs = project.logs.order_by(Log.created.desc()).paginate(
+    query = project.logs.order_by(Log.created.desc())
+    logs = query.paginate(
         page=1,
         per_page=25,
         max_per_page=25

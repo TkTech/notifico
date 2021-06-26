@@ -25,7 +25,7 @@
     {% set name = provider.p.PROVIDER_NAME %}
     <div class="col">
       <div class="card card-bite h-100 border-0">
-        {% if provider.health %}
+        {% if provider.health >= 1 %}
         <div class="health-card health-good"
           title="{{ _("Provider is healthy.") }}"></div>
         {% elif provider.health < 10 %}

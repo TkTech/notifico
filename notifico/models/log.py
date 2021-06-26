@@ -1,5 +1,7 @@
+import sys
 import enum
 import datetime
+import traceback
 
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -48,7 +50,11 @@ class Log(db.Model):
     #: Any arbitrary data that the logger chooses to include. These values
     #: be passed when rendering the `summary` string and can be used for
     #: translation values.
-    payload = db.Column(db.JSON)
+    payload = db.Column(db.JSON, default=dict, server_default='{}')
+
+    #: A possible exception traceback that caused this log event. Should
+    #: only be present for severities of error and critical.
+    trace = db.Column(db.Text())
 
     @classmethod
     def debug(cls, **kwargs):
@@ -64,10 +70,18 @@ class Log(db.Model):
 
     @classmethod
     def error(cls, **kwargs):
+        type_, _, _ = sys.exc_info()
+        if type_ is not None:
+            kwargs['trace'] = traceback.format_exc()
+
         return cls(severity=LogSeverity.ERROR, **kwargs)
 
     @classmethod
     def critical(cls, **kwargs):
+        type_, _, _ = sys.exc_info()
+        if type_ is not None:
+            kwargs['trace'] = traceback.format_exc()
+
         return cls(severity=LogSeverity.CRITICAL, **kwargs)
 
 

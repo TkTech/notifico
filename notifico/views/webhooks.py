@@ -7,8 +7,10 @@ from flask import (
     jsonify
 )
 
-from notifico import errors
+from notifico import errors, db
+from notifico.models.log import Log
 from notifico.models.provider import Provider, ProviderTypes
+from notifico.models.project import Project
 
 webhooks = Blueprint('webhooks', __name__)
 
@@ -41,15 +43,33 @@ def trigger(project, key):
 
     try:
         packed = provider.p.pack_payload(provider, request)
-    except errors.PayloadNotValidError:
-        abort(
-            make_response(
-                jsonify({
-                    'msg': 'Webhook payload was malformed.'
-                }),
-                400
+    except Exception as e:
+        # Any exception causes a reduction in health score. Then we re-raise
+        # for more specific error handlers.
+        provider.health = Provider.health - 1
+        provider.project.health = Project.health - 1
+
+        log = Log.error(summary=(
+            'An unspecified error occured when processing a webhook.'
+        ))
+
+        provider.project.logs.append(log)
+        provider.logs.append(log)
+
+        db.session.add(provider)
+        db.session.commit()
+
+        try:
+            raise e
+        except errors.PayloadNotValidError:
+            abort(
+                make_response(
+                    jsonify({
+                        'msg': 'Webhook payload was malformed.'
+                    }),
+                    400
+                )
             )
-        )
 
     celery.send_task(
         'dispatch_webhook',
