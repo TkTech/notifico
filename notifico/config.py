@@ -54,9 +54,6 @@ SENTRY_DSN = None
 #: handle the /static directory.
 NOTIFICO_ROUTE_STATIC = True
 
-#: Should new users be allowed to register?
-NOTIFICO_NEW_USERS = True
-
 # Configure to allow Notifico to send password reset emails and other
 # notifications by mail.
 

@@ -12,7 +12,10 @@ from notifico.extensions import (
     login_manager
 )
 
+login_manager.login_view = 'users.login'
 
+
+@login_manager.user_loader
 def user_loader(user_id):
     from notifico.models.user import User
 
@@ -65,9 +68,6 @@ def create_app():
     mail.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
-
-    login_manager.login_view = 'users.login'
-    login_manager.user_loader(user_loader)
     login_manager.init_app(app)
 
     # Custom URL converters for convienience.
@@ -84,9 +84,11 @@ def create_app():
         public,
         users,
         projects,
-        webhooks
+        webhooks,
+        admin
     )
 
+    app.register_blueprint(admin.admin, url_prefix='/a')
     app.register_blueprint(users.users, url_prefix='/u')
     app.register_blueprint(webhooks.webhooks, url_prefix='/h')
     app.register_blueprint(projects.projects)

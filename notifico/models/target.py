@@ -13,7 +13,7 @@ class Target(db.Model):
     last_message_sent = db.Column(db.DateTime, nullable=True)
 
     #: An indicator of health of this channel. A healthy channel will be 1,
-    #: an unhealthy channel with be 0.
+    #: an unhealthy channel with be 0 or less.
     health = db.Column(db.Integer, default=1, server_default='1')
 
     #: The Target that is responsible for this channel.

@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% import "ui/components.html" as components %}
+{% import "ui/forms.html" as forms %}
+{% from 'ui/page.html' import render_pagination %}
+
+{% block admin_page %}
+<h2>{{ _("New Group") }}</h2>
+<p>
+{% trans %}
+Create a new user-defined group to apply custom permissions and limits onto one
+or more users. You can select the permissions for this group on the next step.
+{% endtrans %}
+</p>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  {% for field in form if field.widget.input_type != "hidden" %}
+  {{ forms.render_field(field) }}
+  {% endfor %}
+  <div class="form-actions">
+    <button name="create-group" type="submit" class="btn btn-primary">
+      {{ _("Create Group") }}
+    </button>
+  </div>
+</form>
+{% endblock %}

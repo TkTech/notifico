@@ -1,7 +1,18 @@
-from sqlalchemy import func
-from sqlalchemy.ext.hybrid import Comparator
+from notifico.models.log import Log
+from notifico.models.user import User
+from notifico.models.project import Project
+from notifico.models.provider import Provider
+from notifico.models.group import Group, Permission, Limit
 
-
-class CaseInsensitiveComparator(Comparator):
-    def __eq__(self, other):
-        return func.lower(self.__clause_element__()) == func.lower(other)
+#: All models used in the core.
+# We use this so tools like alembic can find all the models we use, even if
+# they're not necessarily imported by the time it runs.
+ALL_MODELS = (
+    Log,
+    User,
+    Project,
+    Provider,
+    Group,
+    Permission,
+    Limit
+)

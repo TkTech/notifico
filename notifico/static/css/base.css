@@ -43,3 +43,8 @@ body {
 .card-bite .list-group-item {
     background-color: var(--card-bite-bg);
 }
+
+.compact {
+    white-space: nowrap;
+    width: 1%;
+}

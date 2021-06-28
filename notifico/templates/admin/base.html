@@ -1,0 +1,28 @@
+{% extends "layouts/main.html" %}
+
+{% block content_page %}
+<div class="container">
+  {% call components.page_header(breadcrumbs) %}
+    {{ admin_title|default(_("Admin")) }}
+  {% endcall %}
+
+  <div class="row">
+    <nav class="col-md-3 d-block">
+      <div class="list-group p-3">
+        <a class="list-group-item list-group-item-action" href="{{ url_for(".dashboard") }}">
+          {{ _("Dashboard") }}
+        </a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for(".groups") }}">
+          {{ _("Groups") }}
+        </a>
+      </div>
+    </nav>
+    <main class="col-md-9 d-block">
+      <div class="p-3">
+        {% block admin_page %}
+        {% endblock %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@
       {% for page in pg.iter_pages() %}
         {% if page %}
           <li class="page-item {% if page == pg.page %}active{% endif %}">
-            <a class="page-link" href="{{ url_for(endpoint, page=page, **kwargs) }}">
+            <a class="page-link" href="{{ url_for(endpoint, page=page) }}">
               {{ page }}
             </a>
           </li>

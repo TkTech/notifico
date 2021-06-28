@@ -1,0 +1,59 @@
+{% extends "admin/base.html" %}
+{% import "ui/components.html" as components %}
+{% import "ui/forms.html" as forms %}
+{% from 'ui/page.html' import render_pagination %}
+
+{% block admin_page %}
+  <h2>{{ group.name }}</h2>
+  <p>{{ group.description|default(_("N/A")) }}</p>
+  {% if group.deletable %}
+  <h2>{{ _("Details") }}</h2>
+  <form method="POST" class="mb-3">
+    {{ details_form.hidden_tag() }}
+    {% for field in details_form if field.widget.input_type != "hidden" %}
+    {{ forms.render_field(field) }}
+    {% endfor %}
+    <div class="form-actions">
+      <button name="save-details" type="submit" class="btn btn-primary">
+        {{ _("Save Details") }}
+      </button>
+    </div>
+  </form>
+  {% endif %}
+  <h2>{{ _("Permissions") }}</h2>
+  <p>
+  {% trans %}
+  The permissions applied to this group will apply to all current members of
+  the group immediately, as well as all future members.
+  {% endtrans %}
+  </p>
+  <form method="POST">
+    <table class="table table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th>{{ _("Permission") }}</th>
+          <th class="compact text-center">{{ _("Enabled?") }}</th>
+      </thead>
+      <tbody>
+        {{ permissions_form.hidden_tag() }}
+        {% for field in permissions_form if field.widget.input_type != "hidden" %}
+        {% set permission = permissions[field.id] %}
+        <tr>
+          <td>
+            <strong>{{ _(permission.name) }}</strong>
+            <em class="d-block text-muted">
+              {{ _(permission.description) }}
+            </em>
+          </td>
+          <td class="compact text-center">{{ field }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="form-actions">
+      <button name="save-permissions" type="submit" class="btn btn-primary">
+        {{ _("Save Permissions") }}
+      </button>
+    </div>
+  </form>
+{% endblock %}

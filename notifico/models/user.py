@@ -8,17 +8,25 @@ from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from notifico.extensions import db
-from notifico.models import CaseInsensitiveComparator
+from notifico.models.utils import CaseInsensitiveComparator
 
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
 
     username = db.Column(db.String(50), unique=True, nullable=False)
+    #: The user's currently active email address.
     email = db.Column(db.String(255), nullable=False)
+    #: The salted and hashed user password.
     password = db.Column(db.String(255), nullable=False)
+    #: The salt used to hash `passworc`.
     salt = db.Column(db.String(8), nullable=False)
+
+    #: The date and time this user was created.
     joined = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
+
+    #: If True, this user skips all permission checks.
+    is_admin = db.Column(db.Boolean, default=False, server_default='f')
 
     @classmethod
     def new(cls, username, email, password):

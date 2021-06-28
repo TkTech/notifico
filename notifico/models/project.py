@@ -4,8 +4,8 @@ from flask import url_for
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from notifico.extensions import db
-from notifico.models import CaseInsensitiveComparator
 from notifico.models.log import HasLogs
+from notifico.models.utils import CaseInsensitiveComparator
 
 
 class Project(db.Model, HasLogs):

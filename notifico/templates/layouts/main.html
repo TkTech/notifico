@@ -15,6 +15,13 @@ should flash messages. #}
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto">
           {% if current_user.is_authenticated %}
+          {% if current_user.is_admin %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for("admin.dashboard") }}">
+              {{ _("Admin") }}
+            </a>
+          </li>
+          {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="{{ current_user.dashboard_url }}">
               {{ _("Projects") }}

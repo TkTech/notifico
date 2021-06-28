@@ -96,7 +96,7 @@ class HasLogs:
 
     .. note::
 
-        Database migrations must be run whenver this mixin is added to a model
+        Database migrations must be run whenever this mixin is added to a model
         in order to generate the association table.
     """
     @declared_attr
