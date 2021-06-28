@@ -8,14 +8,19 @@
 
   <div class="row">
     <nav class="col-md-3 d-block">
-      <div class="list-group p-3">
+      <div class="list-group py-3 px-2">
         <a class="list-group-item list-group-item-action" href="{{ url_for(".dashboard") }}">
           {{ _("Dashboard") }}
         </a>
         <a class="list-group-item list-group-item-action" href="{{ url_for(".groups") }}">
           {{ _("Groups") }}
         </a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for(".users") }}">
+          {{ _("Users") }}
+        </a>
       </div>
+      {% block sidebar %}
+      {% endblock%}
     </nav>
     <main class="col-md-9 d-block">
       <div class="p-3">

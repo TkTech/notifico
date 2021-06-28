@@ -14,6 +14,14 @@ class ValueType(Enum):
     BOOLEAN = 40
 
 
+class CoreGroups(Enum):
+    """Database IDs for core groups, which are guaranteed to both exist,
+    and to have the given ID.
+    """
+    ANONYMOUS = 1
+    REGISTERED = 2
+
+
 group_permission = db.Table(
     'group_permission',
     db.metadata,

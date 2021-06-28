@@ -10,9 +10,14 @@ from flask import (
 from flask_babel import lazy_gettext as _
 
 from notifico.extensions import db
-from notifico.models import Group, Permission
+from notifico.models import Group, Permission, User
+from notifico.models.group import CoreGroups
 from notifico.authorization import has_admin
-from notifico.forms.admin import make_permission_form, GroupDetailsForm
+from notifico.forms.admin import (
+    make_permission_form,
+    GroupDetailsForm,
+    UserFilterForm
+)
 
 
 admin = Blueprint('admin', __name__)
@@ -191,4 +196,57 @@ def groups_delete(group_id):
         admin_title=_('Delete Group'),
         breadcrumbs=crumbs,
         group=group
+    )
+
+
+@admin.route('/users', endpoint='users')
+@has_admin
+def users_list():
+    crumbs = (
+        (_('Admin'), url_for('.dashboard')),
+        (_('Users'), None),
+    )
+
+    try:
+        page = int(request.args.get('page', 1))
+    except ValueError:
+        page = 1
+
+    form = UserFilterForm(request.args, csrf_enabled=False)
+    # The list of groups is unknown when the form is created, so we need
+    # to populate it.
+    form.group.choices = [
+        (group.id, group.name)
+        for group in Group.query.with_entities(Group.id, Group.name)
+    ]
+    # If no group has been explicitly provided, default to the registered
+    # user group.
+    if 'group' not in request.args:
+        form.group.data = next(
+            gid for gid, _ in form.group.choices
+            if gid == CoreGroups.REGISTERED.value
+        )
+
+    if form.validate():
+        pass
+
+    users = db.session.query(
+        User
+    ).join(
+        User.groups
+    ).filter(
+        Group.id == form.group.data
+    )
+
+    users = users.order_by(User.joined.desc()).paginate(
+        page=page,
+        per_page=25
+    )
+
+    return render_template(
+        'admin/users/list.html',
+        admin_title=_('Users'),
+        breadcrumbs=crumbs,
+        users=users,
+        form=form
     )

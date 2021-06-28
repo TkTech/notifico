@@ -10,6 +10,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 from notifico.extensions import db
 from notifico.models.user import User
+from notifico.models.group import Group, CoreGroups
 from notifico.authorization import require_permission
 from notifico.forms.users import (
     UserLoginForm,
@@ -71,6 +72,10 @@ def register():
     if form.validate_on_submit():
         # Checks out, go ahead and create our new user.
         u = User.new(form.username.data, form.email.data, form.password.data)
+
+        # Add to the Registered core user group.
+        u.groups.append(Group.query.get(CoreGroups.REGISTERED.value))
+
         db.session.add(u)
         db.session.commit()
         # ... and send them back to the login screen.

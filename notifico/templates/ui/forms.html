@@ -31,3 +31,35 @@
     {% endif %}
 </div>
 {% endmacro %}
+
+{% macro render_floating_field(field) %}
+<div class="form-floating {% if field.errors %}text-danger{% endif %}">
+    {% if field.type == 'SelectField' %}
+    {{ field(class_="form-select", **kwargs)|safe }}
+    <label for="{{ field.id }}">
+        {{ field.label.text }}
+        {% if field.flags.required %}
+        <span class="text-danger required">*</span>
+        {% endif %}
+    </label>
+    {% else %}
+    {{ field(class_="form-control", **kwargs)|safe }}
+    <label for="{{ field.id }}">
+        {{ field.label.text }}
+        {% if field.flags.required %}
+        <span class="text-danger required">*</span>
+        {% endif %}
+    </label>
+    {% endif %}
+    {% if field.errors %}
+    {% for error in field.errors %}
+    <span class="form-text">{{ error }}</span>
+    {% endfor %}
+    {% endif %}
+    {% if field.description %}
+    <span class="form-text text-muted">
+        {{ field.description|safe }}
+    </span>
+    {% endif %}
+</div>
+{% endmacro %}

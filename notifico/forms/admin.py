@@ -45,3 +45,13 @@ class GroupDetailsForm(FlaskForm):
             'A description of this group.'
         )
     )
+
+
+class UserFilterForm(FlaskForm):
+    group = fields.SelectField(
+        _('Group'),
+        coerce=int,
+        render_kw={
+            'placeholder': _('Select a group...')
+        }
+    )

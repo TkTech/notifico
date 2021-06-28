@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% import "ui/components.html" as components %}
+{% import "ui/forms.html" as forms %}
+{% from 'ui/page.html' import render_pagination %}
+
+
+{% block sidebar %}
+<div class="p-2 mb-3">
+  <span class="fs-4">{{ _("Filters") }}</span>
+  <form method="GET">
+    {{ form.hidden_tag() }}
+    {{ forms.render_floating_field(form.group) }}
+    <button type="submit" class="btn btn-primary mt-3">
+      {{ _("Search") }}
+    </button>
+  </form>
+</div>
+{% endblock %}
+
+
+{% block admin_page %}
+<table class="table table-striped table-sm align-middle">
+  <thead>
+    <tr>
+      <th>{{ _("Username") }}</th>
+      <th class="compact">{{ _("Joined") }}</th>
+      <th class="compact text-center">{{ _("Projects") }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users.items %}
+    <tr>
+      <td>{{ user.username }}</td>
+      <td class="compact">
+        {{ user.joined|pretty_date }}
+      </td>
+      <td class="compact text-center">
+        {{ user.projects.count() }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{{ render_pagination(users, '.users') }}
+{% endblock %}

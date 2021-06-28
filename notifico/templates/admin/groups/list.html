@@ -21,7 +21,9 @@
         </em>
       </td>
       <td class="compact text-center">
-        {{ group.users.count() }}
+        <a href="{{ url_for(".users", group=group.id) }}">
+          {{ group.users.count() }}
+        </a>
       </td>
       <td class="compact px-3">
         <a class="btn btn-primary btn-sm" href="{{ group.edit_url }}">

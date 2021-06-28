@@ -6,7 +6,7 @@ from flask_babel import lazy_gettext as _
 
 from notifico.extensions import db
 from notifico.models.user import User
-from notifico.models.group import Group, Permission
+from notifico.models.group import Group, Permission, CoreGroups
 
 
 def has_admin(f):
@@ -48,7 +48,7 @@ def has_permission(key, *, login_required=True):
             Permission.query.join(
                 Permission, Group.permissions
             ).filter(
-                Group.name == 'Anonymous',
+                Group.id == CoreGroups.ANONYMOUS.value,
                 Permission.key == key
             ).exists()
         ).scalar()

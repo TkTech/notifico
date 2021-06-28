@@ -33,10 +33,11 @@ def seed():
     """Seeds the database with required data, such as the default user groups
     for anonymous and registered users.
     """
-    from notifico.models.group import Group, Permission
+    from notifico.models.group import Group, Permission, CoreGroups
 
     db.session.add_all([
         Group(
+            id=CoreGroups.ANONYMOUS.value,
             name='Anonymous',
             description=(
                 'This group is used for permissions on users who are not'
@@ -48,6 +49,7 @@ def seed():
             ]
         ),
         Group(
+            id=CoreGroups.REGISTERED.value,
             name='Registered',
             description=(
                 'This group is automatically applied to a user once they'
