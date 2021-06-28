@@ -3,6 +3,7 @@ from flask import Flask
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 
 from notifico.util import pretty
+from notifico.authorization import has_permission
 from notifico.extensions import (
     db,
     cache,
@@ -25,6 +26,11 @@ def user_loader(user_id):
         return
 
     return User.query.get(user_id)
+
+
+def default_context():
+    """Context variables loaded into every template by default."""
+    return {'has_permission': has_permission}
 
 
 def create_app():
@@ -98,5 +104,8 @@ def create_app():
     app.jinja_env.filters['pretty_date'] = pretty.pretty_date
     app.jinja_env.filters['plural'] = pretty.plural
     app.jinja_env.filters['fix_link'] = pretty.fix_link
+
+    # And some custom context variables.
+    app.context_processor(default_context)
 
     return app

@@ -7,11 +7,11 @@ from flask import (
     redirect,
     flash
 )
-from flask_login import login_required
 from flask_babel import lazy_gettext as _
 
 from notifico.extensions import db
 from notifico.models import Group, Permission
+from notifico.authorization import has_admin
 from notifico.forms.admin import make_permission_form, GroupDetailsForm
 
 
@@ -19,7 +19,7 @@ admin = Blueprint('admin', __name__)
 
 
 @admin.route('/')
-@login_required
+@has_admin
 def dashboard():
     crumbs = (
         (_('Admin'), url_for('.dashboard')),
@@ -34,7 +34,7 @@ def dashboard():
 
 
 @admin.route('/groups')
-@login_required
+@has_admin
 def groups():
     crumbs = (
         (_('Admin'), url_for('.dashboard')),
@@ -71,7 +71,7 @@ def groups():
 
 
 @admin.route('/groups/new', methods=['GET', 'POST'])
-@login_required
+@has_admin
 def groups_new():
     crumbs = (
         (_('Admin'), url_for('.dashboard')),
@@ -101,7 +101,7 @@ def groups_new():
 
 
 @admin.route('/groups/<int:group_id>', methods=['GET', 'POST'])
-@login_required
+@has_admin
 def groups_edit(group_id):
     crumbs = (
         (_('Admin'), url_for('.dashboard')),
@@ -167,7 +167,7 @@ def groups_edit(group_id):
 
 
 @admin.route('/groups/<int:group_id>/delete', methods=['GET', 'POST'])
-@login_required
+@has_admin
 def groups_delete(group_id):
     crumbs = (
         (_('Admin'), url_for('.dashboard')),

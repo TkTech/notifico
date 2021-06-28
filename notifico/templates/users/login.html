@@ -16,10 +16,11 @@
       <button type="submit" class="btn btn-primary">
         {{ _("Login") }}
       </button>
-      &nbsp;
+      {% if has_permission("can_register", login_required=False) %}
       <a href="{{ url_for('.register') }}" class="btn btn-secondary">
         {{ _("Register") }}
       </a>
+      {% endif %}
       {% if config.NOTIFICO_PASSWORD_RESET %}
       <br />
       <small class="muted">

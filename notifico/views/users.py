@@ -10,6 +10,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 from notifico.extensions import db
 from notifico.models.user import User
+from notifico.authorization import require_permission
 from notifico.forms.users import (
     UserLoginForm,
     UserRegisterForm
@@ -57,6 +58,7 @@ def logout():
 
 
 @users.route('/register', methods=['GET', 'POST'])
+@require_permission('can_register', login_required=False)
 def register():
     """
     If new user registrations are enabled, provides a registration form

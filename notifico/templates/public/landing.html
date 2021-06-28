@@ -11,7 +11,7 @@
       (Github, JIRA, Gitlab, Jenkins, and more) to your favorite chat service.
       {% endtrans %}
     </p>
-    {% if not current_user.is_authenticated %}
+    {% if not current_user.is_authenticated and has_permission('can_register', login_required=False) %}
     <p>
       <a class="btn btn-success btn-large" href="{{ url_for('users.register') }}">
         <i class="icon-plus"></i> {{ _("Sign Up") }}
@@ -52,62 +52,4 @@
     </div>
   </div>
 </div>
-
-
-{#
-<div class="row">
-  <div class="col">
-    <h3>{{ _("Newest Projects") }}</h3>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>{{ _("Created") }}</th>
-          <th>{{ _("Name") }}</th>
-          <th>{{ _("Messages") }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for project in new_projects.items %}
-        <tr>
-          <td nowrap>{{ project.created|pretty_date }}</td>
-          <td class="w-100">
-            {{ repo_link(project) }}
-          </td>
-          <td class="text-center">{{ project.message_count }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <a class="btn btn-info" href="{{ url_for('.projects') }}">
-      {{ _("See All %(total)s Projects", total=new_projects.total) }}
-    </a>
-  </div>
-  <div class="col">
-    <h3>{{ _("Top IRC Networks") }}</h3>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>{{ _("Host") }}</th>
-          <th>{{ _("Channels") }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for network, count in top_networks %}
-        <tr>
-          <td class="w-100">{{ network }}</td>
-          <td nowrap class="text-center">
-            <a href="{{ url_for('.network', network=network) }}">
-              {{ count }}
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <a class="btn btn-info" href="{{ url_for('.networks') }}">
-      {{ _("See All %(total)s Networks", total=total_networks) }}
-    </a>
-  </div>
-</div>
-#}
 {% endblock %}

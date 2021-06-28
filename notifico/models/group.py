@@ -28,6 +28,13 @@ group_limit = db.Table(
     db.Column('limit_id', db.Integer, db.ForeignKey('limit.id'))
 )
 
+group_members = db.Table(
+    'group_members',
+    db.metadata,
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+)
+
 
 class Limit(db.Model):
     """
@@ -111,6 +118,17 @@ class Group(db.Model):
 
     #: The limits users in this group will receive.
     limits = db.relationship('Limit', secondary=group_limit)
+
+    #: All of the users that have membership in this group.
+    users = db.relationship(
+        'User',
+        secondary=group_members,
+        lazy='dynamic',
+        backref=db.backref(
+            'groups',
+            lazy='joined'
+        )
+    )
 
     def permission_matrix(self):
         perms = {perm.key for perm in self.permissions}
