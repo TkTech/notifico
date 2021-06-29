@@ -8,19 +8,17 @@
 {% endcall %}
 
 <div class="container">
-  <div class="section-content">
-    <form class="form form-horizontal" method="POST">
-      {{ form.hidden_tag() }}
-      {{ forms.render_field(form.name) }}
-      {{ forms.render_field(form.website ) }}
-      {{ forms.render_field(form.public) }}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-success">{{ _("Save Changes") }}</button>
-        <a href="{{ project.details_url }}" class="btn btn-secondary">
-          {{ _("Cancel") }}
-        </a>
-      </div>
-    </form>
-  </div>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    {{ forms.render_field(form.name) }}
+    {{ forms.render_field(form.website ) }}
+    {{ forms.render_field(form.public) }}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-success">{{ _("Save Changes") }}</button>
+      <a href="{{ project.details_url }}" class="btn btn-secondary">
+        {{ _("Cancel") }}
+      </a>
+    </div>
+  </form>
 </div>
 {% endblock %}

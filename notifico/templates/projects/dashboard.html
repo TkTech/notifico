@@ -23,7 +23,7 @@
   <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
     {% for project in projects %}
     <div class="col">
-      <div class="card card-bite h-100 border-0">
+      <div class="card h-100">
         {% if project.health >= 1 %}
         <div class="health-card health-good"
           title="{{ _("Project is healthy.") }}"></div>
@@ -34,14 +34,15 @@
         <div class="health-card health-bad"
           title="{{ _("Project is failing.") }}"></div>
         {% endif %}
-        <div class="card-body">
-          <h5 class="card-title d-flex justify-content-between">
-            <a href="{{ project.details_url }}">
-              {{ project.name|truncate(18, True) }}
-            </a>
-          </h5>
-        </div>
-        <ul class="list-group list-group-flush">
+        <a class="card-header-link" href="{{ project.details_url }}">
+          <div class="card-header">
+            <h2 class="card-title text-truncate">
+              <i class="fas fa-chevron-right"></i>
+              {{ project.name }}
+            </h2>
+          </div>
+        </a>
+        <ul class="list-group list-group-flush border-0">
           <li class="list-group-item text-muted">
             <i class="fas fa-calendar"></i>&nbsp;
             {{ _("Created %(date)s", date=project.created|pretty_date) }}
@@ -54,10 +55,8 @@
             <i class="fas fa-envelope"></i>&nbsp;
             {{ _("%(count)s events received", count=project.message_count) }}
           </li>
-          <li class="list-group-item text-muted">
-          </li>
         </ul>
-        <div class="card-body">
+        <div class="card-footer">
           <a href="{{ project.edit_url }}" class="card-link">
             {{ _("Edit") }}
           </a>

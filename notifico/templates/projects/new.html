@@ -8,19 +8,17 @@
 {% endcall %}
 
 <div class="container">
-  <div class="section-content">
-    <form method="POST" action="{{ request.url }}">
-      {{ form.hidden_tag() }}
-      {{ forms.render_field(form.name) }}
-      {{ forms.render_field(form.website ) }}
-      {{ forms.render_field(form.public) }}
-      <button type="submit" class="btn btn-primary">
-        {{ _("Create Project") }}
-      </button>
-      <a href="{{ user.dashboard_url }}" class="btn btn-secondary">
-        {{ _("Cancel") }}
-      </a>
-    </form>
-  </div>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    {{ forms.render_field(form.name) }}
+    {{ forms.render_field(form.website ) }}
+    {{ forms.render_field(form.public) }}
+    <button type="submit" class="btn btn-primary">
+      {{ _("Create Project") }}
+    </button>
+    <a href="{{ user.dashboard_url }}" class="btn btn-secondary">
+      {{ _("Cancel") }}
+    </a>
+  </form>
 </div>
 {% endblock %}

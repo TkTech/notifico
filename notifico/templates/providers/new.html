@@ -8,16 +8,23 @@
 {% endcall %}
 
 <div class="container">
-  <form method="POST">
-    {{ form.hidden_tag() }}
-    {% for field in form if field.widget.input_type != "hidden" %}
-      {{ forms.render_field(field) }}
-    {% endfor %}
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">
-        {{ _("Add") }}
-      </button>
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title mb-0">{{ _("Settings") }}</h5>
     </div>
-  </form>
+    <div class="card-body">
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        {% for field in form if field.widget.input_type != "hidden" %}
+          {{ forms.render_field(field) }}
+        {% endfor %}
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            {{ _("Add") }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}

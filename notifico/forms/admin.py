@@ -55,3 +55,13 @@ class UserFilterForm(FlaskForm):
             'placeholder': _('Select a group...')
         }
     )
+
+
+class GroupSelectForm(FlaskForm):
+    group = fields.SelectField(
+        _('Group'),
+        coerce=int,
+        render_kw={
+            'placeholder': _('Select a group...')
+        }
+    )

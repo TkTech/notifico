@@ -3,7 +3,7 @@
 {% from 'ui/page.html' import render_pagination %}
 
 {% macro group_table(entries) %}
-<table class="table table-striped table-sm align-middle">
+<table class="table align-middle mb-0">
   <thead>
     <tr>
       <th>{{ _("Group") }}</th>
@@ -17,7 +17,7 @@
       <td>
         <strong>{{ group.name }}</strong>
         <em class="d-block text-muted">
-          {{ _(group.description|default(_("N/A"))) }}
+          {{ _(group.description) }}
         </em>
       </td>
       <td class="compact text-center">
@@ -43,33 +43,47 @@
 
 {% block admin_page %}
 {% if page <= 1 %}
-<h2>{{ _("Core Groups") }}</h2>
-<p>
-{% trans %}
-Core groups are special groups that cannot be edited nor deleted. They are
-used internally to provide default permissions for unregistered users,
-newly registered users, etc.
-{% endtrans %}
-</p>
-{% endif %}
-{{ group_table(core_groups) }}
-<h2>{{ _("Custom Groups") }}</h2>
-<p>
-{% trans %}
-Custom groups are user-specified groups that can contain any mix of permissions
-and limits you care to add.
-{% endtrans %}
-</p>
-<a class="btn btn-success mb-3" href="{{ url_for('.groups_new') }}">
-  {{ _("New Group") }}
-</a>
-{% if not user_groups.items %}
-<div class="alert alert-info">
-  {{ _("No custom groups exist yet.") }}
+<div class="card c-card mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="card-title mb-0">{{ _("Core Groups") }}</h6>
+  </div>
+  <div class="card-body">
+    <p>
+    {% trans %}
+    Core groups are special groups that cannot be edited nor deleted. They are
+    used internally to provide default permissions for unregistered users,
+    newly registered users, etc.
+    {% endtrans %}
+    </p>
+  </div>
+  <div class="card-body p-0">
+    {{ group_table(core_groups) }}
+  </div>
 </div>
-{% else %}
-{{ group_table(user_groups.items) }}
 {% endif %}
 
-{{ render_pagination(user_groups, '.groups') }}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="card-title mb-0">{{ _("Custom Groups") }}</h6>
+    <a class="btn btn-success btn-sm" href="{{ url_for('.groups_new') }}">
+      {{ _("Add Group") }}
+    </a>
+  </div>
+  <div class="card-body">
+    <p>
+    {% trans %}
+    Custom groups are user-specified groups that can contain any mix of permissions
+    and limits you care to add.
+    {% endtrans %}
+    </p>
+  </div>
+  <div class="card-body p-0">
+    {% if user_groups.items %}
+    {{ group_table(user_groups.items) }}
+    {% endif %}
+  </div>
+  <div class="card-footer">
+    {{ render_pagination(user_groups, '.groups') }}
+  </div>
+</div>
 {% endblock %}

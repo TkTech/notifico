@@ -1,6 +1,6 @@
 {% macro render_pagination(pg, endpoint) %}
   <nav aria-label="{{ _("Result pages") }}">
-    <ul class="pagination">
+    <ul class="pagination pagination-sm">
       {% for page in pg.iter_pages() %}
         {% if page %}
           <li class="page-item {% if page == pg.page %}active{% endif %}">

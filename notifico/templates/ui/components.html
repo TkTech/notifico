@@ -1,11 +1,11 @@
 {% macro page_header(breadcrumbs=None) %}
 <div class="ex-header">
   <div class="container">
-    <h1 class="pb-3 mb-3">
-        {{ caller() }}
+    <h1 class="pb-3 mb-3 text-truncate">
+      {{ caller() }}
     </h1>
     {% if breadcrumbs %}
-        {{ crumbs(breadcrumbs) }}
+    {{ crumbs(breadcrumbs) }}
     {% endif %}
   </div>
 </div>
@@ -13,17 +13,17 @@
 
 {% macro crumbs(breadcrumbs) %}
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
+  <ol class="breadcrumb">
     {% for crumb, link in breadcrumbs %}
     <li class="breadcrumb-item {{ "active" if loop.last }}">
-        {% if loop.last or link is none %}
-            {{ crumb }}
-        {% else %}
-            <a href="{{ link }}">{{ crumb }}</a>
-        {% endif %}
+      {% if loop.last or link is none %}
+      {{ crumb }}
+      {% else %}
+      <a href="{{ link }}">{{ crumb }}</a>
+      {% endif %}
     </li>
     {% endfor %}
-    </ol>
+  </ol>
 </nav>
 {% endmacro %}
 

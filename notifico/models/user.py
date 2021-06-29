@@ -100,6 +100,10 @@ class User(db.Model, UserMixin):
     def dashboard_url(self):
         return url_for('projects.dashboard', user=self)
 
+    @property
+    def admin_edit_url(self):
+        return url_for('admin.users_edit', user_id=self.id)
+
     def get_id(self) -> str:
         # Part of the flask_login.UserMixin interface.
         return str(self.id)

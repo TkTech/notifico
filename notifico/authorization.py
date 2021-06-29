@@ -29,6 +29,13 @@ def has_admin(f):
 
 
 def has_permission(key, *, login_required=True):
+    """
+    Check to see if the current user has the permission given by `key`.
+
+    If `login_required` is True (the default), users must be logged in or
+    this always fails. If `False`, logged out users will be checked against
+    the Anonymous user group.
+    """
     # Admins skip all permission checks.
     if current_user.is_authenticated and current_user.is_admin:
         return True
@@ -44,6 +51,8 @@ def has_permission(key, *, login_required=True):
             ).exists()
         ).scalar()
     elif not login_required:
+        # If logins are not required, check the defaults inherited from the
+        # Anonymous user group.
         return db.session.query(
             Permission.query.join(
                 Permission, Group.permissions

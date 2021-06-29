@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% import "ui/components.html" as components %}
+{% import "ui/forms.html" as forms %}
+{% from 'ui/page.html' import render_pagination %}
+
+
+{% block admin_page %}
+<section>
+  <h2>{{ user.username }}</h2>
+  <span class="text-muted">{{ _("Joined %(when)s", when=user.joined|pretty_date) }}</span>
+  <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
+    <div class="col">
+    </div>
+  </div>
+</section>
+
+<div class="card">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("User Groups") }}</h6>
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for group in user.groups %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="{{ group.edit_url }}">
+          {{ group.name }}
+        </a>
+        {% if group.deletable %}
+        <form method="POST">
+          <a class="btn btn-danger btn-sm"
+            href="{{ url_for(".users_delete_group",
+              user_id=user.id,
+              group_id=group.id) }}">
+          {{ _("Remove") }}
+        </a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="card-footer align-items-center">
+    <form method="POST">
+      {{ group_form.hidden_tag() }}
+      <div class="row">
+        <div class="col">
+          {{ group_form.group(class_="form-control")|safe }}
+        </div>
+        <div class="col-auto">
+          <button name="add-group" type="submit" class="btn btn-success">
+            {{ _("Add Group") }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

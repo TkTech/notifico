@@ -16,11 +16,41 @@ from notifico.authorization import has_admin
 from notifico.forms.admin import (
     make_permission_form,
     GroupDetailsForm,
-    UserFilterForm
+    UserFilterForm,
+    GroupSelectForm
 )
+from notifico.views.utils import confirmation_view, ConfirmPrompt
 
 
 admin = Blueprint('admin', __name__)
+
+
+prompt_users_delete_group = ConfirmPrompt(
+    cancel_url=lambda user_id, group_id: url_for(
+        '.users_edit',
+        user_id=user_id
+    ),
+    message=_('Are you sure you want to remove this group?'),
+    yes_text=_('Remove Group')
+)
+
+prompt_delete_group = ConfirmPrompt(
+    cancel_url=lambda group_id: url_for('.groups'),
+    message=_(
+        'All users will be removed from the group and the group deleted.'
+        ' Are you sure?'
+    ),
+    yes_text=_('Delete Group')
+)
+
+prompt_delete_user = ConfirmPrompt(
+    cancel_url=lambda user_id: url_for('.users'),
+    message=_(
+        'This user will be permanently deleted. This cannot be undone.'
+        ' Are you sure?'
+    ),
+    yes_text=_('Delete User')
+)
 
 
 @admin.route('/')
@@ -173,30 +203,24 @@ def groups_edit(group_id):
 
 @admin.route('/groups/<int:group_id>/delete', methods=['GET', 'POST'])
 @has_admin
+@confirmation_view(prompt_delete_group)
 def groups_delete(group_id):
-    crumbs = (
-        (_('Admin'), url_for('.dashboard')),
-        (_('Groups'), url_for('.groups')),
-        (_('Delete Group'), None)
-    )
-
     group = Group.query.get(group_id)
     if group is None:
         abort(404)
 
-    if request.method == 'POST' and 'delete-group' in request.form:
-        db.session.delete(group)
-        db.session.commit()
-
-        flash(_('The group has been deleted.'), category='success')
+    if not group.deletable:
+        flash(
+            _('This is a core group and cannot be removed.'),
+            category='danger'
+        )
         return redirect(url_for('.groups'))
 
-    return render_template(
-        'admin/groups/delete.html',
-        admin_title=_('Delete Group'),
-        breadcrumbs=crumbs,
-        group=group
-    )
+    db.session.delete(group)
+    db.session.commit()
+
+    flash(_('The group has been deleted.'), category='success')
+    return redirect(url_for('.groups'))
 
 
 @admin.route('/users', endpoint='users')
@@ -212,7 +236,7 @@ def users_list():
     except ValueError:
         page = 1
 
-    form = UserFilterForm(request.args, csrf_enabled=False)
+    form = UserFilterForm(request.args, meta={'csrf': False})
     # The list of groups is unknown when the form is created, so we need
     # to populate it.
     form.group.choices = [
@@ -250,3 +274,94 @@ def users_list():
         users=users,
         form=form
     )
+
+
+@admin.route('/users/<int:user_id>', methods=['GET', 'POST'])
+@has_admin
+def users_edit(user_id):
+    crumbs = (
+        (_('Admin'), url_for('.dashboard')),
+        (_('Users'), url_for('.users')),
+        (_('Edit User'), None)
+    )
+
+    user = User.query.get(user_id)
+    if user is None:
+        abort(404)
+
+    group_form = GroupSelectForm()
+    group_form.group.choices = [
+        (group.id, group.name)
+        for group in Group.query.filter(
+            Group.deletable.is_(True)
+        ).with_entities(Group.id, Group.name)
+    ]
+
+    if 'add-group' in request.form:
+        if group_form.validate_on_submit():
+            group = Group.query.get(group_form.group.data)
+            if group is None or not group.deletable:
+                # We should never get here unless someone is poking around.
+                flash(_('Not a valid group.'), category='warning')
+            elif group in user.groups:
+                flash(
+                    _('User is already a member of that group.'),
+                    category='warning'
+                )
+            else:
+                user.groups.append(group)
+                db.session.add(user)
+                db.session.commit()
+                flash(_('User added to group.'), category='success')
+
+            return redirect(user.admin_edit_url)
+
+    return render_template(
+        'admin/users/edit.html',
+        admin_title=_('Edit User'),
+        breadcrumbs=crumbs,
+        user=user,
+        group_form=group_form
+    )
+
+
+@admin.route('/useres/<int:user_id>/delete', methods=['GET', 'POST'])
+@has_admin
+@confirmation_view(prompt_delete_user)
+def users_delete(user_id):
+    user = User.query.get(user_id)
+    if user is None:
+        abort(404)
+
+    if user.is_admin:
+        flash(_('Admin users cannot be deleted.'), category='danger')
+        return redirect(url_for('.users'))
+
+    db.session.delete(user)
+    db.session.commit()
+
+    flash(_('The user has been deleted.'), category='success')
+    return redirect(url_for('.users'))
+
+
+@admin.route(
+    '/users/<int:user_id>/groups/<int:group_id>/delete',
+    methods=['GET', 'POST']
+)
+@has_admin
+@confirmation_view(prompt_users_delete_group)
+def users_delete_group(user_id, group_id):
+    user = User.query.get(user_id)
+    if user is None:
+        abort(404)
+
+    group = Group.query.get(group_id)
+    if group is None or not group.deletable:
+        abort(404)
+
+    user.groups.remove(group)
+    db.session.add(user)
+    db.session.commit()
+
+    flash(_('The group has been removed.'), category='success')
+    return redirect(url_for('.users_edit', user_id=user.id))

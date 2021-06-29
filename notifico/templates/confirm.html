@@ -1,0 +1,22 @@
+{% extends "layouts/main.html" %}
+{% import "ui/forms.html" as forms %}
+{% import "ui/components.html" as components %}
+
+{% block content_page %}
+{% call components.page_header() %}
+{{ _("Are you sure?") }}
+{% endcall %}
+
+<div class="container">
+  <p>{{ prompt.message }}</p>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <button name="confirm-yes" type="submit" class="{{ prompt.yes_btn_class|default("btn btn-danger", True) }}">
+      {{ prompt.yes_text }}
+    </button>
+    <a class="{{ prompt.cancel_btn_class|default("btn btn-secondary", True) }}" href="{{ cancel_url }}">
+      {{ _("Cancel") }}
+    </a>
+  </form>
+</div>
+{% endblock %}
