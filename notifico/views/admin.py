@@ -31,7 +31,8 @@ prompt_users_delete_group = ConfirmPrompt(
         user_id=user_id
     ),
     message=_('Are you sure you want to remove this group?'),
-    yes_text=_('Remove Group')
+    yes_text=_('Remove Group'),
+    template='admin/confirm.html'
 )
 
 prompt_delete_group = ConfirmPrompt(
@@ -40,7 +41,8 @@ prompt_delete_group = ConfirmPrompt(
         'All users will be removed from the group and the group deleted.'
         ' Are you sure?'
     ),
-    yes_text=_('Delete Group')
+    yes_text=_('Delete Group'),
+    template='admin/confirm.html'
 )
 
 prompt_delete_user = ConfirmPrompt(
@@ -49,7 +51,8 @@ prompt_delete_user = ConfirmPrompt(
         'This user will be permanently deleted. This cannot be undone.'
         ' Are you sure?'
     ),
-    yes_text=_('Delete User')
+    yes_text=_('Delete User'),
+    template='admin/confirm.html'
 )
 
 

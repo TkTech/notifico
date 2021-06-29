@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% import "ui/forms.html" as forms %}
+{% import "ui/components.html" as components %}
+
+{% block admin_page %}
+<div class="card">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Are you sure?") }}</h6>
+  </div>
+  <div class="card-body">
+    <p>{{ prompt.message }}</p>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <button name="confirm-yes" type="submit" class="{{ prompt.yes_btn_class|default("btn btn-danger", True) }}">
+        {{ prompt.yes_text }}
+      </button>
+      <a class="{{ prompt.cancel_btn_class|default("btn btn-secondary", True) }}" href="{{ cancel_url }}">
+        {{ _("Cancel") }}
+      </a>
+    </form>
+  </div>
+</div>
+{% endblock %}
