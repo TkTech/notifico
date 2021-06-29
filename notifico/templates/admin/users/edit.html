@@ -6,10 +6,24 @@
 
 {% block admin_page %}
 <section>
-  <h2>{{ user.username }}</h2>
-  <span class="text-muted">{{ _("Joined %(when)s", when=user.joined|pretty_date) }}</span>
+  <div class="mb-3">
+    <h2>
+      {% if user.is_admin %}<i class="fas fa-crown"></i>&nbsp;{% endif -%}
+      {{ user.username }}
+    </h2>
+    <span class="text-muted">
+      {{ _("Joined %(when)s", when=user.joined|pretty_date) }}
+    </span>
+  </div>
+
   <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
     <div class="col">
+      <div class="card">
+        <div class="card-body text-center">
+          <strong>{{ user.projects.count() }}</strong>
+          <span class="d-block lead">{{ _("Projects") }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
