@@ -37,7 +37,8 @@ body {
 .health-bad { background-color: red; }
 
 .card,
-.btn {
+.btn,
+.alert {
     border-radius: 0;
 }
 

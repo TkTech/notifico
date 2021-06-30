@@ -3,6 +3,7 @@ import enum
 import datetime
 import traceback
 
+from flask import url_for
 from sqlalchemy.ext.declarative import declared_attr
 
 from notifico.extensions import db
@@ -83,6 +84,10 @@ class Log(db.Model):
             kwargs['trace'] = traceback.format_exc()
 
         return cls(severity=LogSeverity.CRITICAL, **kwargs)
+
+    @property
+    def admin_get_url(self):
+        return url_for('admin.logs_get', log_id=self.id)
 
 
 class HasLogs:

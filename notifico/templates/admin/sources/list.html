@@ -4,4 +4,43 @@
 {% from 'ui/page.html' import render_pagination %}
 
 {% block admin_page %}
+<div class="card">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Installed Sources") }}</h6>
+  </div>
+  <div class="card-body p-0">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>{{ _("Name") }}</th>
+          <th class="compact text-center">{{ _("Instances") }}</th>
+          <th class="compact text-center">{{ _("Status") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for source in sources %}
+        <tr>
+          <td>
+            <i class="{{ source.impl.icon() }} fa-fw"></i>
+            <a href="{{ source.admin_edit_url }}">
+              {{ source.impl.SOURCE_NAME }}
+            </a>
+          </td>
+          <td class="compact text-center">
+            {{ source.instances.count() }}
+          </td>
+          <td class="compact text-center table-{{
+              "success" if source.enabled else "danger" }}">
+            {% if source.enabled %}
+            <span class="text-success">{{ _("Enabled") }}</span>
+            {% else %}
+            <span class="text-danger">{{ _("Disabled") }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

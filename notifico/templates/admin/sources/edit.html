@@ -1,0 +1,139 @@
+{% extends "admin/base.html" %}
+{% import "ui/components.html" as components %}
+{% import "ui/forms.html" as forms %}
+{% from 'ui/page.html' import render_pagination %}
+
+{% block admin_page %}
+<div class="mb-3">
+  <h2>{{ impl.SOURCE_NAME }}</h2>
+  <span class="text-muted">{{ impl.SOURCE_DESCRIPTION }}</span>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Source Details") }}</h6>
+  </div>
+  <div class="card-body p-0">
+    <table class="table align-middle mb-0">
+      <tbody>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Internal ID") }}
+          </td>
+          <td><code>{{ impl.SOURCE_ID }}</code></td>
+        </tr>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Instances") }}
+          </td>
+          <td>{{ source.instances.count() }}</td>
+        </tr>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Status") }}
+          </td>
+          <td>
+            <form method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <div class="d-flex justify-content-between align-items-center">
+                {% if source.enabled %}
+                <span class="text-success">{{ _("Enabled") }}</span>
+                <button name="toggle-source" type="submit" class="btn btn-danger btn-sm">
+                  {{ _("Disable") }}
+                </button>
+                {% else %}
+                <span class="text-danger">{{ _("Disabled") }}</span>
+                <button name="toggle-source" type="submit" class="btn btn-success btn-sm">
+                  {{ _("Enable") }}
+                </button>
+                {% endif %}
+              </div>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("User Groups") }}</h6>
+    <small class="card-subtitle text-muted">
+      {{ _("Only users in these groups can use this Source") }}
+    </small>
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for group in source.groups %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="{{ group.edit_url }}">
+          {{ group.name }}
+        </a>
+        <form method="POST">
+          <a class="btn btn-danger btn-sm"
+             href="{{ url_for(".sources_delete_group",
+               source_id=source.source_id,
+               group_id=group.id) }}">
+          {{ _("Remove") }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="card-footer align-items-center">
+    <form method="POST">
+      {{ group_form.hidden_tag() }}
+      <div class="row">
+        <div class="col">
+          {{ group_form.group(class_="form-control")|safe }}
+        </div>
+        <div class="col-auto">
+          <button name="add-group" type="submit" class="btn btn-success">
+            {{ _("Add Group") }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Source Logs") }}</h6>
+  </div>
+  <div class="card-body p-0">
+    {% if logs.count() %}
+    <table class="table table-striped table-small mb-0">
+      <thead>
+        <tr>
+          <th>{{ _("Severity") }}</th>
+          <th>{{ _("When") }}</th>
+          <th>{{ _("Summary") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr class="table-{{ components.log_to_suffix(log) }}">
+          <td class="compact">
+            <code>{{ log.severity.name }}</code>
+          </td>
+          <td class="compact">{{ log.created|pretty_date|capitalize }}</td>
+          <td>
+            <a class="text-decoration-none" href="{{ log.admin_get_url }}">
+              <code>
+                {{ _(log.summary, **log.payload) }}
+              </code>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info mb-0">
+      {{ _("Nothing has happened yet.") }}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

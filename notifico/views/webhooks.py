@@ -10,7 +10,7 @@ from flask import (
 from notifico import errors
 from notifico.extensions import db
 from notifico.models.log import Log
-from notifico.models.source import Source
+from notifico.models.source import SourceInstance
 from notifico.plugin import SourceTypes
 from notifico.models.project import Project
 
@@ -33,22 +33,22 @@ def trigger(project, key):
         # a cryptic error. We should provide actual help.
         return render_template('errors/this_is_a_webhook.html')
 
-    source = Source.query.filter(
-        Source.project_id == project,
-        Source.key == key
+    source = SourceInstance.query.filter(
+        SourceInstance.project_id == project,
+        SourceInstance.key == key
     ).first()
 
     # All hooks generate a key, even ones that aren't actually accessible via
     # webhook.
-    if source is None or source.source_type != SourceTypes.WEBHOOK:
+    if source is None or source.impl.SOURCE_TYPE != SourceTypes.WEBHOOK:
         abort(404)
 
     try:
-        packed = source.p.pack_payload(source, request)
+        packed = source.impl.pack_payload(source, request)
     except Exception as e:
         # Any exception causes a reduction in health score. Then we re-raise
         # for more specific error handlers.
-        source.health = Source.health - 1
+        source.health = SourceInstance.health - 1
         source.project.health = Project.health - 1
 
         log = Log.error(summary=(

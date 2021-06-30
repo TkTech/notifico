@@ -117,7 +117,9 @@
     </tbody>
   </table>
   {% else %}
-  <small class="text-info">{{ _("Nothing has happened yet.") }}</small>
+  <div class="alert alert-info mb-0">
+    {{ _("Nothing has happened yet.") }}
+  </div>
   {% endif %}
 </div>
 {% endblock %}

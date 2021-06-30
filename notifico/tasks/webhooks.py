@@ -4,7 +4,7 @@ from notifico import db, errors
 from notifico.tasks import celery
 from notifico.models.log import Log
 from notifico.models.project import Project
-from notifico.models.source import Source
+from notifico.models.source import SourceInstance
 
 OPTIONAL_KWARGS = (
     'remote_ip',
@@ -14,7 +14,7 @@ OPTIONAL_KWARGS = (
 
 @celery.task(name='dispatch_webhook')
 def dispatch_webhook(source_id, **kwargs):
-    source = Source.query.get(source_id)
+    source = SourceInstance.query.get(source_id)
     if source is None:
         # Not sure what we should do here. The source was deleted in the
         # (hopefully) short time between receiving it and acting on it. There
@@ -32,7 +32,7 @@ def dispatch_webhook(source_id, **kwargs):
     try:
         source.p.handle_request(source, **optionals)
     except Exception as e:
-        source.health = Source.health - 1
+        source.health = SourceInstance.health - 1
         source.project.health = Project.health - 1
 
         try:

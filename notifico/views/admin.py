@@ -1,3 +1,5 @@
+import json
+
 from flask import (
     Blueprint,
     render_template,
@@ -10,8 +12,10 @@ from flask import (
 from flask_babel import lazy_gettext as _
 
 from notifico.extensions import db
-from notifico.models import Group, Permission, User
-from notifico.models.group import CoreGroups
+from notifico.models.user import User
+from notifico.models.log import Log
+from notifico.models.source import Source, SourceInstance
+from notifico.models.group import Permission, Group, CoreGroups
 from notifico.authorization import has_admin
 from notifico.forms.admin import (
     make_permission_form,
@@ -52,6 +56,18 @@ prompt_delete_user = ConfirmPrompt(
         ' Are you sure?'
     ),
     yes_text=_('Delete User'),
+    template='admin/confirm.html'
+)
+
+prompt_delete_source_group = ConfirmPrompt(
+    cancel_url=lambda source_id, group_id: url_for(
+        '.sources_edit',
+        source_id=source_id
+    ),
+    message=_(
+        'Are you sure you want to remove this group?'
+    ),
+    yes_text=_('Remove Group'),
     template='admin/confirm.html'
 )
 
@@ -373,6 +389,148 @@ def users_delete_group(user_id, group_id):
 @admin.route('/sources/')
 @has_admin
 def sources():
+    crumbs = (
+        (_('Admin'), url_for('.dashboard')),
+        (_('Sources'), None)
+    )
+
+    sources = Source.query.all()
+
     return render_template(
-        'admin/sources/list.html'
+        'admin/sources/list.html',
+        admin_title=_('Sources'),
+        breadcrumbs=crumbs,
+        sources=sources
+    )
+
+
+@admin.route('/sources/<int:source_id>', methods=['GET', 'POST'])
+@has_admin
+def sources_edit(source_id):
+    crumbs = (
+        (_('Admin'), url_for('.dashboard')),
+        (_('Sources'), url_for('.sources')),
+        (_('Edit Source'), None)
+    )
+
+    source = Source.query.get(source_id)
+    if source is None:
+        abort(404)
+
+    logs = db.session.query(Log).join(
+        Log, SourceInstance.logs
+    ).filter(
+        SourceInstance.source_id == source.source_id
+    ).order_by(
+        Log.created.desc()
+    )
+
+    group_form = GroupSelectForm()
+    group_form.group.choices = [
+        (group.id, group.name)
+        for group in Group.query.filter(
+            # Anonymous users being allowed to use a source wouldn't make
+            # much sense.
+            Group.id != CoreGroups.ANONYMOUS.value
+        ).with_entities(Group.id, Group.name)
+    ]
+
+    if 'toggle-source' in request.form:
+        source.enabled = not source.enabled
+        db.session.add(source)
+        db.session.commit()
+        flash(_('Source toggled.'), category='success')
+        return redirect(source.admin_edit_url)
+
+    if 'add-group' in request.form:
+        if group_form.validate_on_submit():
+            group = Group.query.get(group_form.group.data)
+            if group is None:
+                flash(_('Not a valid group.'), category='warning')
+            elif group in source.groups:
+                flash(
+                    _('Group already allowed on Source.'),
+                    category='warning'
+                )
+            else:
+                source.groups.append(group)
+                db.session.add(source)
+                db.session.commit()
+                flash(_('Source enabled for group.'), category='success')
+
+            return redirect(source.admin_edit_url)
+
+    return render_template(
+        'admin/sources/edit.html',
+        admin_title=_('Edit Source'),
+        breadcrumbs=crumbs,
+        source=source,
+        impl=source.impl,
+        logs=logs,
+        group_form=group_form
+    )
+
+
+@admin.route(
+    '/sources/<int:source_id>/groups/<int:group_id>/delete',
+    methods=['GET', 'POST']
+)
+@has_admin
+@confirmation_view(prompt_delete_source_group)
+def sources_delete_group(source_id, group_id):
+    source = Source.query.get(source_id)
+    if source is None:
+        abort(404)
+
+    group = Group.query.get(group_id)
+    if group is None:
+        abort(404)
+
+    source.groups.remove(group)
+    db.session.add(source)
+    db.session.commit()
+
+    flash(_('The group has been removed.'), category='success')
+    return redirect(source.admin_edit_url)
+
+
+@admin.route('/logs/')
+@has_admin
+def logs():
+    crumbs = (
+        (_('Admin'), url_for('.dashboard')),
+        (_('Logs'), None),
+    )
+
+    logs = db.session.query(Log).order_by(
+        Log.created.desc()
+    )
+
+    return render_template(
+        'admin/logs/list.html',
+        admin_title=_('Logs'),
+        breadcrumbs=crumbs,
+        logs=logs
+    )
+
+
+@admin.route('/logs/<int:log_id>')
+@has_admin
+def logs_get(log_id):
+    crumbs = (
+        (_('Admin'), url_for('.dashboard')),
+        (_('Logs'), url_for('.logs')),
+        (_('Details'), None)
+    )
+
+    log = db.session.query(Log).get(log_id)
+    if log is None:
+        abort(404)
+
+    return render_template(
+        'admin/logs/get.html',
+        admin_title=_('Log Details'),
+        breadcrumbs=crumbs,
+        log=log,
+        pretty_payload=json.dumps(log.payload, sort_keys=True, indent=2)
     )

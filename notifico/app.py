@@ -8,6 +8,7 @@ from notifico.extensions import (
     db,
     cache,
     mail,
+    csrf,
     babel,
     migrate,
     login_manager
@@ -75,6 +76,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     # Custom URL converters for convienience.
     from notifico.converters import (

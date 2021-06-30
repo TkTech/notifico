@@ -1,0 +1,72 @@
+{% extends "admin/base.html" %}
+{% import "ui/components.html" as components %}
+{% import "ui/forms.html" as forms %}
+{% from 'ui/page.html' import render_pagination %}
+
+{% block admin_page %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Log Details") }}</h6>
+  </div>
+  <div class="card-body p-0">
+    <table class="table align-middle mb-0">
+      <tbody>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Internal ID") }}
+          </td>
+          <td><code>{{ log.id }}</code></td>
+        </tr>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Severity") }}
+          </td>
+          <td class="table-{{ components.log_to_suffix(log) }}">
+            <code>{{ log.severity.name }}</code>
+          </td>
+        </tr>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Created") }}
+          </td>
+          <td>
+            {{ log.created }}
+          </td>
+        </tr>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Summary") }}
+          </td>
+          <td>
+              <code>
+                {{ _(log.summary, **log.payload) }}
+              </code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Log Payload") }}</h6>
+  </div>
+  <div class="card-body">
+    <code>
+    {{ pretty_payload }}
+    </code>
+  </div>
+</div>
+
+{% if log.trace %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Log Trace") }}</h6>
+  </div>
+  <div class="card-body pb-0">
+    <pre><code>{{ log.trace }}</code></pre>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

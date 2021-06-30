@@ -14,6 +14,14 @@ def _new_random_key():
     return base64.urlsafe_b64encode(os.urandom(24))[:24].decode('ascii')
 
 
+source_groups = db.Table(
+    'source_groups',
+    db.metadata,
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id')),
+    db.Column('source_id', db.Integer, db.ForeignKey('source.source_id'))
+)
+
+
 class Source(db.Model):
     """
     Global configuration for Sources.
@@ -31,9 +39,21 @@ class Source(db.Model):
     #: a new SourceInstance.
     enabled = db.Column(db.Boolean, default=False, server_default='f')
 
-    #: If true, the source is hidden from regular users, but may still be
-    #: used for existing sources.
-    hidden = db.Column(db.Boolean, default=False, server_default='f')
+    #: Only members of these groups can use this provider.
+    groups = db.relationship('Group', secondary=source_groups, lazy='dynamic')
+
+    @property
+    def implementation(self):
+        return get_installed_sources()[self.source_id]
+
+    @property
+    def impl(self):
+        """Shorthand for the `implementation()` property."""
+        return self.implementation
+
+    @property
+    def admin_edit_url(self):
+        return url_for('admin.sources_edit', source_id=self.source_id)
 
 
 class SourceInstance(db.Model, HasLogs):

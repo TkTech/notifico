@@ -33,10 +33,14 @@ def seed():
     """Seeds the database with required data, such as the default user groups
     for anonymous and registered users.
     """
+    from notifico.extensions import db
+    from notifico.plugin import get_installed_sources
+    from notifico.models.utils import get_or_create
+    from notifico.models.source import Source
     from notifico.models.group import Group, Permission, CoreGroups
 
-    db.session.add_all([
-        Group(
+    if not Group.query.get(CoreGroups.ANONYMOUS.value):
+        db.session.add(Group(
             id=CoreGroups.ANONYMOUS.value,
             name='Anonymous',
             description=(
@@ -47,8 +51,10 @@ def seed():
             permissions=[
                 Permission.get('can_register')
             ]
-        ),
-        Group(
+        ))
+
+    if not Group.query.get(CoreGroups.REGISTERED.value):
+        db.session.add(Group(
             id=CoreGroups.REGISTERED.value,
             name='Registered',
             description=(
@@ -61,7 +67,16 @@ def seed():
                 Permission.get('create_provider'),
                 Permission.get('create_channel')
             ]
-        )
-    ])
+        ))
 
     db.session.commit()
+
+    registered_group = db.session.query(Group).get(CoreGroups.REGISTERED.value)
+
+    for source_id, source in get_installed_sources().items():
+        get_or_create(
+            db.session,
+            Source,
+            {'source_id': source_id},
+            {'source_id': source_id, 'groups': [registered_group]}
+        )
