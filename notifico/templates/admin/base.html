@@ -11,13 +11,16 @@
       <div class="card mb-3">
         <div class="list-group list-group-flush">
           <a class="list-group-item list-group-item-action" href="{{ url_for(".dashboard") }}">
-            {{ _("Dashboard") }}
+            <i class="fas fa-chart-bar fa-fw"></i> {{ _("Dashboard") }}
           </a>
           <a class="list-group-item list-group-item-action" href="{{ url_for(".groups") }}">
-            {{ _("Groups") }}
+            <i class="fas fa-users fa-fw"></i> {{ _("Groups") }}
           </a>
           <a class="list-group-item list-group-item-action" href="{{ url_for(".users") }}">
-            {{ _("Users") }}
+            <i class="fas fa-user fa-fw"></i> {{ _("Users") }}
+          </a>
+          <a class="list-group-item list-group-item-action" href="{{ url_for(".sources") }}">
+            <i class="fas fa-link fa-fw"></i> {{ _("Sources") }}
           </a>
         </div>
       </div>

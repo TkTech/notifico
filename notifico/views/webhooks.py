@@ -10,7 +10,8 @@ from flask import (
 from notifico import errors
 from notifico.extensions import db
 from notifico.models.log import Log
-from notifico.models.provider import Provider, ProviderTypes
+from notifico.models.source import Source
+from notifico.plugin import SourceTypes
 from notifico.models.project import Project
 
 webhooks = Blueprint('webhooks', __name__)
@@ -20,11 +21,11 @@ webhooks = Blueprint('webhooks', __name__)
 def trigger(project, key):
     """
     Dispatches incoming webhooks to their respective projects and associated
-    provider.
+    source.
     """
     from notifico.tasks import celery
 
-    # Since we don't currently have any providers that issue a completely
+    # Since we don't currently have any sources that issue a completely
     # empty GET request, we handle that case and return a help page. Users
     # keep clicking on the URLs.
     if request.method == 'GET' and not request.args:
@@ -32,32 +33,32 @@ def trigger(project, key):
         # a cryptic error. We should provide actual help.
         return render_template('errors/this_is_a_webhook.html')
 
-    provider = Provider.query.filter(
-        Provider.project_id == project,
-        Provider.key == key
+    source = Source.query.filter(
+        Source.project_id == project,
+        Source.key == key
     ).first()
 
     # All hooks generate a key, even ones that aren't actually accessible via
     # webhook.
-    if provider is None or provider.provider_type != ProviderTypes.WEBHOOK:
+    if source is None or source.source_type != SourceTypes.WEBHOOK:
         abort(404)
 
     try:
-        packed = provider.p.pack_payload(provider, request)
+        packed = source.p.pack_payload(source, request)
     except Exception as e:
         # Any exception causes a reduction in health score. Then we re-raise
         # for more specific error handlers.
-        provider.health = Provider.health - 1
-        provider.project.health = Project.health - 1
+        source.health = Source.health - 1
+        source.project.health = Project.health - 1
 
         log = Log.error(summary=(
             'An unspecified error occured when processing a webhook.'
         ))
 
-        provider.project.logs.append(log)
-        provider.logs.append(log)
+        source.project.logs.append(log)
+        source.logs.append(log)
 
-        db.session.add(provider)
+        db.session.add(source)
         db.session.commit()
 
         try:
@@ -74,7 +75,7 @@ def trigger(project, key):
 
     task = celery.send_task(
         'dispatch_webhook',
-        (provider.id,),
+        (source.id,),
         {
             'remote_ip': request.remote_addr,
             'payload': packed

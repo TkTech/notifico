@@ -4,7 +4,7 @@ from notifico import db, errors
 from notifico.tasks import celery
 from notifico.models.log import Log
 from notifico.models.project import Project
-from notifico.models.provider import Provider
+from notifico.models.source import Source
 
 OPTIONAL_KWARGS = (
     'remote_ip',
@@ -13,31 +13,31 @@ OPTIONAL_KWARGS = (
 
 
 @celery.task(name='dispatch_webhook')
-def dispatch_webhook(provider_id, **kwargs):
-    provider = Provider.query.get(provider_id)
-    if provider is None:
-        # Not sure what we should do here. The provider was deleted in the
+def dispatch_webhook(source_id, **kwargs):
+    source = Source.query.get(source_id)
+    if source is None:
+        # Not sure what we should do here. The source was deleted in the
         # (hopefully) short time between receiving it and acting on it. There
-        # is no longe a Provider object to log to.
+        # is no longe a Source object to log to.
         return
 
     # We only pass some keyword arguments if the handler has them in their
-    # signature. We want to minimize overhead of making Providers as much as
+    # signature. We want to minimize overhead of making Sources as much as
     # possible.
-    sig = inspect.signature(provider.p.handle_request)
+    sig = inspect.signature(source.p.handle_request)
     optionals = {
         k: kwargs.get(k) for k in OPTIONAL_KWARGS if k in sig.parameters
     }
 
     try:
-        provider.p.handle_request(provider, **optionals)
+        source.p.handle_request(source, **optionals)
     except Exception as e:
-        provider.health = Provider.health - 1
-        provider.project.health = Project.health - 1
+        source.health = Source.health - 1
+        source.project.health = Project.health - 1
 
         try:
             raise e
-        except errors.ProviderError as ee:
+        except errors.SourceError as ee:
             msg = str(ee)
             payload = ee.payload or {}
         else:
@@ -46,10 +46,10 @@ def dispatch_webhook(provider_id, **kwargs):
 
         log = Log.error(summary=msg, payload=payload)
 
-        provider.project.logs.append(log)
-        provider.logs.append(log)
+        source.project.logs.append(log)
+        source.logs.append(log)
 
-        db.session.add(provider)
+        db.session.add(source)
         db.session.commit()
 
         raise

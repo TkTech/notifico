@@ -17,8 +17,8 @@ CORE_PERMISSIONS = (
     PermissionInfo('create_project', 'Can Create Projects', (
         'Users with this permission can create new projects.'
     )),
-    PermissionInfo('create_provider', 'Can Create Providers', (
-        'Users with this permission can create new providers.'
+    PermissionInfo('create_provider', 'Can Create Sources', (
+        'Users with this permission can create new sources.'
     )),
     PermissionInfo('create_channel', 'Can Create Channel', (
         'Users with this permission can create new channels.'

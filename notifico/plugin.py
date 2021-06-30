@@ -10,21 +10,24 @@ from flask_babel import lazy_gettext as _
 
 
 @functools.cache
-def get_providers() -> Dict[int, 'BaseProvider']:
+def get_installed_sources() -> Dict[int, 'SourcePlugin']:
     """
-    Returns a cached dictionary of all known Provider plugins, keyed by
-    PROVIDER_ID.
+    Returns a cached dictionary of all known Source plugins, keyed by
+    SOURCE_ID.
     """
-    plugins = entry_points()['notifico.providers']
+    # Adding a way to purge this cache in all processes via a signal would
+    # allow us to hot-load new plugin sources without having to restart
+    # notifico. Worth looking into.
+    plugins = entry_points()['notifico.sources']
     return {
-        p.PROVIDER_ID: p()
+        p.SOURCE_ID: p()
         for p in (plugin.load() for plugin in plugins)
     }
 
 
-class ProviderForm(flask_wtf.FlaskForm):
+class SourceForm(flask_wtf.FlaskForm):
     """
-    A base form most providers should use for their configuration options.
+    A base form most sources should use for their configuration options.
     """
     description = fields.StringField(
         _('Description'),
@@ -33,42 +36,35 @@ class ProviderForm(flask_wtf.FlaskForm):
         ],
         description=_(
             'Optionally provide a short description to make it easier to'
-            ' recall what this provider is for. This helps when you have many'
-            ' providers on a single project.'
+            ' recall what this source is for. This helps when you have many'
+            ' sources on a single project.'
         )
     )
 
 
-class ProviderTypes(enum.Enum):
-    #: Type for providers that want a chance to handle incoming webhooks.
+class SourceTypes(enum.Enum):
+    #: Type for sources that want a chance to handle incoming webhooks.
     WEBHOOK = 1
-    #: Type for providers that want a chance to poll for events.
+    #: Type for sources that want a chance to poll for events.
     POLLING = 2
 
 
-class BaseProvider:
+class SourcePlugin:
     """
-    A Provider generates payloads for processing and eventual delivery to a
-    :class:~`notifico.target.Target`.
-
-    Providers can be triggered by a webhook, or can come from other sources
-    such as polling.
-
-    When a webhook is received, available providers are hit one after another
-    until `is_our_payload()` returns `True`. This lets us implement "universal"
-    webhooks, which are a big win for user experience.
+    A SourcePlugin generates payloads for processing and eventual delivery to a
+    :class:~`notifico.channel.Channel`.
     """
-    #: A unique identifier for a Provider implementation.
-    PROVIDER_ID: int = None
-    #: A unique, human-readable name for this Provider implementation.
-    PROVIDER_NAME: str = None
-    #: The type of the provider, such as a webhook or a poller.
-    PROVIDER_TYPE: ProviderTypes = None
-    #: A short description of this provider. Should be a lazy_gettext-wrapped
+    #: A unique identifier for a Source implementation.
+    SOURCE_ID: int = None
+    #: A unique, human-readable name for this Source implementation.
+    SOURCE_NAME: str = None
+    #: The type of the source, such as a webhook or a poller.
+    SOURCE_TYPE: SourceTypes = None
+    #: A short description of this source. Should be a lazy_gettext-wrapped
     #: string.
-    PROVIDER_DESCRIPTION: str = None
+    SOURCE_DESCRIPTION: str = None
 
-    #: The minimum period between polling events for polling-type providers.
+    #: The minimum period between polling events for polling-type sources.
     #: Note this only guarantees it won't be polled *before* this duration
     #: has passed, it may take longer. Value is in seconds.
     POLLING_PERIOD: int = None
@@ -77,7 +73,7 @@ class BaseProvider:
     def form(cls):
         """
         An optional Form class that will be presented to the user when
-        initially configuring and when editing the Provider.
+        initially configuring and when editing the Source.
         """
 
     @classmethod
@@ -107,12 +103,12 @@ class BaseProvider:
     @staticmethod
     def icon() -> str:
         """The Font-Awesome icon that should be used to identify this
-        provider, if any is suitable."""
+        source, if any is suitable."""
         return 'fas fa-question'
 
 
-class WebhookProvider(BaseProvider):
-    PROVIDER_TYPE = ProviderTypes.WEBHOOK
+class WebhookSource(SourcePlugin):
+    SOURCE_TYPE = SourceTypes.WEBHOOK
 
     @classmethod
     def external_url(cls, hook) -> str:
@@ -132,7 +128,7 @@ class WebhookProvider(BaseProvider):
         return 'fas fa-link'
 
     @classmethod
-    def pack_payload(cls, provider, request) -> bytes:
+    def pack_payload(cls, source, request) -> bytes:
         """
         Turn the payload of the given request into a `bytes` object that will
         be sent to the background worker for this webhook.
@@ -152,8 +148,8 @@ class WebhookProvider(BaseProvider):
         raise NotImplementedError()
 
 
-class PollingProvider(BaseProvider):
-    PROVIDER_TYPE = ProviderTypes.POLLING
+class PollingSource(SourcePlugin):
+    SOURCE_TYPE = SourceTypes.POLLING
 
     @staticmethod
     def icon() -> str:

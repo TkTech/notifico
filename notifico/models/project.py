@@ -10,15 +10,17 @@ from notifico.models.utils import CaseInsensitiveComparator
 
 class Project(db.Model, HasLogs):
     """
-    A project is a collection of Providers (which emit events) and Channels
-    (which receives processed events).
+    A Project is a logical collection of Sources and Channels.
     """
-    __tablename__ = 'project'
-
     id = db.Column(db.Integer, primary_key=True)
+
+    #: A (hopefully) easily identifiable name for the project.
     name = db.Column(db.String(50), nullable=False)
+    #: The date and time this project was created.
     created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
-    public = db.Column(db.Boolean, default=True)
+    #: If true, this project can be viewed by anyone.
+    public = db.Column(db.Boolean, default=True, server_default='t')
+    #: A public website for this project.
     website = db.Column(db.String(1024))
 
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -32,6 +34,7 @@ class Project(db.Model, HasLogs):
         )
     )
 
+    #: The total number of messages ever received on behalf of this project.
     message_count = db.Column(db.Integer, default=0)
 
     #: The last time a message was received for this project, from any
@@ -67,5 +70,5 @@ class Project(db.Model, HasLogs):
         return url_for('projects.delete_project', project=self)
 
     @property
-    def choose_provider_url(self):
-        return url_for('projects.choose_provider', project=self)
+    def choose_source_url(self):
+        return url_for('projects.choose_source', project=self)

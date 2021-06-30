@@ -12,10 +12,10 @@ from flask_babel import lazy_gettext as _
 from flask_login import login_required, current_user
 
 from notifico.extensions import db
-from notifico.provider import get_providers, ProviderTypes, ProviderForm
+from notifico.plugin import get_installed_sources, SourceTypes, SourceForm
 from notifico.models.log import Log
 from notifico.models.project import Project
-from notifico.models.provider import Provider
+from notifico.models.source import SourceInstance
 from notifico.forms.projects import ProjectDetailsForm
 
 projects = Blueprint('projects', __name__)
@@ -161,152 +161,151 @@ def details(project):
     )
 
 
-@projects.route('/<project:project>/provider/choose')
-def choose_provider(project):
+@projects.route('/<project:project>/source/choose')
+def choose_source(project):
     """
-    Choose a new provider to add to a project.
+    Choose a new source to add to a project.
     """
     crumbs = (
         (project.owner.username, project.owner.dashboard_url),
         (project.name, project.details_url),
-        (_('Choose A Provider'), None)
+        (_('Choose A Source'), None)
     )
 
-    providers = get_providers()
+    sources = get_installed_sources()
 
     return render_template(
-        'providers/choose.html',
+        'sources/choose.html',
         project=project,
         user=project.owner,
         breadcrumbs=crumbs,
-        providers=providers.values()
+        sources=sources.values()
     )
 
 
 @projects.route(
-    '/<project:project>/provider/choose/<int:provider_impl>',
+    '/<project:project>/source/choose/<int:source_impl>',
     methods=['GET', 'POST']
 )
-def new_provider(project, provider_impl):
+def new_source(project, source_impl):
     """
-    Choose a new provider to add to a project.
+    Choose a new source to add to a project.
     """
-    provider_impl = get_providers().get(provider_impl)
-    if not provider_impl:
+    source_impl = get_installed_sources().get(source_impl)
+    if not source_impl:
         abort(404)
 
-    form = provider_impl.form()
+    form = source_impl.form()
     if form is None:
-        # Some providers may really not have any configuration. In such a
+        # Some sources may really not have any configuration. In such a
         # case we need a dummy form.
-        form = ProviderForm()
+        form = SourceForm()
 
     if form.validate_on_submit():
-        provider = Provider(
-            config=provider_impl.config_from_form(form),
-            provider_id=provider_impl.PROVIDER_ID,
-            provider_type=provider_impl.PROVIDER_TYPE,
+        source = SourceInstance(
+            config=source_impl.config_from_form(form),
+            source_id=source_impl.SOURCE_ID,
             project=project
         )
 
         project.logs.append(Log.info(
             summary=(
-                'A new %(provider_name)s provider was created by %(user)s.'
+                'A new %(source_name)s source was created by %(user)s.'
             ),
             payload={
-                'provider_name': provider_impl.PROVIDER_NAME,
+                'source_name': source_impl.SOURCE_NAME,
                 'user': current_user.username,
                 'user_id': current_user.id
             }
         ))
 
-        db.session.add(provider)
+        db.session.add(source)
         # TODO: Although incredibly unlikely, there's a chance for a conflict
         # here if the randomly generated key collides. Should handle it.
         db.session.commit()
 
-        # For webhook-type providers, we want the chance to present the
+        # For webhook-type sources, we want the chance to present the
         # hook front-and-center with instructions on how to use it.
-        if provider_impl.PROVIDER_TYPE == ProviderTypes.WEBHOOK:
+        if source_impl.SOURCE_TYPE == SourceTypes.WEBHOOK:
             return redirect(
                 url_for(
-                    '.get_provider_url',
+                    '.get_source_url',
                     project=project,
-                    provider=provider.id
+                    source=source.id
                 )
             )
 
-        flash(_('Your provider has been created.'), category='success')
+        flash(_('Your source has been created.'), category='success')
         return redirect(project.details_url)
     else:
         crumbs = (
             (project.owner.username, project.owner.dashboard_url),
             (project.name, project.details_url),
-            (_('Choose A Provider'), project.choose_provider_url),
-            (provider_impl.PROVIDER_NAME, None),
+            (_('Choose A Source'), project.choose_source_url),
+            (source_impl.SOURCE_NAME, None),
         )
 
         return render_template(
-            'providers/new.html',
+            'sources/new.html',
             project=project,
             user=project.owner,
             breadcrumbs=crumbs,
-            provider=provider_impl,
+            source=source_impl,
             form=form
         )
 
 
-@projects.route('/<project:project>/provider/<int:provider>')
-def get_provider_url(project, provider):
-    """Presents the user with the webhook URL for the given provider.
+@projects.route('/<project:project>/source/<int:source>')
+def get_source_url(project, source):
+    """Presents the user with the webhook URL for the given source.
     """
-    provider = Provider.query.get_or_404(provider)
+    source = SourceInstance.query.get_or_404(source)
 
     return render_template(
-        'providers/get_url.html',
+        'sources/get_url.html',
         project=project,
         user=project.owner,
-        provider=provider
+        source=source
     )
 
 
 @projects.route(
-    '/<project:project>/provider/<int:provider>/edit',
+    '/<project:project>/source/<int:source>/edit',
     methods=['GET', 'POST']
 )
-def edit_provider(project, provider):
-    """Edit an existing provider."""
-    provider = Provider.query.get_or_404(provider)
+def edit_source(project, source):
+    """Edit an existing source."""
+    source = SourceInstance.query.get_or_404(source)
 
     crumbs = (
         (project.owner.username, project.owner.dashboard_url),
         (project.name, project.details_url),
-        (provider.p.PROVIDER_NAME, None),
+        (source.impl.SOURCE_NAME, None),
     )
 
-    form = provider.p.form()
+    form = source.impl.form()
     if form is None:
-        # Some providers may really not have any configuration. In such a
+        # Some sources may really not have any configuration. In such a
         # case we need a dummy form.
-        form = ProviderForm()
+        form = SourceForm()
 
     if request.method == 'GET':
-        provider.p.update_form_with_config(form, provider.config)
+        source.impl.update_form_with_config(form, source.config)
 
     if form.validate_on_submit():
-        provider.config = provider.p.config_from_form(form)
+        source.config = source.impl.config_from_form(form)
 
-        db.session.add(provider)
+        db.session.add(source)
         db.session.commit()
 
-        flash(_('Your provider has been updated.'), category='success')
+        flash(_('Your source has been updated.'), category='success')
         return redirect(project.details_url)
 
     return render_template(
-        'providers/edit.html',
+        'sources/edit.html',
         project=project,
         user=project.owner,
         breadcrumbs=crumbs,
-        provider=provider.p,
+        source=source.impl,
         form=form
     )

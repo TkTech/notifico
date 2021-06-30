@@ -2,19 +2,19 @@ from flask import Request
 from flask_babel import lazy_gettext as _
 
 from notifico import errors
-from notifico.provider import WebhookProvider
+from notifico.plugin import WebhookSource
 
 
-class PlainProvider(WebhookProvider):
-    PROVIDER_NAME = 'Plain Text'
-    PROVIDER_ID = 10
-    PROVIDER_DESCRIPTION = _(
+class PlainSource(WebhookSource):
+    SOURCE_NAME = 'Plain Text'
+    SOURCE_ID = 10
+    SOURCE_DESCRIPTION = _(
         'An extremely basic webhook that accepts one argument, "payload".'
         ' Good for simple embedded devices and shell scripts.'
     )
 
     @classmethod
-    def pack_payload(cls, provider, request: Request):
+    def pack_payload(cls, source, request: Request):
         if request.method == 'POST':
             try:
                 msg = request.form['payload']
@@ -31,5 +31,5 @@ class PlainProvider(WebhookProvider):
         return msg
 
     @classmethod
-    def handle_request(cls, provider, payload):
+    def handle_request(cls, source, payload):
         pass

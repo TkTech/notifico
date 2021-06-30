@@ -2,10 +2,10 @@ from flask_babel import lazy_gettext as _
 
 from wtforms import fields, validators
 
-from notifico.provider import PollingProvider, ProviderForm
+from notifico.plugin import PollingSource, SourceForm
 
 
-class MediaWikiProviderForm(ProviderForm):
+class MediaWikiSourceForm(SourceForm):
     url = fields.URLField(
         _('URL'),
         validators=[
@@ -32,16 +32,16 @@ class MediaWikiProviderForm(ProviderForm):
     )
 
 
-class MediaWikiProvider(PollingProvider):
-    PROVIDER_NAME = 'MediaWiki'
-    PROVIDER_ID = 30
-    PROVIDER_DESCRIPTION = _(
+class MediaWikiSource(PollingSource):
+    SOURCE_NAME = 'MediaWiki'
+    SOURCE_ID = 30
+    SOURCE_DESCRIPTION = _(
         'Periodically checks a MediaWiki site for changes.'
     )
 
     @classmethod
     def form(cls):
-        return MediaWikiProviderForm()
+        return MediaWikiSourceForm()
 
     @staticmethod
     def icon():

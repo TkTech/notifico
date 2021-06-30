@@ -10,8 +10,8 @@
   <p>
   {% trans %}
   A project is a collection of webhooks and channels that will be linked
-  together. A single project can handle any number of services (such as
-  Github and JIRA) going to any number of destinations.
+  together. A single project can handle any number of <em>Sources</em> (such as
+  Github and JIRA) going to any number of <em>channels</em> (such as IRC).
   {% endtrans %}
   </p>
 
@@ -49,7 +49,7 @@
           </li>
           <li class="list-group-item text-muted">
             <i class="fas fa-link"></i>&nbsp;
-            {{ _("%(count)s providers", count=project.providers.count()) }}
+            {{ _("%(count)s sources", count=project.sources.count()) }}
           </li>
           <li class="list-group-item text-muted">
             <i class="fas fa-envelope"></i>&nbsp;

@@ -58,10 +58,10 @@ if __name__ == '__main__':
             'console_scripts': [
                 'notifico=notifico.cli:cli'
             ],
-            'notifico.providers': [
-                'plain=notifico.providers.plain:PlainProvider',
-                'github=notifico.providers.github:GithubProvider',
-                'mediawiki=notifico.providers.mediawiki:MediaWikiProvider'
+            'notifico.sources': [
+                'plain=notifico.sources.plain:PlainSource',
+                'github=notifico.sources.github:GithubSource',
+                'mediawiki=notifico.sources.mediawiki:MediaWikiSource'
             ]
         }
     )

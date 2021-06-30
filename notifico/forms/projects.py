@@ -2,8 +2,6 @@ import flask_wtf as wtf
 from flask_babel import lazy_gettext as _
 from wtforms import fields, validators
 
-from notifico.provider import get_providers
-
 
 class ProjectDetailsForm(wtf.FlaskForm):
     name = fields.StringField('Project Name', validators=[
@@ -27,15 +25,4 @@ class ProjectDetailsForm(wtf.FlaskForm):
         validators.Optional(),
         validators.Length(max=1024),
         validators.URL()
-    ])
-
-
-class NewProviderForm(wtf.FlaskForm):
-    name = fields.StringField('Project Name', validators=[
-        validators.DataRequired(),
-        validators.Length(1, 50),
-        validators.Regexp(r'^[a-zA-Z0-9_\-\.]*$', message=(
-            'Project name must only contain a to z, 0 to 9, dashes'
-            ' and underscores.'
-        ))
     ])

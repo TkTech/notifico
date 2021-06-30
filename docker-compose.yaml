@@ -23,7 +23,11 @@ services:
       FLASK_ENV: "development"
       NOTIFICO_CONFIG: "/app/misc/docker_config.py"
 
-    entrypoint: ["notifico", "run", "--reload"]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        python setup.py develop
+        notifico run --reload
 
   worker:
     image: notifico_base_image

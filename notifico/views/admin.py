@@ -328,7 +328,7 @@ def users_edit(user_id):
     )
 
 
-@admin.route('/useres/<int:user_id>/delete', methods=['GET', 'POST'])
+@admin.route('/users/<int:user_id>/delete', methods=['GET', 'POST'])
 @has_admin
 @confirmation_view(prompt_delete_user)
 def users_delete(user_id):
@@ -368,3 +368,11 @@ def users_delete_group(user_id, group_id):
 
     flash(_('The group has been removed.'), category='success')
     return redirect(url_for('.users_edit', user_id=user.id))
+
+
+@admin.route('/sources/')
+@has_admin
+def sources():
+    return render_template(
+        'admin/sources/list.html'
+    )

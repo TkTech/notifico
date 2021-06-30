@@ -1,7 +1,7 @@
 from notifico.models.log import Log
 from notifico.models.user import User
 from notifico.models.project import Project
-from notifico.models.provider import Provider
+from notifico.models.source import Source, SourceInstance
 from notifico.models.group import Group, Permission, Limit
 
 #: All models used in the core.
@@ -11,8 +11,9 @@ ALL_MODELS = (
     Log,
     User,
     Project,
-    Provider,
     Group,
     Permission,
-    Limit
+    Limit,
+    Source,
+    SourceInstance
 )

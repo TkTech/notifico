@@ -2,7 +2,7 @@ class PayloadError(ValueError):
     pass
 
 
-class ProviderError(ValueError):
+class SourceError(ValueError):
     def __init__(self, msg=None, *, payload=None):
         super().__init__(msg)
         self.payload = payload

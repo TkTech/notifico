@@ -9,31 +9,31 @@
 {% endcall %}
 
 <div class="container">
-  <h2>{{ _("Providers") }}</h2>
+  <h2>{{ _("Sources") }}</h2>
   <p>
     {% trans %}
-    Providers are the sources of messages and events for your project.
+    Sources generate messages and events for your project.
     {% endtrans %}
   </p>
-  <a class="btn btn-success text-decoration-none mb-3" href="{{ project.choose_provider_url }}">
+  <a class="btn btn-success text-decoration-none mb-3" href="{{ project.choose_source_url }}">
     <i class="fas fa-plus"></i>
-    {{ _("Add a new provider") }}
+    {{ _("Add a new source") }}
   </a>
   <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
-    {% for provider in project.providers %}
-    {% set icon = provider.p.icon() %}
-    {% set name = provider.p.PROVIDER_NAME %}
+    {% for source in project.sources %}
+    {% set icon = source.impl.icon() %}
+    {% set name = source.impl.SOURCE_NAME %}
     <div class="col">
       <div class="card card-bite h-100 border-0">
-        {% if provider.health >= 1 %}
+        {% if source.health >= 1 %}
         <div class="health-card health-good"
-          title="{{ _("Provider is healthy.") }}"></div>
-        {% elif provider.health < 10 %}
+          title="{{ _("Source is healthy.") }}"></div>
+        {% elif source.health < 10 %}
         <div class="health-card health-warn"
-          title="{{ _("Provider is occasionally failing") }}"></div>
+          title="{{ _("Source is occasionally failing") }}"></div>
         {% else %}
         <div class="health-card health-bad"
-          title="{{ _("Provider is failing.") }}"></div>
+          title="{{ _("Source is failing.") }}"></div>
         {% endif %}
         <div class="card-body">
           <h5 class="card-title">
@@ -42,30 +42,30 @@
           </h5>
           <h6 class="card-subtitle mb-2 text-muted">
             {# nbsp here is to preserve spacing when no nickname is present. #}
-            {{ provider.description|default("&nbsp"|safe, True) }}
+            {{ source.description|default("&nbsp"|safe, True) }}
           </h6>
         </div>
         <ul class="list-group list-group-flush">
           <li class="list-group-item text-muted">
             <i class="fas fa-calendar"></i>&nbsp;
-            {{ _("Created %(date)s", date=provider.created|pretty_date) }}
+            {{ _("Created %(date)s", date=source.created|pretty_date) }}
           </li>
           <li class="list-group-item text-muted">
             <i class="fas fa-envelope"></i>&nbsp;
-            {% if provider.events_received %}
-            {{ _("%(count)s events.", count=provider.events_received) }}
+            {% if source.events_received %}
+            {{ _("%(count)s events.", count=source.events_received) }}
             {% else %}
             {{ _("No events recieved yet.") }}
             {% endif %}
           </li>
         </ul>
         <div class="card-body">
-          {% if provider.p.PROVIDER_TYPE.value == 1 %}
-            <a class="card-link" href="{{ provider.get_webhook_url }}">
+          {% if source.impl.SOURCE_TYPE.value == 1 %}
+            <a class="card-link" href="{{ source.get_webhook_url }}">
               {{ _("Get URL") }}
             </a>
           {% endif %}
-          <a class="card-link" href="{{ provider.edit_url }}">
+          <a class="card-link" href="{{ source.edit_url }}">
             {{ _("Edit") }}
           </a>
           <a href="#" class="card-link">{{ _("Delete") }}</a>

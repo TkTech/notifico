@@ -4,35 +4,35 @@
 
 {% block content_page %}
 {% call components.page_header(breadcrumbs) %}
-  {{ _("Choose A Provider") }}
+  {{ _("Choose A Source") }}
 {% endcall %}
 
 <div class="container">
   <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
-    {% for provider in providers %}
+    {% for source in sources %}
     <div class="col">
       <div class="card card-bite h-100">
         <div class="card-body">
           <div class="card-title">
-            <h5>{{ provider.PROVIDER_NAME }}</h5>
+            <h5>{{ source.SOURCE_NAME }}</h5>
           </div>
           <div class="card-text">
-            {{ provider.PROVIDER_DESCRIPTION }}
+            {{ source.SOURCE_DESCRIPTION }}
             <div class="pt-3">
-              <a class="btn btn-primary" href="{{ url_for('.new_provider',
+              <a class="btn btn-primary" href="{{ url_for('.new_source',
                   project=project,
-                  provider_impl=provider.PROVIDER_ID) }}">
+                  source_impl=source.SOURCE_ID) }}">
                 {{ _("Add") }}
               </a>
             </div>
           </div>
         </div>
         <div class="card-footer text-muted">
-          {% set provider_type = provider.PROVIDER_TYPE.value %}
-          {% if provider_type == 1 %}
-          <small>{{ _("This provider is a webhook.") }}</small>
-          {% elif provider_type == 2 %}
-          <small>{{ _("This provider polls for changes.") }}</small>
+          {% set source_type = source.SOURCE_TYPE.value %}
+          {% if source_type == 1 %}
+          <small>{{ _("This source is a webhook.") }}</small>
+          {% elif source_type == 2 %}
+          <small>{{ _("This source polls for changes.") }}</small>
           {% endif %}
         </div>
       </div>

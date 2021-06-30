@@ -11,6 +11,6 @@ RUN apk add --no-cache --virtual .deps build-base\
     linux-headers \
     libffi-dev
 COPY . .
-RUN python setup.py develop
-# Purge build time dependencies.
-RUN apk del .deps
+# Install in development mode and purge build time dependencies.
+RUN python setup.py develop && \
+    apk del .deps
