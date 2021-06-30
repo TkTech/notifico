@@ -14,8 +14,10 @@ from flask_login import login_required, current_user
 from notifico.extensions import db
 from notifico.plugin import get_installed_sources, SourceTypes, SourceForm
 from notifico.models.log import Log
+from notifico.models.user import User
+from notifico.models.group import Group, group_members
 from notifico.models.project import Project
-from notifico.models.source import SourceInstance
+from notifico.models.source import Source, SourceInstance, source_groups
 from notifico.forms.projects import ProjectDetailsForm
 
 projects = Blueprint('projects', __name__)
@@ -172,14 +174,26 @@ def choose_source(project):
         (_('Choose A Source'), None)
     )
 
-    sources = get_installed_sources()
+    # A messy query, but far more effecient than the 5 joins SQLAlchemy tries
+    # to do the "clean" way.  Filters sources to only show those that are
+    # allowed to the current user's groups.
+    sources = db.session.query(
+        Source
+    ).join(
+        source_groups
+    ).join(
+        group_members, group_members.c.group_id == source_groups.c.group_id
+    ).filter(
+        Source.enabled.is_(True),
+        group_members.c.user_id == current_user.id
+    )
 
     return render_template(
         'sources/choose.html',
         project=project,
         user=project.owner,
         breadcrumbs=crumbs,
-        sources=sources.values()
+        sources=sources
     )
 
 
