@@ -18,8 +18,21 @@ from notifico.models.group import group_members
 from notifico.models.project import Project
 from notifico.models.source import Source, SourceInstance, source_groups
 from notifico.forms.projects import ProjectDetailsForm
+from notifico.views.utils import confirmation_view, ConfirmPrompt
 
 projects = Blueprint('projects', __name__)
+
+
+prompt_delete_project = ConfirmPrompt(
+    cancel_url=lambda project: url_for(
+        '.dashboard',
+        user=project.owner
+    ),
+    message=_(
+        'Are you sure you want to delete this project? This cannot be undone.'
+    ),
+    yes_text=_('Delete Project')
+)
 
 
 @projects.route('/<user:user>/')
@@ -116,22 +129,13 @@ def edit_project(project):
 
 
 @projects.route('/<project:project>/delete', methods=['GET', 'POST'])
-@login_required
+@confirmation_view(prompt_delete_project)
 def delete_project(project):
-    """
-    Delete an existing project.
-    """
-    if request.method == 'POST':
-        redirect_to = project.owner.dashboard_url
-        db.session.delete(project)
-        db.session.commit()
-        return redirect(redirect_to)
+    db.session.delete(project)
+    db.session.commit()
 
-    return render_template(
-        'projects/delete.html',
-        project=project,
-        user=project.owner
-    )
+    flash(_('The project has been deleted.'), category='success')
+    return redirect(url_for('.dashboard', user=project.owner))
 
 
 @projects.route('/<project:project>/')
