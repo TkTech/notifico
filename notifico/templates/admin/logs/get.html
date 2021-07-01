@@ -69,4 +69,52 @@
   </div>
 </div>
 {% endif %}
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Log Context") }}</h6>
+    <small class="card-subtitle text-muted">
+      {{ _("Internal IDs related to this error.") }}
+    </small>
+  </div>
+  <div class="card-body p-0">
+    {% if not log.related.count() %}
+    <div class="alert alert-info mb-0">
+      {{ _("No context available for this event.") }}
+    </div>
+    {% else %}
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th class="compact">{{ _("What") }}</th>
+          <th>{{ _("Value") }}</th>
+          <th class="compact text-center">{{ _("ID") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for related in log.related %}
+        {% set obj = get_related(related) %}
+        <tr>
+          <td class="compact table-info">{{ related.context_type.name }}</td>
+          <td>
+            {% if obj is none %}
+            <span class="text-danger">{{ _("Object no longer exists.") }}</span>
+            {% elif related.context_type.name == "USER" %}
+            <a href="{{ obj.admin_edit_url }}">{{ obj.username }}</a>
+            {% elif related.context_type.name == "SOURCE_IMPL" %}
+            <a href="{{ obj.admin_edit_url }}">{{ obj.impl.SOURCE_NAME }}</a>
+            {% elif related.context_type.name == "PROJECT" %}
+            <a href="{{ obj.details_url }}">{{ obj.name }}</a>
+            {% endif %}
+          </td>
+          <td class="compact text-center">
+            <code>{{ related.context_id }}</code>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

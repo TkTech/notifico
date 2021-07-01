@@ -13,8 +13,9 @@ from flask_babel import lazy_gettext as _
 
 from notifico.extensions import db
 from notifico.models.user import User
+from notifico.models.project import Project
 from notifico.models.log import Log, LogContext, LogContextType
-from notifico.models.source import Source
+from notifico.models.source import Source, SourceInstance
 from notifico.models.group import Permission, Group, CoreGroups
 from notifico.authorization import has_admin
 from notifico.forms.admin import (
@@ -517,6 +518,17 @@ def logs():
     )
 
 
+def _get_related(related: LogContext):
+    if related.context_type == LogContextType.USER:
+        return db.session.query(User).get(related.context_id)
+    elif related.context_type == LogContextType.SOURCE_IMPL:
+        return db.session.query(Source).get(related.context_id)
+    elif related.context_type == LogContextType.SOURCE_INST:
+        return db.session.query(SourceInstance).get(related.context_id)
+    elif related.context_type == LogContextType.PROJECT:
+        return db.session.query(Project).get(related.context_id)
+
+
 @admin.route('/logs/<int:log_id>')
 @has_admin
 def logs_get(log_id):
@@ -535,5 +547,6 @@ def logs_get(log_id):
         admin_title=_('Log Details'),
         breadcrumbs=crumbs,
         log=log,
-        pretty_payload=json.dumps(log.payload, sort_keys=True, indent=2)
+        pretty_payload=json.dumps(log.payload, sort_keys=True, indent=2),
+        get_related=_get_related
     )
