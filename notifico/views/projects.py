@@ -229,20 +229,39 @@ def new_source(project, source_impl):
             project=project
         )
 
-        project.logs.append(Log.info(
-            summary=(
-                'A new %(source_name)s source was created by %(user)s.'
-            ),
-            payload={
-                'source_name': source_impl.SOURCE_NAME,
-                'user': current_user.username,
-                'user_id': current_user.id
-            }
-        ))
-
         db.session.add(source)
-        # TODO: Although incredibly unlikely, there's a chance for a conflict
-        # here if the randomly generated key collides. Should handle it.
+        # Flush to populate source.id.
+        db.session.flush()
+        db.session.add(
+            Log.info(
+                summary=(
+                    'A new %(source_name)s source was created by %(user)s.'
+                ),
+                payload={
+                    'source_name': source_impl.SOURCE_NAME,
+                    'user': current_user.username,
+                    'user_id': current_user.id
+                },
+                related=[
+                    LogContext(
+                        context_type=LogContextType.USER,
+                        context_id=current_user.id
+                    ),
+                    LogContext(
+                        context_type=LogContextType.PROJECT,
+                        context_id=project.id
+                    ),
+                    LogContext(
+                        context_type=LogContextType.SOURCE_IMPL,
+                        context_id=source_impl.SOURCE_ID
+                    ),
+                    LogContext(
+                        context_type=LogContextType.SOURCE_INST,
+                        context_id=source.id
+                    )
+                ]
+            )
+        )
         db.session.commit()
 
         # For webhook-type sources, we want the chance to present the
