@@ -28,7 +28,7 @@
   </div>
 </section>
 
-<div class="card">
+<div class="card mb-3">
   <div class="card-header">
     <h6 class="card-title mb-0">{{ _("User Groups") }}</h6>
   </div>
@@ -64,6 +64,46 @@
         </div>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("User Logs") }}</h6>
+  </div>
+  <div class="card-body p-0">
+    {% if logs.count() %}
+    <table class="table table-striped table-small mb-0">
+      <thead>
+        <tr>
+          <th>{{ _("Severity") }}</th>
+          <th>{{ _("When") }}</th>
+          <th>{{ _("Summary") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr class="table-{{ components.log_to_suffix(log) }}">
+          <td class="compact">
+            <code>{{ log.severity.name }}</code>
+          </td>
+          <td class="compact">{{ log.created|pretty_date|capitalize }}</td>
+          <td>
+            <a class="text-decoration-none" href="{{ log.admin_get_url }}">
+              <code>
+                {{ _(log.summary, **log.payload) }}
+              </code>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info mb-0">
+      {{ _("Nothing has happened yet.") }}
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

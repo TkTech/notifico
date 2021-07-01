@@ -309,6 +309,17 @@ def users_edit(user_id):
     if user is None:
         abort(404)
 
+    logs = db.session.query(
+        Log
+    ).join(
+        LogContext
+    ).filter(
+        LogContext.context_type == LogContextType.USER,
+        LogContext.context_id == user_id
+    ).order_by(
+        Log.created.desc()
+    )
+
     group_form = GroupSelectForm()
     group_form.group.choices = [
         (group.id, group.name)
@@ -341,7 +352,8 @@ def users_edit(user_id):
         admin_title=_('Edit User'),
         breadcrumbs=crumbs,
         user=user,
-        group_form=group_form
+        group_form=group_form,
+        logs=logs
     )
 
 
