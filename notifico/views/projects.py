@@ -34,6 +34,12 @@ prompt_delete_project = ConfirmPrompt(
     yes_text=_('Delete Project')
 )
 
+prompt_delete_source = ConfirmPrompt(
+    cancel_url=lambda project, source_id: project.details_url,
+    message=_('Are you sure you want to delete this source?'),
+    yes_text=_('Delete Source')
+)
+
 
 @projects.route('/<user:user>/')
 def dashboard(user):
@@ -299,11 +305,13 @@ def new_source(project, source_impl):
         )
 
 
-@projects.route('/<project:project>/source/<int:source>')
-def get_source_url(project, source):
+@projects.route('/<project:project>/source/<int:source_id>')
+def get_source_url(project, source_id):
     """Presents the user with the webhook URL for the given source.
     """
-    source = SourceInstance.query.get_or_404(source)
+    source = db.session.query(SourceInstance).get(source_id)
+    if source is None:
+        abort(404)
 
     return render_template(
         'sources/get_url.html',
@@ -314,12 +322,14 @@ def get_source_url(project, source):
 
 
 @projects.route(
-    '/<project:project>/source/<int:source>/edit',
+    '/<project:project>/source/<int:source_id>/edit',
     methods=['GET', 'POST']
 )
-def edit_source(project, source):
+def edit_source(project, source_id):
     """Edit an existing source."""
-    source = SourceInstance.query.get_or_404(source)
+    source = db.session.query(SourceInstance).get(source_id)
+    if source is None:
+        abort(404)
 
     crumbs = (
         (project.owner.username, project.owner.dashboard_url),
@@ -353,3 +363,20 @@ def edit_source(project, source):
         source=source.impl,
         form=form
     )
+
+
+@projects.route(
+    '/<project:project>/source/<int:source_id>/delete',
+    methods=['GET', 'POST']
+)
+@confirmation_view(prompt_delete_source)
+def delete_source(project, source_id):
+    source = db.session.query(SourceInstance).get(source_id)
+    if source is None:
+        abort(404)
+
+    db.session.delete(source)
+    db.session.commit()
+
+    flash(_('The source has been deleted.'), category='success')
+    return redirect(project.details_url)

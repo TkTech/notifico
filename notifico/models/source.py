@@ -140,7 +140,7 @@ class SourceInstance(db.Model):
         return url_for(
             'projects.edit_source',
             project=self.project,
-            source=self.id
+            source_id=self.id
         )
 
     @property
@@ -148,5 +148,13 @@ class SourceInstance(db.Model):
         return url_for(
             'projects.get_source_url',
             project=self.project,
-            source=self.id
+            source_id=self.id
+        )
+
+    @property
+    def delete_url(self):
+        return url_for(
+            'projects.delete_source',
+            project=self.project,
+            source_id=self.id
         )
