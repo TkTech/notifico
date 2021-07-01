@@ -13,9 +13,8 @@ from flask_login import login_required, current_user
 
 from notifico.extensions import db
 from notifico.plugin import get_installed_sources, SourceTypes, SourceForm
-from notifico.models.log import Log
-from notifico.models.user import User
-from notifico.models.group import Group, group_members
+from notifico.models.log import Log, LogContext, LogContextType
+from notifico.models.group import group_members
 from notifico.models.project import Project
 from notifico.models.source import Source, SourceInstance, source_groups
 from notifico.forms.projects import ProjectDetailsForm
@@ -145,9 +144,17 @@ def details(project):
         (project.name, None)
     )
 
-    # This will become a performanc pain point very quickly. Needs to be
-    # moved to sort-pagination off of the timestamp.
-    query = project.logs.order_by(Log.created.desc())
+    query = db.session.query(
+        Log
+    ).join(
+        LogContext
+    ).filter(
+        LogContext.context_type == LogContextType.PROJECT,
+        LogContext.context_id == project.id
+    ).order_by(
+        Log.created.desc()
+    )
+
     logs = query.paginate(
         page=1,
         per_page=25,

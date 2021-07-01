@@ -1,8 +1,9 @@
 import inspect
 
-from notifico import db, errors
+from notifico import errors
 from notifico.tasks import celery
-from notifico.models.log import Log
+from notifico.extensions import db
+from notifico.models.log import Log, LogContext, LogContextType
 from notifico.models.project import Project
 from notifico.models.source import SourceInstance
 
@@ -24,13 +25,13 @@ def dispatch_webhook(source_id, **kwargs):
     # We only pass some keyword arguments if the handler has them in their
     # signature. We want to minimize overhead of making Sources as much as
     # possible.
-    sig = inspect.signature(source.p.handle_request)
+    sig = inspect.signature(source.impl.handle_request)
     optionals = {
         k: kwargs.get(k) for k in OPTIONAL_KWARGS if k in sig.parameters
     }
 
     try:
-        source.p.handle_request(source, **optionals)
+        source.impl.handle_request(source, **optionals)
     except Exception as e:
         source.health = SourceInstance.health - 1
         source.project.health = Project.health - 1
@@ -44,12 +45,31 @@ def dispatch_webhook(source_id, **kwargs):
             msg = 'An unspecified error occured when processing a webhook.'
             payload = {}
 
-        log = Log.error(summary=msg, payload=payload)
+        db.session.add(
+            Log.error(
+                summary=msg,
+                payload=payload,
+                related=[
+                    LogContext(
+                        context_type=LogContextType.SOURCE_IMPL,
+                        context_id=source.source_id
+                    ),
+                    LogContext(
+                        context_type=LogContextType.SOURCE_INST,
+                        context_id=source.id
+                    ),
+                    LogContext(
+                        context_type=LogContextType.PROJECT,
+                        context_id=source.project.id
+                    ),
+                    LogContext(
+                        context_type=LogContextType.USER,
+                        context_id=source.project.owner.id
+                    )
+                ]
+            )
+        )
 
-        source.project.logs.append(log)
-        source.logs.append(log)
-
-        db.session.add(source)
         db.session.commit()
 
         raise

@@ -4,7 +4,6 @@ import datetime
 import traceback
 
 from flask import url_for
-from sqlalchemy.ext.declarative import declared_attr
 
 from notifico.extensions import db
 
@@ -23,6 +22,47 @@ class LogSeverity(enum.Enum):
     WARNING = 30
     ERROR = 40
     CRITICAL = 50
+
+
+class LogContextType(enum.Enum):
+    """
+    Used to specify what type of ID is in the context container.
+    """
+    #: The ID of a specific user.
+    USER = 10
+    #: The ID of a specific project.
+    PROJECT = 20
+    #: The ID of a source instance.
+    SOURCE_INST = 30
+    #: The ID of a source implementation.
+    SOURCE_IMPL = 40
+
+
+class LogContext(db.Model):
+    """
+    Used to provide additional context on the who or what of a log error.
+
+    Useful for showing all events related to a user, or a project with no
+    more than a single JOIN.
+    """
+    __tablename__ = 'log_context'
+
+    log_id = db.Column(db.Integer, db.ForeignKey('log.id'), primary_key=True)
+    log = db.relationship(
+        'Log',
+        backref=db.backref(
+            'related',
+            lazy='dynamic',
+            cascade='all, delete, delete-orphan',
+        )
+    )
+
+    context_type = db.Column(
+        db.Enum(LogContextType),
+        nullable=False,
+        primary_key=True
+    )
+    context_id = db.Column(db.BigInteger, nullable=False, primary_key=True)
 
 
 class Log(db.Model):
@@ -88,44 +128,3 @@ class Log(db.Model):
     @property
     def admin_get_url(self):
         return url_for('admin.logs_get', log_id=self.id)
-
-
-class HasLogs:
-    """
-    A mixin for database models that adds a convienient `logs` property,
-    allowing you to store and retrieve logs.
-
-    Note that this only works when the associated model has a single `id`
-    column. To work with more complex models, you'll need to make the
-    association table and relationship yourself.
-
-    .. note::
-
-        Database migrations must be run whenever this mixin is added to a model
-        in order to generate the association table.
-    """
-    @declared_attr
-    def logs(cls):
-        log_assoc = db.Table(
-            f'{cls.__tablename__}_logs',
-            cls.metadata,
-            db.Column(
-                'log_id',
-                db.ForeignKey('log.id', ondelete='cascade'),
-                primary_key=True
-            ),
-            db.Column(
-                f'{cls.__tablename__}_id',
-                db.ForeignKey(f'{cls.__tablename__}.id', ondelete='cascade'),
-                primary_key=True
-            )
-        )
-
-        return db.relationship(
-            Log,
-            secondary=log_assoc,
-            lazy='dynamic',
-            cascade='all, delete, delete-orphan',
-            passive_deletes=True,
-            single_parent=True
-        )

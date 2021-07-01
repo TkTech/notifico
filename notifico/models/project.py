@@ -4,11 +4,10 @@ from flask import url_for
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from notifico.extensions import db
-from notifico.models.log import HasLogs
 from notifico.models.utils import CaseInsensitiveComparator
 
 
-class Project(db.Model, HasLogs):
+class Project(db.Model):
     """
     A Project is a logical collection of Sources and Channels.
     """

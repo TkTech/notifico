@@ -13,8 +13,8 @@ from flask_babel import lazy_gettext as _
 
 from notifico.extensions import db
 from notifico.models.user import User
-from notifico.models.log import Log
-from notifico.models.source import Source, SourceInstance
+from notifico.models.log import Log, LogContext, LogContextType
+from notifico.models.source import Source
 from notifico.models.group import Permission, Group, CoreGroups
 from notifico.authorization import has_admin
 from notifico.forms.admin import (
@@ -417,10 +417,13 @@ def sources_edit(source_id):
     if source is None:
         abort(404)
 
-    logs = db.session.query(Log).join(
-        Log, SourceInstance.logs
+    logs = db.session.query(
+        Log
+    ).join(
+        LogContext
     ).filter(
-        SourceInstance.source_id == source.source_id
+        LogContext.context_type == LogContextType.SOURCE_IMPL,
+        LogContext.context_id == source_id
     ).order_by(
         Log.created.desc()
     )

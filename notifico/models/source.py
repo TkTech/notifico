@@ -6,7 +6,6 @@ from typing import Optional
 from flask import url_for
 
 from notifico.extensions import db
-from notifico.models.log import HasLogs
 from notifico.plugin import get_installed_sources
 
 
@@ -56,7 +55,7 @@ class Source(db.Model):
         return url_for('admin.sources_edit', source_id=self.source_id)
 
 
-class SourceInstance(db.Model, HasLogs):
+class SourceInstance(db.Model):
     """
     A configured instance of the source, attached to a specific project.
     """

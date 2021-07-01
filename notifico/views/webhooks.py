@@ -9,7 +9,7 @@ from flask import (
 
 from notifico import errors
 from notifico.extensions import db
-from notifico.models.log import Log
+from notifico.models.log import Log, LogContext, LogContextType
 from notifico.models.source import SourceInstance
 from notifico.plugin import SourceTypes
 from notifico.models.project import Project
@@ -51,14 +51,32 @@ def trigger(project, key):
         source.health = SourceInstance.health - 1
         source.project.health = Project.health - 1
 
-        log = Log.error(summary=(
-            'An unspecified error occured when processing a webhook.'
-        ))
+        db.session.add(
+            Log.error(
+                summary=(
+                    'An unspecified error occured when processing a webhook.'
+                ),
+                related=[
+                    LogContext(
+                        context_type=LogContextType.SOURCE_IMPL,
+                        context_id=source.source_id
+                    ),
+                    LogContext(
+                        context_type=LogContextType.SOURCE_INST,
+                        context_id=source.id
+                    ),
+                    LogContext(
+                        context_type=LogContextType.PROJECT,
+                        context_id=source.project.id
+                    ),
+                    LogContext(
+                        context_type=LogContextType.USER,
+                        context_id=source.project.owner.id
+                    )
+                ]
+            )
+        )
 
-        source.project.logs.append(log)
-        source.logs.append(log)
-
-        db.session.add(source)
         db.session.commit()
 
         try:
