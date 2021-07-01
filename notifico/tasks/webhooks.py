@@ -41,14 +41,18 @@ def dispatch_webhook(source_id, **kwargs):
         except errors.SourceError as ee:
             msg = str(ee)
             payload = ee.payload or {}
-        else:
+        except Exception:
             msg = 'An unspecified error occured when processing a webhook.'
             payload = {}
 
         db.session.add(
             Log.error(
                 summary=msg,
-                payload=payload,
+                payload={
+                    **payload,
+                    'payload': kwargs.get('payload'),
+                    'remote_ip': kwargs.get('remote_ip')
+                },
                 related=[
                     LogContext(
                         context_type=LogContextType.SOURCE_IMPL,

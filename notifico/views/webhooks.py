@@ -56,6 +56,9 @@ def trigger(project, key):
                 summary=(
                     'An unspecified error occured when processing a webhook.'
                 ),
+                payload={
+                    'request_ip': request.remote_addr
+                },
                 related=[
                     LogContext(
                         context_type=LogContextType.SOURCE_IMPL,
