@@ -10,7 +10,8 @@ from flask import (
 from notifico import errors
 from notifico.extensions import db
 from notifico.models.log import Log, LogContext, LogContextType
-from notifico.models.source import SourceInstance
+from notifico.models.source import Source, SourceInstance, source_groups
+from notifico.models.group import group_members
 from notifico.plugin import SourceTypes
 from notifico.models.project import Project
 
@@ -41,7 +42,53 @@ def trigger(project, key):
     # All hooks generate a key, even ones that aren't actually accessible via
     # webhook.
     if source is None or source.impl.SOURCE_TYPE != SourceTypes.WEBHOOK:
-        abort(404)
+        return make_response(
+            jsonify({
+                'msg': 'No such webhook.',
+            }),
+            404
+        )
+
+    """
+    select * from source
+    join source_groups sg on source.source_id = sg.source_id
+    join group_members gm on sg.group_id = gm.group_id
+    join source_instance si on source.source_id = si.source_id
+    join project on project.id = si.project_id
+    where source.enabled is 0 and gm.user_id = project.owner_id and source.source_id = 10
+    """
+
+    can_use = db.session.query(
+        db.session.query(
+            Source
+        ).join(
+            source_groups
+        ).join(
+            group_members,
+            group_members.c.group_id == source_groups.c.group_id
+        ).join(
+            SourceInstance
+        ).join(
+            Project
+        ).filter(
+            Source.enabled == 1,
+            SourceInstance.id == source.id,
+            group_members.c.user_id == Project.owner_id,
+        ).exists()
+    ).scalar()
+
+    if not can_use:
+        # 410 is the "Gone" status. Is there a better one? We may not be
+        # permanently unavailable.
+        return make_response(
+            jsonify({
+                'msg': (
+                    'This webhook is valid, but this type of webhook'
+                    ' has been disabled.'
+                )
+            }),
+            404
+        )
 
     try:
         packed = source.impl.pack_payload(source, request)

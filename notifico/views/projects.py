@@ -191,9 +191,6 @@ def choose_source(project):
         (_('Choose A Source'), None)
     )
 
-    # A messy query, but far more effecient than the 5 joins SQLAlchemy tries
-    # to do the "clean" way.  Filters sources to only show those that are
-    # allowed to the current user's groups.
     sources = db.session.query(
         Source
     ).join(
