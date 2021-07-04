@@ -12,11 +12,9 @@ from flask_babel import lazy_gettext as _
 from flask_login import login_required, current_user
 
 from notifico.extensions import db
-from notifico.plugin import get_installed_sources, SourceTypes, SourceForm
 from notifico.models.log import Log, LogContext, LogContextType
 from notifico.models.group import group_members
 from notifico.models.project import Project
-from notifico.models.source import Source, SourceInstance, source_groups
 from notifico.forms.projects import ProjectDetailsForm
 from notifico.views.utils import confirmation_view, ConfirmPrompt
 
@@ -154,29 +152,11 @@ def details(project):
         (project.name, None)
     )
 
-    query = db.session.query(
-        Log
-    ).join(
-        LogContext
-    ).filter(
-        LogContext.context_type == LogContextType.PROJECT,
-        LogContext.context_id == project.id
-    ).order_by(
-        Log.created.desc()
-    )
-
-    logs = query.paginate(
-        page=1,
-        per_page=25,
-        max_per_page=25
-    )
-
     return render_template(
         'projects/get.html',
         project=project,
         user=project.owner,
-        breadcrumbs=crumbs,
-        project_logs=logs
+        breadcrumbs=crumbs
     )
 
 
@@ -334,6 +314,19 @@ def edit_source(project, source_id):
         (source.impl.SOURCE_NAME, None),
     )
 
+    logs = db.session.query(
+        Log
+    ).join(
+        LogContext
+    ).filter(
+        LogContext.context_type == LogContextType.SOURCE_INST,
+        LogContext.context_id == source.id
+    ).order_by(
+        Log.created.desc()
+    ).limit(
+        10
+    )
+
     form = source.impl.form()
     if form is None:
         # Some sources may really not have any configuration. In such a
@@ -357,8 +350,10 @@ def edit_source(project, source_id):
         project=project,
         user=project.owner,
         breadcrumbs=crumbs,
-        source=source.impl,
-        form=form
+        source=source,
+        impl=source.impl,
+        form=form,
+        logs=logs
     )
 
 

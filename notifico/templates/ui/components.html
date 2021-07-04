@@ -35,3 +35,28 @@
   {% elif level == 40 or level == 50 %}danger
   {% endif %}
 {%- endmacro -%}
+
+{# Renders a log table with minimal details. Includes the <thead> and <tbody>,
+   but not the <table> itself. #}
+{%- macro simple_log_table(logs) -%}
+<thead>
+  <tr>
+    <th class="compact">{{ _("Severity") }}</th>
+    <th class="compact">{{ _("When") }}</th>
+    <th>{{ _("Summary") }}</th>
+  </tr>
+</thead>
+<tbody>
+  {% for log in logs %}
+    <tr class="table-{{ log_to_suffix(log) }}">
+      <td class="compact text-{{ log_to_suffix(log) }}">
+        {{ log.severity.name }}
+      </td>
+      <td class="compact">{{ log.created|pretty_date|capitalize }}</td>
+      <td>
+        {{ _(log.summary, **log.payload) }}
+      </td>
+    </tr>
+  {% endfor %}
+</tbody>
+{%- endmacro -%}

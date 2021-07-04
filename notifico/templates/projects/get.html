@@ -24,7 +24,7 @@
     {% set icon = source.impl.icon() %}
     {% set name = source.impl.SOURCE_NAME %}
     <div class="col">
-      <div class="card card-bite h-100 border-0">
+      <div class="card h-100">
         {% if source.health >= 1 %}
         <div class="health-card health-good"
           title="{{ _("Source is healthy.") }}"></div>
@@ -35,23 +35,26 @@
         <div class="health-card health-bad"
           title="{{ _("Source is failing.") }}"></div>
         {% endif %}
-        <div class="card-body">
-          <h5 class="card-title">
-            {% if icon %}<i class="{{ icon }}" title="{{ name }}"></i>&nbsp;{% endif -%}
-            {{ name }}
-          </h5>
-          <h6 class="card-subtitle mb-2 text-muted">
-            {# nbsp here is to preserve spacing when no nickname is present. #}
-            {{ source.description|default("&nbsp"|safe, True) }}
-          </h6>
-        </div>
-        <ul class="list-group list-group-flush">
+        <a class="card-header-link h-100" href="{{ source.edit_url }}">
+          <div class="card-header h-100">
+            <h5 class="card-title">
+              {% if icon %}<i class="{{ icon }} fa-fw" title="{{ name }}"></i>&nbsp;{% endif -%}
+              {{ name }}
+            </h5>
+            {% if source.description %}
+            <small class="card-subtitle text-muted">
+              {{ source.description }}
+            </small>
+            {% endif %}
+          </div>
+        </a>
+        <ul class="list-group list-group-flush h-100 border-top-0">
           <li class="list-group-item text-muted">
-            <i class="fas fa-calendar"></i>&nbsp;
+            <i class="fas fa-calendar fa-fw"></i>&nbsp;
             {{ _("Created %(date)s", date=source.created|pretty_date) }}
           </li>
           <li class="list-group-item text-muted">
-            <i class="fas fa-envelope"></i>&nbsp;
+            <i class="fas fa-envelope fa-fw"></i>&nbsp;
             {% if source.events_received %}
             {{ _("%(count)s events.", count=source.events_received) }}
             {% else %}
@@ -59,15 +62,7 @@
             {% endif %}
           </li>
         </ul>
-        <div class="card-body">
-          {% if source.impl.SOURCE_TYPE.value == 1 %}
-            <a class="card-link" href="{{ source.get_webhook_url }}">
-              {{ _("Get URL") }}
-            </a>
-          {% endif %}
-          <a class="card-link" href="{{ source.edit_url }}">
-            {{ _("Edit") }}
-          </a>
+        <div class="card-footer">
           <a class="card-link" href="{{ source.delete_url }}">
             {{ _("Delete") }}
           </a>
@@ -90,38 +85,5 @@
     <i class="fas fa-plus"></i>
     {{ _("Add a new channel") }}
   </a>
-</div>
-
-<div class="container py-3">
-  <h2>{{ _("Logs") }}</h2>
-  <p>
-    {% trans %}
-    See everything that has happened recently with your project.
-    {% endtrans %}
-  </p>
-  {% if project_logs.total %}
-  <table class="table table-striped table-small">
-    <thead>
-      <tr>
-        <th class="compact">{{ _("When") }}</th>
-        <th>{{ _("Summary") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for log in project_logs.items %}
-      <tr class="table-{{ components.log_to_suffix(log) }}">
-        <td class="compact">{{ log.created|pretty_date|capitalize }}</td>
-        <td>
-          {{ _(log.summary, **log.payload) }}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <div class="alert alert-info mb-0">
-    {{ _("Nothing has happened yet.") }}
-  </div>
-  {% endif %}
 </div>
 {% endblock %}

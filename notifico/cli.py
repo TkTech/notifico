@@ -1,5 +1,7 @@
 import click
 from flask.cli import FlaskGroup
+from rich.console import Console
+from rich.table import Table
 
 from notifico.app import create_app
 from notifico.extensions import db
@@ -33,10 +35,6 @@ def seed():
     """Seeds the database with required data, such as the default user groups
     for anonymous and registered users.
     """
-    from notifico.extensions import db
-    from notifico.plugin import get_installed_sources
-    from notifico.models.utils import get_or_create
-    from notifico.models.source import Source
     from notifico.models.group import Group, Permission, CoreGroups
 
     if not Group.query.get(CoreGroups.ANONYMOUS.value):
@@ -71,12 +69,94 @@ def seed():
 
     db.session.commit()
 
-    registered_group = db.session.query(Group).get(CoreGroups.REGISTERED.value)
 
-    for source_id, source in get_installed_sources().items():
-        get_or_create(
-            db.session,
-            Source,
-            {'source_id': source_id},
-            {'source_id': source_id, 'groups': [registered_group]}
+@cli.group('plugins')
+def plugins():
+    """Commands used for plugin management."""
+
+
+@plugins.command('list')
+def plugins_list():
+    """List all available plugins."""
+    from notifico.plugins.core import all_available_plugins
+    from notifico.models.plugin import Plugin
+
+    console = Console()
+
+    table = Table(show_header=True)
+    table.add_column('plugin_id')
+    table.add_column('Installed', justify='center')
+    table.add_column('Enabled', justify='center')
+    table.add_column('URL')
+    table.add_column('Description')
+
+    for plugin_id, plugin in all_available_plugins().items():
+        metadata = plugin.metadata()
+        record = Plugin.query.filter_by(plugin_id=plugin_id).first()
+        table.add_row(
+            plugin_id,
+            '\u2713' if record else '\u2717',
+            '\u2713' if record and record.enabled else '\u2717',
+            metadata.url,
+            metadata.description
         )
+
+    console.print(table)
+
+
+@plugins.command('install')
+@click.argument('plugin_id')
+@click.option('--enable', help='Enable this plugin after installing')
+def plugins_install(plugin_id, enable=False):
+    """Install the plugin specified by `plugin_id`."""
+    from notifico.models.group import Group, CoreGroups
+    from notifico.models.plugin import Plugin
+    from notifico.plugins.core import all_available_plugins
+
+    plugin = all_available_plugins().get(plugin_id)
+    if plugin is None:
+        click.echo(f'No plugin found by the name of {plugin_id}')
+        return 1
+
+    record = Plugin.query.filter_by(plugin_id=plugin_id).first()
+    if record:
+        click.echo(
+            'This plugin is already installed. Enable/disable it from the'
+            'admin panel.'
+        )
+        return
+
+    db.session.add(
+        Plugin(
+            plugin_id=plugin_id,
+            enabled=enable,
+            groups=[
+                db.session.query(Group).get(CoreGroups.REGISTERED.value)
+            ]
+        )
+    )
+    db.session.commit()
+
+    plugin.on_install()
+
+
+@plugins.command('uninstall')
+@click.argument('plugin_id')
+def plugins_uninstall(plugin_id):
+    """Uninstall the plugin specified by `plugin_id`."""
+    from notifico.models.plugin import Plugin
+    from notifico.plugins.core import all_available_plugins
+
+    plugin = all_available_plugins().get(plugin_id)
+    if plugin is None:
+        click.echo(f'No plugin found by the name of {plugin_id}')
+        return 1
+
+    record = Plugin.query.filter_by(plugin_id=plugin_id).first()
+    if record is None:
+        click.echo('This plugin is not installed.')
+        return
+
+    db.session.delete(record)
+    db.session.commit()
+    plugin.on_uninstall()

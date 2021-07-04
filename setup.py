@@ -40,6 +40,7 @@ if __name__ == '__main__':
             'xmltodict',
             'unidecode',
             'raven',
+            'rich',
             # Click >=8 is broken on Celery 5.1.0. See:
             # https://github.com/celery/celery/issues/6768
             'click<8.0.0',
@@ -58,10 +59,9 @@ if __name__ == '__main__':
             'console_scripts': [
                 'notifico=notifico.cli:cli'
             ],
-            'notifico.sources': [
-                'plain=notifico.sources.plain:PlainSource',
-                'github=notifico.sources.github:GithubSource',
-                'mediawiki=notifico.sources.mediawiki:MediaWikiSource'
+            # Core plugins that ship with Notifico.
+            'notifico_plugin': [
+                'notifico.plain=notifico.plugins.plain:PlainTextPlugin',
             ]
         }
     )

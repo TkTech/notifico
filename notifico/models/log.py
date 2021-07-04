@@ -32,10 +32,10 @@ class LogContextType(enum.Enum):
     USER = 10
     #: The ID of a specific project.
     PROJECT = 20
-    #: The ID of a source instance.
-    SOURCE_INST = 30
-    #: The ID of a source implementation.
-    SOURCE_IMPL = 40
+    #: The ID of a channel instance.
+    CHANNEL_INST = 30
+    #: The ID of a plugin.
+    PLUGIN = 40
 
 
 class LogContext(db.Model):

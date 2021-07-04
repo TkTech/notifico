@@ -10,9 +10,9 @@ from flask import (
 from notifico import errors
 from notifico.extensions import db
 from notifico.models.log import Log, LogContext, LogContextType
-from notifico.models.source import Source, SourceInstance, source_groups
+from notifico.models.channel import Channel
+from notifico.models.plugin import plugin_groups
 from notifico.models.group import group_members
-from notifico.plugin import SourceTypes
 from notifico.models.project import Project
 
 webhooks = Blueprint('webhooks', __name__)
@@ -48,15 +48,6 @@ def trigger(project, key):
             }),
             404
         )
-
-    """
-    select * from source
-    join source_groups sg on source.source_id = sg.source_id
-    join group_members gm on sg.group_id = gm.group_id
-    join source_instance si on source.source_id = si.source_id
-    join project on project.id = si.project_id
-    where source.enabled is 0 and gm.user_id = project.owner_id and source.source_id = 10
-    """
 
     can_use = db.session.query(
         db.session.query(

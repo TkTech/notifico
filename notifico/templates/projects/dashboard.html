@@ -9,9 +9,9 @@
 <div class="container">
   <p>
   {% trans %}
-  A project is a collection of webhooks and channels that will be linked
+  A project is a collection of sources and channels that will be linked
   together. A single project can handle any number of <em>Sources</em> (such as
-  Github and JIRA) going to any number of <em>channels</em> (such as IRC).
+  Github and JIRA) going to any number of <em>Channels</em> (such as IRC).
   {% endtrans %}
   </p>
 
@@ -36,12 +36,12 @@
         {% endif %}
         <a class="card-header-link" href="{{ project.details_url }}">
           <div class="card-header">
-            <h2 class="card-title text-truncate">
+            <h5 class="card-title text-truncate">
               {{ project.name }}
-            </h2>
+            </h5>
           </div>
         </a>
-        <ul class="list-group list-group-flush border-0">
+        <ul class="list-group list-group-flush border-top-0">
           <li class="list-group-item text-muted">
             <i class="fas fa-calendar"></i>&nbsp;
             {{ _("Created %(date)s", date=project.created|pretty_date) }}

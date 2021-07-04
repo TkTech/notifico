@@ -5,13 +5,13 @@
 
 {% block admin_page %}
 <div class="mb-3">
-  <h2>{{ impl.SOURCE_NAME }}</h2>
-  <span class="text-muted">{{ impl.SOURCE_DESCRIPTION }}</span>
+  <h2>{{ plugin.plugin_id }}</h2>
+  <span class="text-muted">{{ plugin.meta.description }}</span>
 </div>
 
 <div class="card mb-3">
   <div class="card-header">
-    <h6 class="card-title mb-0">{{ _("Source Details") }}</h6>
+    <h6 class="card-title mb-0">{{ _("Details") }}</h6>
   </div>
   <div class="card-body p-0">
     <table class="table align-middle mb-0">
@@ -20,13 +20,7 @@
           <td class="table-info compact fw-bold">
             {{ _("Internal ID") }}
           </td>
-          <td><code>{{ impl.SOURCE_ID }}</code></td>
-        </tr>
-        <tr>
-          <td class="table-info compact fw-bold">
-            {{ _("Instances") }}
-          </td>
-          <td>{{ source.instances.count() }}</td>
+          <td><code>{{ plugin.id }}</code></td>
         </tr>
         <tr>
           <td class="table-info compact fw-bold">
@@ -36,14 +30,14 @@
             <form method="POST">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               <div class="d-flex justify-content-between align-items-center">
-                {% if source.enabled %}
+                {% if plugin.enabled %}
                 <span class="text-success">{{ _("Enabled") }}</span>
-                <button name="toggle-source" type="submit" class="btn btn-danger btn-sm">
+                <button name="toggle-plugin" type="submit" class="btn btn-danger btn-sm">
                   {{ _("Disable") }}
                 </button>
                 {% else %}
                 <span class="text-danger">{{ _("Disabled") }}</span>
-                <button name="toggle-source" type="submit" class="btn btn-success btn-sm">
+                <button name="toggle-plugin" type="submit" class="btn btn-success btn-sm">
                   {{ _("Enable") }}
                 </button>
                 {% endif %}
@@ -51,28 +45,53 @@
             </form>
           </td>
         </tr>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Author") }}
+          </td>
+          <td>
+            {{ plugin.meta.author }} ({{ plugin.meta.author_email }})
+          </td>
+        </tr>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("URL") }}
+          </td>
+          <td>
+            {{ plugin.meta.url|urlize }}
+          </td>
+        </tr>
+        <tr>
+          <td class="table-info compact fw-bold">
+            {{ _("Version") }}
+          </td>
+          <td>
+            <code>{{ plugin.meta.version }}</code>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 </div>
 
+{% if impl.supports_groups() %}
 <div class="card mb-3">
   <div class="card-header">
     <h6 class="card-title mb-0">{{ _("User Groups") }}</h6>
     <small class="card-subtitle text-muted">
-      {{ _("Only users in these groups can use this Source") }}
+      {{ _("Only users in these groups can use this plugin.") }}
     </small>
   </div>
   <ul class="list-group list-group-flush">
-    {% for group in source.groups %}
+    {% for group in plugin.groups %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <a href="{{ group.edit_url }}">
           {{ group.name }}
         </a>
         <form method="POST">
           <a class="btn btn-danger btn-sm"
-             href="{{ url_for(".sources_delete_group",
-               source_id=source.source_id,
+             href="{{ url_for(".plugins_delete_group",
+               plugin_id=plugin.id,
                group_id=group.id) }}">
           {{ _("Remove") }}
         </a>
@@ -95,10 +114,11 @@
     </form>
   </div>
 </div>
+{% endif %}
 
 <div class="card mb-3">
   <div class="card-header">
-    <h6 class="card-title mb-0">{{ _("Source Logs") }}</h6>
+    <h6 class="card-title mb-0">{{ _("Logs") }}</h6>
   </div>
   <div class="card-body p-0">
     {% if logs.count() %}

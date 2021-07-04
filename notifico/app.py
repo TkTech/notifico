@@ -1,5 +1,7 @@
+from functools import partial
+
 from redis import Redis
-from flask import Flask
+from flask import Flask, abort
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 
 from notifico.util import pretty
@@ -34,9 +36,27 @@ def default_context():
     return {'has_permission': has_permission}
 
 
+def _is_plugin_enabled(plugin_id):
+    """
+    Called before routes added by plugins. If the plugin has been disabled,
+    prevents further actions and 404s.
+    """
+    from notifico.models.plugin import Plugin as PluginModel
+
+    exists = db.session.query(
+        PluginModel.query.filter(
+            PluginModel.plugin_id == plugin_id,
+            PluginModel.enabled.is_(True)
+        ).exists()
+    ).scalar()
+
+    if not exists:
+        abort(404)
+
+
 def create_app():
     """
-    Construct a new Flask instance and return it.
+    Construct a new Notifico/Flask application instance and return it.
     """
     import os
 
@@ -48,8 +68,11 @@ def create_app():
     # even for startup errors.
     babel.init_app(app)
 
-    # We should handle routing for static assets ourself (handy for small and
-    # quick deployments).
+    # We should handle routing for static assets ourself, which is handy for
+    # development and tiny deployments. Using `static_url_path` with `Flask()`
+    # doesn't work for us, since we have a wildcard route. This middleware
+    # runs *before* any requests even get to Flask. We want all static assets
+    # at the root to support things like favicons and .well-known.
     if app.config.get('NOTIFICO_ROUTE_STATIC'):
         app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
             '/': os.path.join(os.path.dirname(__file__), 'static')
@@ -61,6 +84,7 @@ def create_app():
         port=app.config['REDIS_PORT'],
         db=app.config['REDIS_DB']
     )
+
     # Attach Flask-Cache to our application instance. We override
     # the backend configuration settings because we only want one
     # Redis instance.
@@ -84,8 +108,10 @@ def create_app():
         ProjectConverter
     )
 
-    app.url_map.converters['user'] = UserConverter
-    app.url_map.converters['project'] = ProjectConverter
+    app.url_map.converters.update({
+        'user': UserConverter,
+        'project': ProjectConverter
+    })
 
     # Import and register all of our blueprints.
     from notifico.views import (
@@ -102,12 +128,41 @@ def create_app():
     app.register_blueprint(projects.projects)
     app.register_blueprint(public.public)
 
-    # Setup some custom Jinja2 filters.
-    app.jinja_env.filters['pretty_date'] = pretty.pretty_date
-    app.jinja_env.filters['plural'] = pretty.plural
-    app.jinja_env.filters['fix_link'] = pretty.fix_link
+    # Setup custom Jinja2 filters.
+    app.jinja_env.filters.update({
+        'pretty_date': pretty.pretty_date,
+        'plural': pretty.plural,
+        'fix_link': pretty.fix_link
+    })
 
     # And some custom context variables.
     app.context_processor(default_context)
+
+    # Flask plugins are tricky to support with runtime control. Flask doesn't
+    # allow us to *un*register a blueprint, nor to sanely overwite routes. The
+    # current solution is to *always* register blueprints for installed
+    # extensions, and control their availability with a decorator.
+    # We should revisit this, and add a way to restart all servesr and workers
+    # on plugin changes, probably using a SIGHUP, instead of querying for
+    # enabled plugins all the time.
+    from notifico.plugins.core import all_available_plugins
+
+    for plugin_id, plugin in all_available_plugins().items():
+        try:
+            blueprints = plugin.register_blueprints()
+        except NotImplementedError:
+            pass
+        else:
+            for blueprint in blueprints:
+                # Hijack views to 404 if the plugin is disabled.
+                # What order are these getting called in? Needs to be kept
+                # in mind when plugins are adding their own before_request()
+                # callbacks.
+                blueprint.before_request(
+                    partial(
+                        _is_plugin_enabled, plugin_id
+                    )
+                )
+                app.register_blueprint(blueprint)
 
     return app

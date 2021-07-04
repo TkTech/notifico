@@ -1,28 +1,18 @@
+__all__ = (
+    'SourceForm',
+    'SourceTypes',
+    'WebhookSource',
+    'PollingSource',
+    'SourcePlugin'
+)
 import enum
-import functools
-from typing import Dict, Any
-from importlib.metadata import entry_points
 
 import flask_wtf
 from flask import url_for
-from wtforms import fields, validators
 from flask_babel import lazy_gettext as _
+from wtforms import fields, validators
 
-
-@functools.cache
-def get_installed_sources() -> Dict[int, 'SourcePlugin']:
-    """
-    Returns a cached dictionary of all known Source plugins, keyed by
-    SOURCE_ID.
-    """
-    # Adding a way to purge this cache in all processes via a signal would
-    # allow us to hot-load new plugin sources without having to restart
-    # notifico. Worth looking into.
-    plugins = entry_points()['notifico.sources']
-    return {
-        p.SOURCE_ID: p()
-        for p in (plugin.load() for plugin in plugins)
-    }
+from notifico.plugins.core import CorePlugin
 
 
 class SourceForm(flask_wtf.FlaskForm):
@@ -49,13 +39,12 @@ class SourceTypes(enum.Enum):
     POLLING = 2
 
 
-class SourcePlugin:
+class SourcePlugin(CorePlugin):
     """
-    A SourcePlugin generates payloads for processing and eventual delivery to a
-    :class:~`notifico.channel.Channel`.
+    The base class for Source plugins. Don't directly subclass this (unless
+    you _really_ know what you're doing!), instead use :class:`WebhookSource`
+    or :class:`PollingSource`.
     """
-    #: A unique identifier for a Source implementation.
-    SOURCE_ID: int = None
     #: A unique, human-readable name for this Source implementation.
     SOURCE_NAME: str = None
     #: The type of the source, such as a webhook or a poller.
@@ -64,47 +53,13 @@ class SourcePlugin:
     #: string.
     SOURCE_DESCRIPTION: str = None
 
-    #: The minimum period between polling events for polling-type sources.
-    #: Note this only guarantees it won't be polled *before* this duration
-    #: has passed, it may take longer. Value is in seconds.
-    POLLING_PERIOD: int = None
-
     @classmethod
-    def form(cls):
+    def user_form(cls):
         """
-        An optional Form class that will be presented to the user when
-        initially configuring and when editing the Source.
+        An optional FlaskForm *class* (not an instance!) that will be
+        presented to an end user when configuring this plugin.
         """
-
-    @classmethod
-    def config_from_form(cls, form) -> Dict[int, Any]:
-        """
-        Pack a configuration form into a dictionary. The dictionary must
-        be safe to serialize as JSON.
-        """
-        return dict(
-            (field.id, field.data) for field in form
-            if field.id != 'csrf_token'
-        )
-
-    @classmethod
-    def update_form_with_config(cls, form, config):
-        """
-        Update the provided form instance using the stored configuration
-        in `config`.
-        """
-        if config is None or not isinstance(config, dict):
-            return
-
-        for field in form:
-            if field.id in config:
-                field.data = config[field.id]
-
-    @staticmethod
-    def icon() -> str:
-        """The Font-Awesome icon that should be used to identify this
-        source, if any is suitable."""
-        return 'fas fa-question'
+        return SourceForm
 
 
 class WebhookSource(SourcePlugin):

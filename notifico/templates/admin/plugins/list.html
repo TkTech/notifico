@@ -1,0 +1,93 @@
+{% extends "admin/base.html" %}
+{% import "ui/components.html" as components %}
+{% import "ui/forms.html" as forms %}
+{% from 'ui/page.html' import render_pagination %}
+
+{% block admin_page %}
+{% if installed_plugins %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Installed Plugins") }}</h6>
+  </div>
+  <div class="card-body p-0">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th class="compact"></th>
+          <th>{{ _("Name") }}</th>
+          <th class="compact text-center">{{ _("Status") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for plugin in installed_plugins %}
+        <tr>
+          <td class="compact">
+            <i class="{{ plugin.impl.icon() }} fa-fw"></i>
+          </td>
+          <td>
+            <strong>
+              <a href="{{ plugin.admin_edit_url }}">
+                {{ plugin.plugin_id }}
+              </a>
+            </strong>
+            <small class="text-muted d-block">
+              {{ plugin.meta.description }}
+            </small>
+          </td>
+          <td class="compact text-center table-{{
+              "success" if plugin.enabled else "danger" }}">
+            {% if plugin.enabled %}
+            <span class="text-success">{{ _("Enabled") }}</span>
+            {% else %}
+            <span class="text-danger">{{ _("Disabled") }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if available_plugins %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h6 class="card-title mb-0">{{ _("Available Plugins") }}</h6>
+  </div>
+  <div class="card-body">
+    {% trans %}
+    The following plugins were detected, but have not been installed.
+    Because plugins may introduce new code, you need to use <code>notifico
+     plugins install</code> from the command line, and then re-deploy Notifico
+    and its background workers before enabling the plugin.
+    {% endtrans %}
+  </div>
+  <div class="card-body p-0">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th class="compact"></th>
+          <th>{{ _("Name") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for plugin_id, plugin in available_plugins.items() %}
+        <tr>
+          <td class="compact">
+            <i class="{{ plugin.icon() }} fa-fw"></i>
+          </td>
+          <td>
+            <strong>{{ plugin_id }}</strong>
+            <small class="text-muted d-block">
+              {{ plugin.metadata().description }}
+            </small>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

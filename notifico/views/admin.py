@@ -12,11 +12,18 @@ from flask import (
 from flask_babel import lazy_gettext as _
 
 from notifico.extensions import db
-from notifico.models.user import User
-from notifico.models.project import Project
-from notifico.models.log import Log, LogContext, LogContextType
-from notifico.models.source import Source, SourceInstance
-from notifico.models.group import Permission, Group, CoreGroups
+from notifico.models import (
+    Group,
+    Permission,
+    Log,
+    LogContext,
+    Project,
+    User,
+    Channel,
+    Plugin as PluginModel
+)
+from notifico.models.log import LogContextType
+from notifico.models.group import CoreGroups
 from notifico.authorization import has_admin
 from notifico.forms.admin import (
     make_permission_form,
@@ -25,6 +32,7 @@ from notifico.forms.admin import (
     GroupSelectForm
 )
 from notifico.views.utils import confirmation_view, ConfirmPrompt
+from notifico.plugins.core import all_available_plugins
 
 
 admin = Blueprint('admin', __name__)
@@ -60,10 +68,10 @@ prompt_delete_user = ConfirmPrompt(
     template='admin/confirm.html'
 )
 
-prompt_delete_source_group = ConfirmPrompt(
-    cancel_url=lambda source_id, group_id: url_for(
-        '.sources_edit',
-        source_id=source_id
+prompt_delete_plugin_group = ConfirmPrompt(
+    cancel_url=lambda plugin_id, group_id: url_for(
+        '.plugins_edit',
+        plugin_id=plugin_id
     ),
     message=_(
         'Are you sure you want to remove this group?'
@@ -399,35 +407,39 @@ def users_delete_group(user_id, group_id):
     return redirect(url_for('.users_edit', user_id=user.id))
 
 
-@admin.route('/sources/')
+@admin.route('/plugins/')
 @has_admin
-def sources():
+def plugins():
     crumbs = (
         (_('Admin'), url_for('.dashboard')),
-        (_('Sources'), None)
+        (_('Plugins'), None)
     )
 
-    sources = Source.query.all()
+    available_plugins = all_available_plugins()
+    installed_plugins = PluginModel.query.all()
+    for plugin in installed_plugins:
+        available_plugins.pop(plugin.plugin_id)
 
     return render_template(
-        'admin/sources/list.html',
-        admin_title=_('Sources'),
+        'admin/plugins/list.html',
+        admin_title=_('Plugins'),
         breadcrumbs=crumbs,
-        sources=sources
+        available_plugins=available_plugins,
+        installed_plugins=installed_plugins
     )
 
 
-@admin.route('/sources/<int:source_id>', methods=['GET', 'POST'])
+@admin.route('/plugins/<int:plugin_id>', methods=['GET', 'POST'])
 @has_admin
-def sources_edit(source_id):
+def plugins_edit(plugin_id):
     crumbs = (
         (_('Admin'), url_for('.dashboard')),
-        (_('Sources'), url_for('.sources')),
-        (_('Edit Source'), None)
+        (_('Plugins'), url_for('.plugins')),
+        (_('Edit Plugin'), None)
     )
 
-    source = Source.query.get(source_id)
-    if source is None:
+    plugin = PluginModel.query.get(plugin_id)
+    if plugin is None:
         abort(404)
 
     logs = db.session.query(
@@ -435,8 +447,8 @@ def sources_edit(source_id):
     ).join(
         LogContext
     ).filter(
-        LogContext.context_type == LogContextType.SOURCE_IMPL,
-        LogContext.context_id == source_id
+        LogContext.context_type == LogContextType.PLUGIN,
+        LogContext.context_id == plugin_id
     ).order_by(
         Log.created.desc()
     )
@@ -444,70 +456,66 @@ def sources_edit(source_id):
     group_form = GroupSelectForm()
     group_form.group.choices = [
         (group.id, group.name)
-        for group in Group.query.filter(
-            # Anonymous users being allowed to use a source wouldn't make
-            # much sense.
-            Group.id != CoreGroups.ANONYMOUS.value
-        ).with_entities(Group.id, Group.name)
+        for group in Group.query.with_entities(Group.id, Group.name)
     ]
 
-    if 'toggle-source' in request.form:
-        source.enabled = not source.enabled
-        db.session.add(source)
+    if 'toggle-plugin' in request.form:
+        plugin.enabled = not plugin.enabled
+        db.session.add(plugin)
         db.session.commit()
-        flash(_('Source toggled.'), category='success')
-        return redirect(source.admin_edit_url)
+        flash(_('Plugin toggled.'), category='success')
+        return redirect(plugin.admin_edit_url)
 
     if 'add-group' in request.form:
         if group_form.validate_on_submit():
             group = Group.query.get(group_form.group.data)
             if group is None:
                 flash(_('Not a valid group.'), category='warning')
-            elif group in source.groups:
+            elif group in plugin.groups:
                 flash(
                     _('Group already allowed on Source.'),
                     category='warning'
                 )
             else:
-                source.groups.append(group)
-                db.session.add(source)
+                plugin.groups.append(group)
+                db.session.add(plugin)
                 db.session.commit()
-                flash(_('Source enabled for group.'), category='success')
+                flash(_('Plugin enabled for group.'), category='success')
 
-            return redirect(source.admin_edit_url)
+            return redirect(plugin.admin_edit_url)
 
     return render_template(
-        'admin/sources/edit.html',
-        admin_title=_('Edit Source'),
+        'admin/plugins/edit.html',
+        admin_title=_('Edit Plugins'),
         breadcrumbs=crumbs,
-        source=source,
-        impl=source.impl,
+        plugin=plugin,
+        impl=plugin.impl,
         logs=logs,
         group_form=group_form
     )
 
 
 @admin.route(
-    '/sources/<int:source_id>/groups/<int:group_id>/delete',
+    '/plugin/<int:plugin_id>/groups/<int:group_id>/delete',
     methods=['GET', 'POST']
 )
 @has_admin
-@confirmation_view(prompt_delete_source_group)
-def sources_delete_group(source_id, group_id):
-    source = Source.query.get(source_id)
-    if source is None:
+@confirmation_view(prompt_delete_plugin_group)
+def plugins_delete_group(plugin_id, group_id):
+    plugin = PluginModel.query.get(plugin_id)
+    if plugin is None:
         abort(404)
 
     group = Group.query.get(group_id)
     if group is None:
         abort(404)
 
-    source.groups.remove(group)
-    db.session.add(source)
+    plugin.groups.remove(group)
+    db.session.add(plugin)
     db.session.commit()
 
     flash(_('The group has been removed.'), category='success')
-    return redirect(source.admin_edit_url)
+    return redirect(plugin.admin_edit_url)
 
 
 @admin.route('/logs/')
@@ -533,10 +541,10 @@ def logs():
 def _get_related(related: LogContext):
     if related.context_type == LogContextType.USER:
         return db.session.query(User).get(related.context_id)
-    elif related.context_type == LogContextType.SOURCE_IMPL:
-        return db.session.query(Source).get(related.context_id)
-    elif related.context_type == LogContextType.SOURCE_INST:
-        return db.session.query(SourceInstance).get(related.context_id)
+    elif related.context_type == LogContextType.CHANNEL_INST:
+        return db.session.query(Channel).get(related.context_id)
+    elif related.context_type == LogContextType.PLUGIN:
+        return db.session.query(PluginModel).get(related.context_id)
     elif related.context_type == LogContextType.PROJECT:
         return db.session.query(Project).get(related.context_id)
 
