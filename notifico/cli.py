@@ -137,13 +137,8 @@ def plugins_install(plugin_id, enable=False):
         )
     )
     db.session.commit()
-
     plugin.on_install()
-
-    click.echo(
-        'Plugin has been installed. Please restart/re-deploy Notifico'
-        ' immediately.'
-    )
+    click.echo('Plugin has been installed.')
 
 
 @plugins.command('uninstall')

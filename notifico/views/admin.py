@@ -7,7 +7,8 @@ from flask import (
     request,
     abort,
     redirect,
-    flash
+    flash,
+    current_app
 )
 from flask_babel import lazy_gettext as _
 
@@ -415,17 +416,23 @@ def plugins():
         (_('Plugins'), None)
     )
 
-    available_plugins = all_available_plugins()
-    installed_plugins = PluginModel.query.all()
-    for plugin in installed_plugins:
-        available_plugins.pop(plugin.plugin_id)
+    plugins = {
+        'available': all_available_plugins(),
+        'installed': {p.plugin_id: p for p in PluginModel.query.all()},
+        'restart': set()
+    }
+
+    for plugin in plugins['installed'].values():
+        plugins['available'].pop(plugin.plugin_id)
+        if plugin.plugin_id not in current_app.noti.plugins:
+            # Plugin wasn't enabled when the server started.
+            plugins['restart'].add(plugin.plugin_id)
 
     return render_template(
         'admin/plugins/list.html',
         admin_title=_('Plugins'),
         breadcrumbs=crumbs,
-        available_plugins=available_plugins,
-        installed_plugins=installed_plugins
+        plugins=plugins
     )
 
 
@@ -458,13 +465,6 @@ def plugins_edit(plugin_id):
         (group.id, group.name)
         for group in Group.query.with_entities(Group.id, Group.name)
     ]
-
-    if 'toggle-plugin' in request.form:
-        plugin.enabled = not plugin.enabled
-        db.session.add(plugin)
-        db.session.commit()
-        flash(_('Plugin toggled.'), category='success')
-        return redirect(plugin.admin_edit_url)
 
     if 'add-group' in request.form:
         if group_form.validate_on_submit():

@@ -4,11 +4,21 @@
 {% from 'ui/page.html' import render_pagination %}
 
 {% block admin_page %}
-{% if installed_plugins %}
+{% if plugins.installed %}
 <div class="card mb-3">
   <div class="card-header">
     <h6 class="card-title mb-0">{{ _("Installed Plugins") }}</h6>
   </div>
+  {% if plugins.restart %}
+  <div class="card-body p-0">
+    <div class="alert alert-warning">
+      {% trans %}
+      Plugins have been installed/enabled, but the server has not been
+      restarted since. Notifico may be unstable until restarted.
+      {% endtrans %}
+    </div>
+  </div>
+  {% endif %}
   <div class="card-body p-0">
     <table class="table align-middle mb-0">
       <thead>
@@ -19,7 +29,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for plugin in installed_plugins %}
+        {% for plugin_id, plugin in plugins.installed.items() %}
         <tr>
           <td class="compact">
             <i class="{{ plugin.impl.icon() }} fa-fw"></i>
@@ -34,8 +44,7 @@
               {{ plugin.meta.description }}
             </small>
           </td>
-          <td class="compact text-center table-{{
-              "success" if plugin.enabled else "danger" }}">
+          <td class="compact text-center">
             {% if plugin.enabled %}
             <span class="text-success">{{ _("Enabled") }}</span>
             {% else %}
@@ -50,7 +59,7 @@
 </div>
 {% endif %}
 
-{% if available_plugins %}
+{% if plugins.available %}
 <div class="card mb-3">
   <div class="card-header">
     <h6 class="card-title mb-0">{{ _("Available Plugins") }}</h6>
@@ -59,8 +68,8 @@
     {% trans %}
     The following plugins were detected, but have not been installed.
     Because plugins may introduce new code, you need to use <code>notifico
-     plugins install</code> from the command line, and then re-deploy Notifico
-    and its background workers before enabling the plugin.
+    plugins install --enable</code> from the command line, and then restart
+    Notifico.
     {% endtrans %}
   </div>
   <div class="card-body p-0">
@@ -72,7 +81,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for plugin_id, plugin in available_plugins.items() %}
+        {% for plugin_id, plugin in plugins.available.items() %}
         <tr>
           <td class="compact">
             <i class="{{ plugin.icon() }} fa-fw"></i>

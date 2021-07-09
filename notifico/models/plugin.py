@@ -12,10 +12,6 @@ plugin_groups = db.Table(
 )
 
 
-class Implement(db.Model):
-    id = db.Column(db.String(255), primary_key=True)
-
-
 class Plugin(db.Model):
     __tablename__ = 'plugin'
 

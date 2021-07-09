@@ -127,25 +127,14 @@ class Plugin:
     def register_channel(cls):
         """
         Returns a :class:`~notifico.plugins.channel:Channel` implementation
-        provided by this plugin. Return value should be classes themselves,
-        and *not an instance* of that class.
-
-        .. note::
-
-            Channels are 1:1 with plugins. Want to add two channels, add two
-            plugins. This requirement may be relaxed in the future.
+        provided by this plugin. Return value should be the class itself,
+        not an instance of the class.
         """
-        raise NotImplementedError()
 
     @classmethod
     def register_blueprints(cls):
         """
         Return a list of Flask blueprints to be registered with the main
         Notifico app.
-
-        .. note::
-
-            These blueprints will all 404 unless the plugin is also enabled
-            from the admin panel.
         """
-        raise NotImplementedError()
+        return []

@@ -49,5 +49,5 @@ class PlainTextPlugin(Plugin):
         )
 
     @classmethod
-    def register_channel(cls):
+    def register_inbound_channel(cls):
         return PlainTextChannel

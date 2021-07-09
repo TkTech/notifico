@@ -1,7 +1,5 @@
-from functools import partial
-
 from redis import Redis
-from flask import Flask, abort
+from flask import Flask
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 
 from notifico.util import pretty
@@ -34,24 +32,6 @@ def user_loader(user_id):
 def default_context():
     """Context variables loaded into every template by default."""
     return {'has_permission': has_permission}
-
-
-def _is_plugin_enabled(plugin_id):
-    """
-    Called before routes added by plugins. If the plugin has been disabled,
-    prevents further actions and 404s.
-    """
-    from notifico.models.plugin import Plugin as PluginModel
-
-    exists = db.session.query(
-        PluginModel.query.filter(
-            PluginModel.plugin_id == plugin_id,
-            PluginModel.enabled.is_(True)
-        ).exists()
-    ).scalar()
-
-    if not exists:
-        abort(404)
 
 
 def create_app():
@@ -138,31 +118,32 @@ def create_app():
     # And some custom context variables.
     app.context_processor(default_context)
 
-    # Flask plugins are tricky to support with runtime control. Flask doesn't
-    # allow us to *un*register a blueprint, nor to sanely overwite routes. The
-    # current solution is to *always* register blueprints for installed
-    # extensions, and control their availability with a decorator.
-    # We should revisit this, and add a way to restart all servesr and workers
-    # on plugin changes, probably using a SIGHUP, instead of querying for
-    # enabled plugins all the time.
-    from notifico.plugins.core import all_available_plugins
+    # Get all plugins that were enabled at the time the application was
+    # created.
+    from notifico.models.plugin import Plugin as PluginModel
+    try:
+        with app.app_context():
+            plugins = db.session.query(PluginModel).filter(
+                PluginModel.enabled.is_(True)
+            ).all()
+    except Exception:
+        # If the database doesn't exist or hasn't been migrated, we don't
+        # want to do anything at all. Bit of a chicken-and-egg scenario.
+        return app
 
-    for plugin_id, plugin in all_available_plugins().items():
-        try:
-            blueprints = plugin.register_blueprints()
-        except NotImplementedError:
-            pass
-        else:
-            for blueprint in blueprints:
-                # Hijack views to 404 if the plugin is disabled.
-                # What order are these getting called in? Needs to be kept
-                # in mind when plugins are adding their own before_request()
-                # callbacks.
-                blueprint.before_request(
-                    partial(
-                        _is_plugin_enabled, plugin_id
-                    )
-                )
-                app.register_blueprint(blueprint)
+    channels = []
+    for plugin in plugins:
+        for blueprint in plugin.impl.register_blueprints():
+            app.register_blueprint(blueprint)
+
+        channel = plugin.impl.register_channel()
+        if channel is not None:
+            channels.append(channel)
+
+    # Chuck the plugins and channels somewhere where they won't be trampled
+    # or trample themselves.
+    app.noti = type('Noti', (object,), {})()
+    app.noti.plugins = {p.plugin_id: p for p in plugins}
+    app.noti.channels = frozenset(channels)
 
     return app
