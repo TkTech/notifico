@@ -5,6 +5,8 @@ from rich.table import Table
 
 from notifico.app import create_app
 from notifico.extensions import db
+from notifico.models.plugin import Plugin
+from notifico.plugins.core import all_available_plugins
 
 
 @click.group(cls=FlaskGroup, create_app=create_app)
@@ -106,12 +108,14 @@ def plugins_list():
 
 @plugins.command('install')
 @click.argument('plugin_id')
-@click.option('--enable', help='Enable this plugin after installing')
+@click.option(
+    '--enable',
+    is_flag=True,
+    help='Enable this plugin after installing'
+)
 def plugins_install(plugin_id, enable=False):
     """Install the plugin specified by `plugin_id`."""
     from notifico.models.group import Group, CoreGroups
-    from notifico.models.plugin import Plugin
-    from notifico.plugins.core import all_available_plugins
 
     plugin = all_available_plugins().get(plugin_id)
     if plugin is None:
@@ -120,10 +124,7 @@ def plugins_install(plugin_id, enable=False):
 
     record = Plugin.query.filter_by(plugin_id=plugin_id).first()
     if record:
-        click.echo(
-            'This plugin is already installed. Enable/disable it from the'
-            'admin panel.'
-        )
+        click.echo('This plugin is already installed.')
         return
 
     db.session.add(
@@ -139,14 +140,19 @@ def plugins_install(plugin_id, enable=False):
 
     plugin.on_install()
 
+    click.echo(
+        'Plugin has been installed. Please restart/re-deploy Notifico'
+        ' immediately.'
+    )
+
 
 @plugins.command('uninstall')
 @click.argument('plugin_id')
 def plugins_uninstall(plugin_id):
-    """Uninstall the plugin specified by `plugin_id`."""
-    from notifico.models.plugin import Plugin
-    from notifico.plugins.core import all_available_plugins
+    """Uninstall the plugin specified by `plugin_id`.
 
+    If you want to keep plugin data, you should just disable it instead.
+    """
     plugin = all_available_plugins().get(plugin_id)
     if plugin is None:
         click.echo(f'No plugin found by the name of {plugin_id}')
@@ -157,6 +163,54 @@ def plugins_uninstall(plugin_id):
         click.echo('This plugin is not installed.')
         return
 
-    db.session.delete(record)
+    yes = click.confirm(
+        'This plugin will be uninstalled, potentially permanently deleting'
+        ' all associated data. Are you sure?'
+    )
+    if yes:
+        db.session.delete(record)
+        db.session.commit()
+        plugin.on_uninstall()
+        click.echo('Plugin has been uninstalled.')
+
+
+@plugins.command('enable')
+@click.argument('plugin_id')
+def plugins_enable(plugin_id, enable=False):
+    """Enable the given plugin."""
+    plugin = all_available_plugins().get(plugin_id)
+    if plugin is None:
+        click.echo(f'No plugin found by the name of {plugin_id}')
+        return 1
+
+    record = Plugin.query.filter_by(plugin_id=plugin_id).first()
+    if record is None:
+        click.echo(
+            f'This plugin is not installed yet. Install and enable it with'
+            f' "notifico plugin install {plugin_id} --enable"'
+        )
+        return
+
+    record.enabled = True
     db.session.commit()
-    plugin.on_uninstall()
+
+
+@plugins.command('disable')
+@click.argument('plugin_id')
+def plugins_disable(plugin_id, enable=False):
+    """Disable the given plugin."""
+    plugin = all_available_plugins().get(plugin_id)
+    if plugin is None:
+        click.echo(f'No plugin found by the name of {plugin_id}')
+        return 1
+
+    record = Plugin.query.filter_by(plugin_id=plugin_id).first()
+    if record is None:
+        click.echo(
+            f'This plugin is not installed yet. Install it with'
+            f' "notifico plugin install {plugin_id}"'
+        )
+        return
+
+    record.enabled = False
+    db.session.commit()
