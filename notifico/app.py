@@ -1,3 +1,7 @@
+import secrets
+from pathlib import Path
+
+import pydantic
 from redis import Redis
 from flask import Flask
 from werkzeug.middleware.shared_data import SharedDataMiddleware
@@ -15,6 +19,39 @@ from notifico.extensions import (
 )
 
 login_manager.login_view = 'users.login'
+
+
+def _sql_default():
+    path = Path.cwd() / 'testing.db'
+    return f'sqlite:///{path!s}'
+
+
+class Settings(pydantic.BaseSettings):
+    """
+    Default application settings, which can be overwritten using NOTI_
+    prefixed environment variables or a .env file.
+    """
+    #: A Redis instance, used for caching and background workers.
+    REDIS: pydantic.RedisDsn = 'redis://localhost:6379/0'
+    #: Secret key used for encrypting and signing.
+    SECRET_KEY: str = pydantic.Field(
+        # Randomize the secret on each launch if the user hasn't provided
+        # a real secret key.
+        default_factory=lambda: secrets.token_hex(24)
+    )
+    #: Enable CSRF on all POST endpoints by default.
+    # This is provided by the Flask-WTF extension.
+    CSRF_ENABLED: bool = True
+    #: Database DSN.
+    SQLALCHEMY_DATABASE_URI: str = pydantic.Field(
+        default_factory=_sql_default
+    )
+    # A deprecated Flask-SQLAlchemy feature, ignore this.
+    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
+
+    class Config:
+        env_prefix = 'NOTI_'
+        env_file = '.env'
 
 
 @login_manager.user_loader
@@ -41,33 +78,19 @@ def create_app():
     import os
 
     app = Flask(__name__)
-    app.config.from_object('notifico.config')
-    app.config.from_envvar('NOTIFICO_CONFIG', silent=True)
+    app.config.update(Settings().dict())
 
     # We want translations as early as possible, since we'll ideally use them
     # even for startup errors.
     babel.init_app(app)
 
-    # We should handle routing for static assets ourself, which is handy for
-    # development and tiny deployments. Using `static_url_path` with `Flask()`
-    # doesn't work for us, since we have a wildcard route. This middleware
-    # runs *before* any requests even get to Flask. We want all static assets
-    # at the root to support things like favicons and .well-known.
-    if app.config.get('NOTIFICO_ROUTE_STATIC'):
-        app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
-            '/': os.path.join(os.path.dirname(__file__), 'static')
-        })
+    # In production, nginx should serve the static directory directly.
+    app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
+        '/': os.path.join(os.path.dirname(__file__), 'static')
+    })
 
-    # Setup our redis connection (which is already thread safe)
-    app.redis = Redis(
-        host=app.config['REDIS_HOST'],
-        port=app.config['REDIS_PORT'],
-        db=app.config['REDIS_DB']
-    )
+    app.redis = Redis.from_url(str(app.config['REDIS']))
 
-    # Attach Flask-Cache to our application instance. We override
-    # the backend configuration settings because we only want one
-    # Redis instance.
     cache.init_app(app, config={
         'CACHE_TYPE': 'redis',
         'CACHE_REDIS_HOST': app.redis,

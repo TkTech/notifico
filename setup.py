@@ -41,6 +41,8 @@ if __name__ == '__main__':
             'unidecode',
             'raven',
             'rich',
+            'pydantic',
+            'python-dotenv',
             # Click >=8 is broken on Celery 5.1.0. See:
             # https://github.com/celery/celery/issues/6768
             'click<8.0.0',

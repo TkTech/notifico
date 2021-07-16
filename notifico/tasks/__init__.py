@@ -11,7 +11,11 @@ def make_celery():
     app = create_app()
     celery = Celery()
 
-    celery.config_from_object(app.config['CELERY'])
+    celery.conf.update(
+        broker_url=str(app.config['REDIS']),
+        celery_result_backend=str(app.config['REDIS']),
+        celery_task_serializer='json'
+    )
 
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):

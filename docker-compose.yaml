@@ -21,8 +21,9 @@ services:
       - .:/app
     environment:
       FLASK_ENV: "development"
-      NOTIFICO_CONFIG: "/app/misc/docker_config.py"
+      NOTI_REDIS: "redis://redis:6379/0"
 
+    working_dir: /app
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -37,6 +38,7 @@ services:
       - .:/app
     environment:
       FLASK_ENV: "development"
-      NOTIFICO_CONFIG: "/app/misc/docker_config.py"
+      NOTI_REDIS: "redis://redis:6379/0"
 
+    working_dir: /app
     entrypoint: ["celery", "-A", "notifico.tasks.celery", "worker"]
