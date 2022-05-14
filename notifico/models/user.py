@@ -51,7 +51,9 @@ class User(db.Model):
         """
         Returns a hashed password from `password` and `salt`.
         """
-        return hashlib.sha256(salt + password.strip()).hexdigest()
+        return hashlib.sha256(
+            salt + password.strip().encode('utf-8')
+        ).hexdigest()
 
     def set_password(self, new_password):
         self.salt = self._create_salt()

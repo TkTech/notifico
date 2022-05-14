@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-import json
-
 from flask import (
     Blueprint,
     render_template,
@@ -9,8 +6,6 @@ from flask import (
     current_app,
     url_for,
     session,
-    abort,
-    make_response,
     request,
     flash
 )

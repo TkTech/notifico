@@ -104,12 +104,10 @@ def create_instance():
     from notifico.views.account import account
     from notifico.views.public import public
     from notifico.views.projects import projects
-    from notifico.views.admin import admin
 
     app.register_blueprint(account, url_prefix='/u')
     app.register_blueprint(projects)
     app.register_blueprint(public)
-    app.register_blueprint(admin, url_prefix='/_')
 
     # Register our custom error handlers.
     from notifico.views import errors
