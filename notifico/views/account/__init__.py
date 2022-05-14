@@ -248,19 +248,3 @@ def settings(do=None):
         password_form=password_form,
         delete_form=delete_form
     )
-
-
-@account.route('/user.json')
-@user_required
-def user_export():
-    """
-    Provides the user, their projects, channels, and hooks as a JSON
-    file.
-    """
-    response = make_response(
-        json.dumps(
-            g.user.export(), sort_keys=True, indent=4
-        )
-    )
-    response.headers['Content-Type'] = 'application/json'
-    return response
