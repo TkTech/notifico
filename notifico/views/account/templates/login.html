@@ -16,7 +16,7 @@
         <a href="{{ url_for('.register') }}" class="btn btn-primary">
           <i class="icon-plus"></i> Sign Up
         </a>
-        {% if config.NOTIFICO_PASSWORD_RESET %}
+        {% if config.PASSWORD_RESET %}
         <br />
         <small class="muted">
           <a href="{{ url_for('.forgot_password') }}">Lost your password?</a>

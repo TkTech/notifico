@@ -14,6 +14,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from raven.contrib.flask import Sentry
 
+from notifico.settings import Settings
 from notifico.util import pretty
 
 db = SQLAlchemy()
@@ -58,9 +59,10 @@ def create_instance():
     import os
 
     app = Flask(__name__)
-    app.config.from_object('notifico.config')
+    # app.config.from_object('notifico.config')
+    app.config.from_mapping(Settings().dict())
 
-    if app.config.get('NOTIFICO_ROUTE_STATIC'):
+    if app.config.get('ROUTE_STATIC'):
         # We should handle routing for static assets ourself (handy for
         # small and quick deployments).
         import os.path
@@ -83,16 +85,7 @@ def create_instance():
         port=app.config['REDIS_PORT'],
         db=app.config['REDIS_DB']
     )
-    # Attach Flask-Cache to our application instance. We override
-    # the backend configuration settings because we only want one
-    # Redis instance.
-    cache.init_app(app, config={
-        'CACHE_TYPE': 'redis',
-        'CACHE_REDIS_HOST': app.redis,
-        'CACHE_OPTIONS': {
-            'key_prefix': 'cache_'
-        }
-    })
+    cache.init_app(app)
     mail.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)

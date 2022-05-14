@@ -71,13 +71,13 @@ def logout():
 @account.route('/forgot', methods=['GET', 'POST'])
 def forgot_password():
     """
-    If NOTIFICO_PASSWORD_RESET is enabled and Flask-Mail is configured,
+    If PASSWORD_RESET is enabled and Flask-Mail is configured,
     this view allows you to request a password reset email. It also
     handles accepting those tokens.
     """
     # Because this functionality depends on Flask-Mail and
     # celery being properly configured, we default to disabled.
-    if not current_app.config.get('NOTIFICO_PASSWORD_RESET'):
+    if not current_app.config.get('PASSWORD_RESET'):
         flash(
             'Password resets have been disabled by the administrator.',
             category='warning'
@@ -87,7 +87,7 @@ def forgot_password():
     # How long should reset tokens last? We default
     # to 24 hours.
     token_expiry = current_app.config.get(
-        'NOTIFICO_PASSWORD_RESET_EXPIRY',
+        'PASSWORD_RESET_EXPIRY',
         60 * 60 * 24
     )
 
@@ -117,7 +117,7 @@ def forgot_password():
                 hours=token_expiry / 60 / 60
             ),
             recipients=[user.email],
-            sender=current_app.config['NOTIFICO_MAIL_SENDER']
+            sender=current_app.config['MAIL_SENDER']
         )
         flash('A reset email has been sent.', category='success')
         return redirect(url_for('.login'))
@@ -194,7 +194,7 @@ def register():
         return redirect(url_for('public.landing'))
 
     # Make sure this instance is allowing new users.
-    if not current_app.config.get('NOTIFICO_NEW_USERS', True):
+    if not current_app.config.get('NEW_USERS', True):
         return redirect(url_for('public.landing'))
 
     form = UserRegisterForm()

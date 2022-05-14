@@ -92,8 +92,3 @@ NOTIFICO_PASSWORD_RESET = False
 NOTIFICO_PASSWORD_RESET_EXPIRY = 60 * 60 * 24
 # The address or (name, address) to use when sending an email.
 NOTIFICO_MAIL_SENDER = None
-
-try:
-    from local_config import *
-except ImportError:
-    pass
