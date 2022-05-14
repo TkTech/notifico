@@ -1,13 +1,12 @@
-# -*- coding: utf8 -*-
-__all__ = ('PlainTextHook',)
 import flask_wtf as wtf
+from wtforms import fields, validators
 
 from notifico.services.hooks import HookService
 
 
-class PlainTextConfigForm(wtf.Form):
-    use_colours = wtf.BooleanField('Use Colors', validators=[
-        wtf.Optional()
+class PlainTextConfigForm(wtf.FlaskForm):
+    use_colours = fields.BooleanField('Use Colors', validators=[
+        validators.Optional()
     ], default=False, description=(
         'If checked, messages will include mIRC colouring.'
     ))

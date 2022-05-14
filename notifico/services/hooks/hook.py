@@ -1,5 +1,3 @@
-# -*- coding: utf8 -*-
-__all__ = ('HookService',)
 import re
 
 from flask import current_app

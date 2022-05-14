@@ -1,4 +1,3 @@
-# -*- coding: utf8 -*-
 from functools import wraps
 
 from redis import Redis
@@ -12,6 +11,7 @@ from flask import (
 from flask_caching import Cache
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from raven.contrib.flask import Sentry
 
 from notifico.util import pretty
@@ -21,11 +21,12 @@ sentry = Sentry()
 cache = Cache()
 mail = Mail()
 celery = Celery()
+migrate = Migrate()
 
 
 def user_required(f):
     """
-    A decorator for views which required a logged in user.
+    A decorator for views which required a logged-in user.
     """
     @wraps(f)
     def _wrapped(*args, **kwargs):
@@ -63,7 +64,7 @@ def create_instance():
         # We should handle routing for static assets ourself (handy for
         # small and quick deployments).
         import os.path
-        from werkzeug import SharedDataMiddleware
+        from werkzeug.middleware.shared_data import SharedDataMiddleware
 
         app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
             '/': os.path.join(os.path.dirname(__file__), 'static')
@@ -92,10 +93,9 @@ def create_instance():
             'key_prefix': 'cache_'
         }
     })
-    # Attach Flask-Mail to our application instance.
     mail.init_app(app)
-    # Attach Flask-SQLAlchemy to our application instance.
     db.init_app(app)
+    migrate.init_app(app, db)
 
     # Update celery's configuration with our application config.
     celery.config_from_object(app.config)
@@ -104,23 +104,17 @@ def create_instance():
     from notifico.views.account import account
     from notifico.views.public import public
     from notifico.views.projects import projects
-    from notifico.views.pimport import pimport
     from notifico.views.admin import admin
 
     app.register_blueprint(account, url_prefix='/u')
     app.register_blueprint(projects)
     app.register_blueprint(public)
-    app.register_blueprint(pimport, url_prefix='/i')
     app.register_blueprint(admin, url_prefix='/_')
 
     # Register our custom error handlers.
     from notifico.views import errors
 
     app.register_error_handler(500, errors.error_500)
-
-    # cia.vc XML-RPC kludge.
-    from notifico.services.hooks.cia import handler
-    handler.connect(app, '/RPC2')
 
     # Setup some custom Jinja2 filters.
     app.jinja_env.filters['pretty_date'] = pretty.pretty_date

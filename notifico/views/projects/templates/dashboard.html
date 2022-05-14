@@ -44,9 +44,6 @@
     {% endif %}
     {% if is_owner %}
     <a href="{{ url_for('.new') }}" class="btn btn-success"><i class="icon-plus"></i> New Project</a>
-    {% if config.SERVICE_GITHUB_CLIENT_ID and config.SERVICE_GITHUB_CLIENT_SECRET %}
-      <a href="{{ url_for('pimport.github') }}" class="btn btn-info"><i class="icon-github-alt"></i> Sync With Github</a>
-    {% endif %}
     {% endif %}
   </div>
 {% endblock %}

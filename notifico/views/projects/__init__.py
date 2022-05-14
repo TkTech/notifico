@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""__init__.py
-
-Project related views, such as project creation and details.
-"""
 from functools import wraps
 
 from flask import (
@@ -16,6 +10,7 @@ from flask import (
     request
 )
 import flask_wtf as wtf
+from wtforms import fields, validators
 
 from notifico import db, user_required
 from notifico.models import User, Project, Hook, Channel
@@ -24,54 +19,53 @@ from notifico.services.hooks import HookService
 projects = Blueprint('projects', __name__, template_folder='templates')
 
 
-class ProjectDetailsForm(wtf.Form):
-    name = wtf.TextField('Project Name', validators=[
-        wtf.Required(),
-        wtf.Length(1, 50),
-        wtf.Regexp(r'^[a-zA-Z0-9_\-\.]*$', message=(
+class ProjectDetailsForm(wtf.FlaskForm):
+    name = fields.StringField('Project Name', validators=[
+        validators.InputRequired(),
+        validators.Length(1, 50),
+        validators.Regexp(r'^[a-zA-Z0-9_\-\.]*$', message=(
             'Project name must only contain a to z, 0 to 9, dashes'
             ' and underscores.'
         ))
     ])
-    public = wtf.BooleanField('Public', validators=[
-    ], default=True)
-    website = wtf.TextField('Project URL', validators=[
-        wtf.Optional(),
-        wtf.Length(max=1024),
-        wtf.validators.URL()
+    public = fields.BooleanField('Public', default=True)
+    website = fields.StringField('Project URL', validators=[
+        validators.Optional(),
+        validators.Length(max=1024),
+        validators.URL()
     ])
 
 
-class HookDetailsForm(wtf.Form):
-    service_id = wtf.SelectField('Service', validators=[
-        wtf.Required()
+class HookDetailsForm(wtf.FlaskForm):
+    service_id = fields.SelectField('Service', validators=[
+        validators.InputRequired()
     ], coerce=int)
 
 
-class PasswordConfirmForm(wtf.Form):
-    password = wtf.PasswordField('Password', validators=[
-        wtf.Required()
+class PasswordConfirmForm(wtf.FlaskForm):
+    password = fields.PasswordField('Password', validators=[
+        validators.InputRequired()
     ])
 
     def validate_password(form, field):
         if not User.login(g.user.username, field.data):
-            raise wtf.ValidationError('Your password is incorrect.')
+            raise validators.ValidationError('Your password is incorrect.')
 
 
-class ChannelDetailsForm(wtf.Form):
-    channel = wtf.TextField('Channel', validators=[
-        wtf.Required(),
-        wtf.Length(min=1, max=80)
+class ChannelDetailsForm(wtf.FlaskForm):
+    channel = fields.StringField('Channel', validators=[
+        validators.InputRequired(),
+        validators.Length(min=1, max=80)
     ])
-    host = wtf.TextField('Host', validators=[
-        wtf.Required(),
-        wtf.Length(min=1, max=255)
+    host = fields.StringField('Host', validators=[
+        validators.InputRequired(),
+        validators.Length(min=1, max=255)
     ], default='chat.freenode.net')
-    port = wtf.IntegerField('Port', validators=[
-        wtf.NumberRange(1024, 66552)
+    port = fields.IntegerField('Port', validators=[
+        validators.NumberRange(1024, 66552)
     ], default=6667)
-    ssl = wtf.BooleanField('Use SSL', default=False)
-    public = wtf.BooleanField('Public', default=True, description=(
+    ssl = fields.BooleanField('Use SSL', default=False)
+    public = fields.BooleanField('Public', default=True, description=(
         'Allow others to see that this channel exists.'
     ))
 

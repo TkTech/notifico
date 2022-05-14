@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Utility kludge to start celery within a Flask application
 context, so we can use Flask's configuration for everything.

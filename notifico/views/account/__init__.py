@@ -15,7 +15,7 @@ from flask import (
     flash
 )
 from notifico import db, user_required
-from notifico.models import User, AuthToken
+from notifico.models import User
 from notifico.services import reset, background
 from notifico.views.account.forms import (
     UserLoginForm,
@@ -264,29 +264,3 @@ def user_export():
     )
     response.headers['Content-Type'] = 'application/json'
     return response
-
-
-@account.route('/tokens/')
-@account.route('/tokens/<int:tid>')
-@user_required
-def tokens(tid=None):
-    """
-    Allows the user to view their OAuth tokens stored with Notifico.
-    """
-    if tid is not None:
-        t = AuthToken.query.get(tid)
-        if t is None:
-            # The token no longer exists.
-            return abort(404)
-
-        if t.owner.id != g.user.id:
-            # Forbidden, you don't own this token.
-            return abort(403)
-
-        t.owner.tokens.remove(t)
-        db.session.delete(t)
-        db.session.commit()
-
-        return redirect(url_for('.tokens'))
-
-    return render_template('tokens.html')

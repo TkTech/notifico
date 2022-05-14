@@ -15,6 +15,7 @@ SECRET_KEY = 'YouReallyShouldChangeThisYouKnow'
 # ---
 db_path = os.path.abspath(os.path.join(os.getcwd(), 'testing.db'))
 SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(db_path)
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # ---
 # Flask-WTF
@@ -54,13 +55,6 @@ IRC_REALNAME = u"Notifico! - https://github.com/notifico"
 # ---
 # Service integration configuration.
 # ---
-# Your Github OAuth CLIENT_ID and CLIENT_SECRET tokens, as given
-# to you when you create an application on github. If one or both of
-# these are left blank, the "Import From Github" button will not appear
-# on the projects page.
-SERVICE_GITHUB_CLIENT_ID = None
-SERVICE_GITHUB_CLIENT_SECRET = None
-
 # Your Google Analytics ID (ID-XXXXXXX) as a string.
 # If left blank, the analytics snippet will not be included in the
 # base template.
