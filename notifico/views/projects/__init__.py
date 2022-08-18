@@ -60,11 +60,11 @@ class ChannelDetailsForm(wtf.FlaskForm):
     host = fields.StringField('Host', validators=[
         validators.InputRequired(),
         validators.Length(min=1, max=255)
-    ], default='chat.freenode.net')
+    ], default='irc.libera.chat')
     port = fields.IntegerField('Port', validators=[
         validators.NumberRange(1024, 66552)
-    ], default=6667)
-    ssl = fields.BooleanField('Use SSL', default=False)
+    ], default=6697)
+    ssl = fields.BooleanField('Use SSL', default=True)
     public = fields.BooleanField('Public', default=True, description=(
         'Allow others to see that this channel exists.'
     ))
@@ -157,9 +157,9 @@ def new():
                 # New public projects get added to #commits by default.
                 c = Channel.new(
                     '#commits',
-                    'chat.freenode.net',
-                    6667,
-                    ssl=False,
+                    'irc.libera.chat',
+                    6697,
+                    ssl=True,
                     public=True
                 )
                 p.channels.append(c)
