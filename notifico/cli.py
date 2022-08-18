@@ -33,3 +33,7 @@ def create(username, email, password, superuser=False):
 
     db.session.add(user)
     db.session.commit()
+
+
+if __name__ == '__main__':
+    cli()
