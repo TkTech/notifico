@@ -10,3 +10,4 @@ from notifico.services.hooks.cia import *
 from notifico.services.hooks.travisci import *
 from notifico.services.hooks.appveyor import *
 from notifico.services.hooks.gitlab import *
+from notifico.services.hooks.gitea import *
