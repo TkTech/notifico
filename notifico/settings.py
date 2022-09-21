@@ -1,4 +1,5 @@
 import os.path
+import secrets
 import typing as t
 
 from pydantic import BaseSettings, Field
@@ -6,19 +7,13 @@ from pydantic import BaseSettings, Field
 
 class Settings(BaseSettings):
     #: Key used for encrypting or signing various values, such as sessions.
-    SECRET_KEY: str = 'YouReallyShouldChangeThis'
+    SECRET_KEY: str = Field(default_factory=lambda: secrets.token_hex(30))
     #: Enable CSRF protection on Flask-WTF forms.
     CSRF_ENABLED: bool = True
 
     SQLALCHEMY_DATABASE_URI: str = Field(
-        default_factory=lambda: 'sqlite:///{0}'.format(
-            os.path.abspath(
-                os.path.join(
-                    os.getcwd(),
-                    'testing.db'
-                )
-            )
-        )
+        env='NOTIFICO_DB',
+        default='postgresql://localhost/notifico'
     )
     #: Just keep this disabled.
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False

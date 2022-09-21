@@ -1,7 +1,19 @@
-version: '2'
+version: '3.8'
+
 services:
   redis:
-    image: redis:latest
+    image: redis:7.0
+    volumes:
+      - .:/code
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: notifico
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - .:/code
+
   frontend:
     build: .
     ports:
@@ -10,6 +22,11 @@ services:
       - .:/code
     depends_on:
       - redis
+      - db
     environment:
       FLASK_DEBUG: 1
+      NOTIFICO_DB: postgresql://postgres:notifico@db/postgres
     command: poetry run notifico run --host 0.0.0.0
+
+volumes:
+  postgres:
