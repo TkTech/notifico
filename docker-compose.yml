@@ -1,0 +1,15 @@
+version: '2'
+services:
+  redis:
+    image: redis:latest
+  frontend:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+    environment:
+      FLASK_DEBUG: 1
+    command: poetry run notifico run --host 0.0.0.0
