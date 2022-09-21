@@ -26,6 +26,7 @@ services:
     environment:
       FLASK_DEBUG: 1
       NOTIFICO_DB: postgresql://postgres:notifico@db/postgres
+      FLASK_APP: "notifico:create_app"
     command: poetry run notifico run --host 0.0.0.0
 
 volumes:
