@@ -40,6 +40,13 @@ def total_networks():
 
 
 @cache.memoize(timeout=60 * 5)
+def total_channels():
+    return db.session.query(
+        func.count(Channel).label('count')
+    ).scalar()
+
+
+@cache.memoize(timeout=60 * 5)
 def top_networks(limit=20):
     return (
         db.session.query(

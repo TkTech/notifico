@@ -34,7 +34,8 @@ def landing():
         new_projects=new_projects,
         top_networks=stats.top_networks(limit=10),
         total_networks=stats.total_networks(),
-        total_users=stats.total_users()
+        total_users=stats.total_users(),
+        total_messages=stats.total_messages()
     )
 
 

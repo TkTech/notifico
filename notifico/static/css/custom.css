@@ -1,0 +1,13 @@
+.stats-box {
+    text-align: center;
+    padding: 24px;
+    background: #f9f9f9;
+    border: 1px solid #CCC;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.stats-value {
+    font-size: 120%;
+    font-weight: bold;
+}
