@@ -1,15 +1,12 @@
-# -*- coding: utf8 -*-
-
-from functools import wraps, partial
+from functools import wraps
 
 import gevent
 import gevent.queue
 import gevent.event
 
-from utopia import signals
-from utopia.client import ProtocolClient
-from utopia.plugins.protocol import ISupportPlugin
-from utopia.plugins.util import LogPlugin
+from notifico.utopia import signals
+from notifico.utopia.client import ProtocolClient
+from notifico.utopia.plugins.protocol import ISupportPlugin
 
 
 class BotificoBot(ProtocolClient):

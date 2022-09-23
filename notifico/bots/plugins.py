@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from utopia import signals
+from notifico.utopia import signals
 import datetime
 
 

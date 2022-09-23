@@ -4,11 +4,11 @@ import random
 import logging
 from collections import defaultdict
 
-from utopia import signals
-from utopia.client import Identity
-from utopia.plugins.handshake import HandshakePlugin
-from utopia.plugins.protocol import EasyProtocolPlugin
-from utopia.plugins.util import LogPlugin
+from notifico.utopia import signals
+from notifico.utopia.client import Identity
+from notifico.utopia.plugins.handshake import HandshakePlugin
+from notifico.utopia.plugins.protocol import EasyProtocolPlugin
+from notifico.utopia.plugins.util import LogPlugin
 
 from notifico.bots.util import Network
 from notifico.bots.plugins import NickInUsePlugin, CTCPPlugin
