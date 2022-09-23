@@ -1,9 +1,8 @@
 # -*- coding: utf8 -*-
 __all__ = ('User', 'Group')
-import os
-import base64
 import hashlib
 import datetime
+import secrets
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -20,7 +19,7 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    salt = db.Column(db.String(8), nullable=False)
+    salt = db.Column(db.String(64), nullable=False)
     joined = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
 
     # ---
@@ -40,20 +39,18 @@ class User(db.Model):
         return u
 
     @staticmethod
-    def _create_salt():
-        """
-        Returns a new base64 salt.
-        """
-        return base64.b64encode(os.urandom(8))[:8]
+    def _create_salt() -> str:
+        return secrets.token_hex(32)
 
     @staticmethod
-    def _hash_password(password, salt):
+    def _hash_password(password: str, salt: str) -> str:
         """
         Returns a hashed password from `password` and `salt`.
         """
-        return hashlib.sha256(
-            salt + password.strip().encode('utf-8')
-        ).hexdigest()
+        h = hashlib.sha256()
+        h.update(salt.encode('utf-8'))
+        h.update(password.strip().encode('utf-8'))
+        return h.hexdigest()
 
     def set_password(self, new_password):
         self.salt = self._create_salt()
