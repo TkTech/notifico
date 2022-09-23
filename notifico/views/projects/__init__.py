@@ -14,7 +14,7 @@ from wtforms import fields, validators
 
 from notifico import db, user_required
 from notifico.models import User, Project, Hook, Channel
-from notifico.services.hooks import HookService
+from notifico.service import available_services
 
 projects = Blueprint('projects', __name__, template_folder='templates')
 
@@ -263,7 +263,7 @@ def new_hook(u, p, sid):
         # (403 Forbidden)
         return abort(403)
 
-    hook = HookService.services.get(sid)
+    hook = available_services()[sid]
     form = hook.form()
     if form:
         form = form()
@@ -283,7 +283,7 @@ def new_hook(u, p, sid):
 
     return render_template('new_hook.html',
         project=p,
-        services=HookService.services,
+        services=available_services(),
         service=hook,
         form=form
     )
@@ -324,7 +324,7 @@ def edit_hook(u, p, hid):
 
     return render_template('edit_hook.html',
         project=p,
-        services=HookService.services,
+        services=available_services(),
         service=hook_service,
         form=form
     )
@@ -348,7 +348,7 @@ def hook_receive(pid, key):
         Project.message_count: Project.message_count + 1
     })
 
-    hook = HookService.services.get(h.service_id)
+    hook = available_services()[h.service_id]
     if hook is None:
         # TODO: This should be logged somewhere.
         return ''

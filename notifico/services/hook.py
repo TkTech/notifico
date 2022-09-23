@@ -1,18 +1,17 @@
+import abc
 import re
 
 from flask import current_app
 from jinja2 import Environment, PackageLoader
 
 from notifico.util import irc
-from notifico.services import Service
 from notifico.services.messages import MessageService
 
 
-class HookService(object):
+class HookService(abc.ABC):
     """
     The base type for any `Service`.
     """
-    __metaclass__ = Service
     #: Alias to `notifico.util.irc.colors`
     colors = irc.mirc_colors()
 
@@ -22,18 +21,16 @@ class HookService(object):
     @classmethod
     def description(cls):
         """
-        A description of this service as a HTML string.
+        A description of this service as an HTML string.
         """
         return ''
 
-    @classmethod
-    def env(cls):
+    @staticmethod
+    def env():
         """
         Returns a Jinja2 `Environment` for template rendering.
         """
-        return Environment(
-            loader=PackageLoader('notifico.services.hooks', 'templates')
-        )
+        raise NotImplementedError()
 
     @classmethod
     def shorten(cls, url):
@@ -129,6 +126,6 @@ class HookService(object):
     def absolute_url(cls, hook):
         """
         Returns an absolute URL used as this hooks endpoint if it does
-        not use the standard hook-recieve endpoint.
+        not use the standard hook-receive endpoint.
         """
         raise NotImplementedError()

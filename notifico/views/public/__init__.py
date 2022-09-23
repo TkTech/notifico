@@ -11,7 +11,7 @@ from sqlalchemy import func, text
 from notifico import db
 from notifico.services import stats
 from notifico.models import User, Channel, Project
-from notifico.services.hooks import HookService
+from notifico.services.hook import HookService
 
 public = Blueprint('public', __name__, template_folder='templates')
 

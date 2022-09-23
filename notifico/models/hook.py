@@ -1,11 +1,9 @@
-# -*- coding: utf8 -*-
-__all__ = ('Hook',)
 import os
 import base64
 import datetime
 
 from notifico import db
-from notifico.services.hooks import HookService
+from notifico.service import available_services
 
 
 class Hook(db.Model):
@@ -16,9 +14,15 @@ class Hook(db.Model):
     config = db.Column(db.PickleType)
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    project = db.relationship('Project', backref=db.backref(
-        'hooks', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
-    ))
+    project = db.relationship(
+        'Project',
+        backref=db.backref(
+            'hooks',
+            order_by=id,
+            lazy='dynamic',
+            cascade='all, delete-orphan'
+        )
+    )
 
     message_count = db.Column(db.Integer, default=0)
 
@@ -43,7 +47,7 @@ class Hook(db.Model):
 
     @property
     def hook(self):
-        return HookService.services[self.service_id]
+        return available_services()[self.service_id]
 
     def absolute_url(self):
         hook = self.hook

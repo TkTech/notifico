@@ -5,7 +5,7 @@ from wtforms import fields, validators
 from functools import wraps
 from wtforms.fields import SelectMultipleField
 
-from notifico.services.hooks import HookService
+from notifico.contrib.services import BundledService
 
 
 def simplify_payload(payload):
@@ -151,26 +151,26 @@ def _create_push_summary(project_name, j, config):
 
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=project_name,
-        **HookService.colors
+        **BundledService.colors
     ))
 
     # The user doing the push.
     line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
         pusher=j['pusher'],
-        **HookService.colors
+        **BundledService.colors
     ))
 
     # The number of commits included in this push.
     line.append(u'{GREEN}{count}{RESET} {commits}'.format(
         count=len(original['commits']),
         commits='commit' if len(original['commits']) == 1 else 'commits',
-        **HookService.colors
+        **BundledService.colors
     ))
 
     if show_branch and j['branch']:
         line.append(u'to {GREEN}{branch}{RESET}'.format(
             branch=j['branch'],
-            **HookService.colors
+            **BundledService.colors
         ))
 
     # File movement summary.
@@ -195,7 +195,7 @@ def _create_push_summary(project_name, j, config):
         )
     line.append(u'{PINK}{0}{RESET}'.format(
         GitlabHook.shorten(link),
-        **HookService.colors
+        **BundledService.colors
     ))
 
     return u' '.join(line)
@@ -213,18 +213,18 @@ def _create_commit_summary(project_name, j, config):
 
         line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
             name=project_name,
-            **HookService.colors
+            **BundledService.colors
         ))
 
         if author:
             line.append(u'{ORANGE}{author}{RESET}'.format(
                 author=author,
-                **HookService.colors
+                **BundledService.colors
             ))
 
         line.append(u'{GREEN}{sha}{RESET}'.format(
             sha=commit['id'][:7],
-            **HookService.colors
+            **BundledService.colors
         ))
 
         line.append(u'-')
@@ -247,7 +247,7 @@ def _create_push_final_summary(project_name, j, config):
 
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=project_name,
-        **HookService.colors
+        **BundledService.colors
     ))
 
     line.append(u'... and {count} more commits.'.format(
@@ -257,7 +257,7 @@ def _create_push_final_summary(project_name, j, config):
     return u' '.join(line)
 
 
-class GitlabHook(HookService):
+class GitlabHook(BundledService):
     SERVICE_NAME = 'Gitlab'
     SERVICE_ID = 90
 
@@ -307,7 +307,7 @@ class GitlabHook(HookService):
             num=json['object_attributes']['iid'],
             title=json['object_attributes']['title'],
             url=GitlabHook.shorten(json['object_attributes']['url']),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -340,7 +340,7 @@ class GitlabHook(HookService):
             num=json['issue']['iid'],
             title=json['issue']['title'],
             url=GitlabHook.shorten(json['object_attributes']['url']),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -356,7 +356,7 @@ class GitlabHook(HookService):
             who=json['user']['username'],
             commit=json['commit']['id'],
             url=GitlabHook.shorten(json['object_attributes']['url']),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -373,7 +373,7 @@ class GitlabHook(HookService):
             num=json['snippet']['id'],
             title=json['snippet']['title'],
             url=GitlabHook.shorten(json['object_attributes']['url']),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -390,7 +390,7 @@ class GitlabHook(HookService):
             num=json['merge_request']['iid'],
             title=json['merge_request']['title'],
             url=GitlabHook.shorten(json['object_attributes']['url']),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -411,7 +411,7 @@ class GitlabHook(HookService):
             num=json['object_attributes']['iid'],
             title=json['object_attributes']['title'],
             url=GitlabHook.shorten(json['object_attributes']['url']),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -431,7 +431,7 @@ class GitlabHook(HookService):
             action=action,
             pname=json['object_attributes']['title'],
             url=GitlabHook.shorten(json['object_attributes']['url']),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -442,9 +442,9 @@ class GitlabHook(HookService):
             '{status_color}{status}{RESET} - {PINK}{url}{RESET}'
         )
 
-        status_color = HookService.colors['GREEN']
+        status_color = BundledService.colors['GREEN']
         if json['object_attributes']['status'].lower() != 'success':
-            status_color = HookService.colors['RED']
+            status_color = BundledService.colors['RED']
         link = u'{0}/pipelines/{1}'.format(
             json['project']['web_url'],
             json['object_attributes']['id']
@@ -456,7 +456,7 @@ class GitlabHook(HookService):
             status_color=status_color,
             status=json['object_attributes']['status'],
             url=GitlabHook.shorten(link),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -469,9 +469,9 @@ class GitlabHook(HookService):
         if not is_event_allowed(hook.config, 'build', json['build_status']):
             return
 
-        status_color = HookService.colors['GREEN']
+        status_color = BundledService.colors['GREEN']
         if json['build_status'].lower() != 'success':
-            status_color = HookService.colors['RED']
+            status_color = BundledService.colors['RED']
         link = 'u{0}/builds/{1}'.format(
             json['repository']['homepage'],
             json['build_id']
@@ -483,7 +483,7 @@ class GitlabHook(HookService):
             status_color=status_color,
             status=json['build_status'],
             url=GitlabHook.shorten(link),
-            **HookService.colors
+            **BundledService.colors
         )
 
     @classmethod
@@ -556,12 +556,12 @@ class GitlabHook(HookService):
 
         line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
             name=project_name,
-            **HookService.colors
+            **BundledService.colors
         ))
 
         line.append(u'{ORANGE}{pusher}{RESET}'.format(
             pusher=j['pusher'],
-            **HookService.colors
+            **BundledService.colors
         ))
 
         if j['tag']:
@@ -574,12 +574,12 @@ class GitlabHook(HookService):
                     return ''
                 line.append(u'tagged {GREEN}{sha}{RESET} as'.format(
                     sha=original['after'],
-                    **HookService.colors
+                    **BundledService.colors
                 ))
 
             line.append(u'{GREEN}{tag}{RESET}'.format(
                 tag=j['tag'],
-                **HookService.colors
+                **BundledService.colors
             ))
         elif j['branch']:
             if re.match(r'0+', original['after']):
@@ -593,7 +593,7 @@ class GitlabHook(HookService):
 
             line.append(u'{GREEN}{branch}{RESET}'.format(
                 branch=j['branch'],
-                **HookService.colors
+                **BundledService.colors
             ))
 
         return u' '.join(line)

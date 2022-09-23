@@ -1,7 +1,7 @@
 import flask_wtf as wtf
 from wtforms import fields, validators
 
-from notifico.services.hooks import HookService
+from notifico.contrib.services import BundledService
 
 
 class PlainTextConfigForm(wtf.FlaskForm):
@@ -12,7 +12,7 @@ class PlainTextConfigForm(wtf.FlaskForm):
     ))
 
 
-class PlainTextHook(HookService):
+class PlainTextHook(BundledService):
     """
     Simple service hook that just accepts text.
     """

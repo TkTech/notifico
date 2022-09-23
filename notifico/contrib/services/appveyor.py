@@ -1,7 +1,7 @@
 import flask_wtf as wtf
 from wtforms import fields, validators
 
-from notifico.services.hooks import HookService
+from notifico.contrib.services import BundledService
 
 
 class AppVeyorConfigForm(wtf.FlaskForm):
@@ -12,7 +12,7 @@ class AppVeyorConfigForm(wtf.FlaskForm):
     ))
 
 
-class AppVeyorHook(HookService):
+class AppVeyorHook(BundledService):
     """
     HookService hook for https://ci.appveyor.com
     """
@@ -49,7 +49,7 @@ class AppVeyorHook(HookService):
 
         prefix = u'{RESET}[{BLUE}{name}{RESET}] '.format(
             name=event_data['projectName'],
-            **HookService.colors
+            **cls.colors
         )
         return prefix + line
 
@@ -59,9 +59,9 @@ class AppVeyorHook(HookService):
         Create and return a one-line summary of the build
         """
         if payload['failed'] == True:
-            status_colour = HookService.colors['RED']
+            status_colour = cls.colors['RED']
         elif payload['passed'] == True:
-            status_colour = HookService.colors['GREEN']
+            status_colour = cls.colors['GREEN']
 
         lines = []
 
@@ -74,22 +74,22 @@ class AppVeyorHook(HookService):
         lines.append(u'{status}{message}{RESET}.'.format(
             status=status_colour,
             message=payload['status'],
-            **HookService.colors
+            **cls.colors
         ))
 
         # branch & commit hash
         lines.append(u'({G}{branch}{R} @ {G}{commit}{R})'.format(
             branch=payload['branch'],
             commit=payload['commitId'][:7],
-            G=HookService.colors['GREEN'],
-            R=HookService.colors['RESET']
+            G=cls.colors['GREEN'],
+            R=cls.colors['RESET']
         ))
         
         if payload['isPullRequest'] == True:
             lines.append(u'(pull request {G}#{n}{R})'.format(
                 n=payload['pullRequestId'],
-                G=HookService.colors['GREEN'],
-                R=HookService.colors['RESET']
+                G=cls.colors['GREEN'],
+                R=cls.colors['RESET']
             ))
         
         line = u' '.join(lines)

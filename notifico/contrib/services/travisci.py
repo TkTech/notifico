@@ -4,8 +4,8 @@ from hashlib import sha256
 import flask_wtf as wtf
 from wtforms import fields, validators
 
-from notifico.services.hooks import HookService
-from notifico.services.hooks.github import GithubHook
+from notifico.contrib.services import BundledService
+from notifico.contrib.services.github import GithubHook
 
 
 class TravisConfigForm(wtf.FlaskForm):
@@ -33,9 +33,9 @@ class TravisConfigForm(wtf.FlaskForm):
     ))
 
 
-class TravisHook(HookService):
+class TravisHook(BundledService):
     """
-    HookService hook for https://travis-ci.org.
+    BundledService hook for https://travis-ci.org.
     """
     SERVICE_NAME = 'Travis CI'
     SERVICE_ID = 60
@@ -84,7 +84,7 @@ class TravisHook(HookService):
 
         prefix = u'{RESET}[{BLUE}{name}{RESET}] '.format(
             name=payload['repository']['name'],
-            **HookService.colors
+            **cls.colors
         )
         return prefix + line
 
@@ -93,9 +93,9 @@ class TravisHook(HookService):
         """
         Create and return a one-line summary of the build
         """
-        status_colour = HookService.colors['RED']
+        status_colour = cls.colors['RED']
         if payload['result'] == 0:
-            status_colour = HookService.colors['GREEN']
+            status_colour = BundledService.colors['GREEN']
 
         lines = []
 
@@ -108,21 +108,21 @@ class TravisHook(HookService):
         lines.append(u'{status}{message}{RESET}.'.format(
             status=status_colour,
             message=payload['result_message'].lower(),
-            **HookService.colors
+            **BundledService.colors
         ))
 
         # branch & commit hash
         lines.append(u'({G}{branch}{R} @ {G}{commit}{R})'.format(
             branch=payload['branch'],
             commit=payload['commit'][:7],
-            G=HookService.colors['GREEN'],
-            R=HookService.colors['RESET']
+            G=BundledService.colors['GREEN'],
+            R=BundledService.colors['RESET']
         ))
 
         # Short URL to changes on GH
         lines.append(u'{PINK}{url}{RESET}'.format(
             url=GithubHook.shorten(payload['compare_url']),
-            **HookService.colors
+            **BundledService.colors
         ))
 
         line = u' '.join(lines)
