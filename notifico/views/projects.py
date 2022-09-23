@@ -271,13 +271,13 @@ def new_hook(u, p, sid):
         form = form()
 
     if form and hook.validate(form, request):
-        h = Hook.new(sid, config=hook.pack_form(form))
+        h = Hook(service_id=sid, config=hook.pack_form(form))
         p.hooks.append(h)
         db.session.add(h)
         db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
     elif form is None and request.method == 'POST':
-        h = Hook.new(sid)
+        h = Hook(service_id=sid)
         p.hooks.append(h)
         db.session.add(h)
         db.session.commit()

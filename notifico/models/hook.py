@@ -1,6 +1,5 @@
-import os
-import base64
 import datetime
+import secrets
 
 from notifico import db
 from notifico.service import available_services
@@ -9,7 +8,11 @@ from notifico.service import available_services
 class Hook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
-    key = db.Column(db.String(255), nullable=False)
+    key = db.Column(
+        db.String(255),
+        nullable=False,
+        default=lambda: secrets.token_hex(24)
+    )
     service_id = db.Column(db.Integer)
     config = db.Column(db.PickleType)
 
@@ -25,18 +28,6 @@ class Hook(db.Model):
     )
 
     message_count = db.Column(db.Integer, default=0)
-
-    @classmethod
-    def new(cls, service_id, config=None):
-        p = cls()
-        p.service_id = service_id
-        p.key = cls._new_key()
-        p.config = config
-        return p
-
-    @staticmethod
-    def _new_key():
-        return base64.urlsafe_b64encode(os.urandom(24))[:24]
 
     @classmethod
     def by_service_and_project(cls, service_id, project_id):
