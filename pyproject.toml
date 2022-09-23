@@ -30,6 +30,8 @@ pydantic = "^1.9.0"
 python-dotenv = "^0.20.0"
 psycopg2 = "^2.9.3"
 rich = "^12.5.1"
+gevent = "^21.12.0"
+utopia = { git = "https://github.com/TkTech/utopia.git", rev = "70293ed5" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"

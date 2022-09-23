@@ -1,6 +1,7 @@
 import os.path
 import secrets
 import typing as t
+from typing import Optional
 
 from pydantic import BaseSettings, Field
 
@@ -46,7 +47,13 @@ class Settings(BaseSettings):
     PASSWORD_RESET = False
     #: How long (in seconds) password resets should be valid for.
     PASSWORD_RESET_EXPIRY = 60 * 60 * 24
-    #: The address or (name, address) to use when sending an email.
+
+    IRC_NICKNAME: str = 'Not'
+    IRC_USERNAME: str = 'notifico'
+    IRC_REALNAME: str = 'Notifico! - https://github.com/tktech/notifico'
+
+    #: DSN for optional Sentry error reporting.
+    SENTRY_DSN: Optional[str] = None
 
     class Config:
         case_sensitive = True

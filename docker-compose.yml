@@ -14,6 +14,18 @@ services:
       - postgres:/var/lib/postgresql/data
       - .:/code
 
+  bots:
+    build: .
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+      - db
+    environment:
+      NOTIFICO_DB: postgresql://postgres:notifico@db/postgres
+      NOTIFICO_REDIS_HOST: 'redis'
+    command: poetry run notifico bots start
+
   frontend:
     build: .
     ports:

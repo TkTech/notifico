@@ -9,18 +9,20 @@ from raven.conf import setup_logging
 from notifico.bots.util import Network, Channel
 from notifico.bots.manager import BotManager
 from notifico.bots.bot import BotificoBot
-import notifico.config as config
+from notifico.settings import Settings
 
 
 def start_manager():
-    if config.SENTRY_DSN:
-        handler = SentryHandler(config.SENTRY_DSN)
+    settings = Settings()
+
+    if settings.SENTRY_DSN:
+        handler = SentryHandler(settings.SENTRY_DSN)
         setup_logging(handler)
 
     r = redis.StrictRedis(
-        host=config.REDIS_HOST,
-        port=config.REDIS_PORT,
-        db=config.REDIS_DB
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        db=settings.REDIS_DB
     )
     manager = BotManager(BotificoBot)
 
@@ -47,6 +49,7 @@ def start_manager():
                 )
 
         gevent.sleep(0.1)
+
 
 if __name__ == '__main__':
     start_manager()

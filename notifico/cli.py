@@ -1,10 +1,7 @@
 import datetime
 
 import click
-from rich.console import Console
 from flask.cli import FlaskGroup
-from rich.markup import escape
-from sqlalchemy import func
 
 from notifico import create_app, db
 from notifico.models import Project
@@ -26,6 +23,11 @@ def users():
 @cli.group()
 def tools():
     """Misc. tools."""
+
+
+@cli.group()
+def bots():
+    """Bot management commands."""
 
 
 @users.command()
@@ -85,6 +87,15 @@ def purge(make_changes=False):
 
     if make_changes:
         db.session.commit()
+
+
+@bots.command('start')
+def bots_start():
+    """
+    Start the IRC bot manager.
+    """
+    from notifico.bots import start_manager
+    start_manager()
 
 
 if __name__ == '__main__':

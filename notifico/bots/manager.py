@@ -12,7 +12,7 @@ from utopia.plugins.util import LogPlugin
 
 from notifico.bots.util import Network
 from notifico.bots.plugins import NickInUsePlugin, CTCPPlugin
-import notifico.config as config
+from notifico.settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +25,7 @@ class BotManager(object):
     def __init__(self, bot_class):
         self._active_bots = defaultdict(set)
         self._bot_class = bot_class
+        self.settings = Settings()
 
         # A stack of released nicknames to keep our nicknames
         # unique across all networks.
@@ -91,8 +92,8 @@ class BotManager(object):
         bot = self._bot_class(
             Identity(
                 nickname,
-                user=config.IRC_USERNAME,
-                real=config.IRC_REALNAME,
+                user=self.settings.IRC_USERNAME,
+                real=self.settings.IRC_REALNAME,
                 password=network.password
             ),
             network.host,
@@ -137,16 +138,16 @@ class BotManager(object):
         :param suffix_length: The maximum length for the randomly generated
                               nickname suffix.
         """
-        
+
         # Trying the default nickname
-        primary_nick = config.IRC_NICKNAME
+        primary_nick = self.settings.IRC_NICKNAME
         if primary_nick not in self._nick_stack:
             self._nick_stack.append(primary_nick)
             return primary_nick
 
         # Keep trying until we get a nickname that's not already in use.
         while True:
-            new_nick = config.IRC_NICKNAME + '-{random_suffix:x}'.format(
+            new_nick = self.settings.IRC_NICKNAME + '-{random_suffix:x}'.format(
                 # By far the fastest pure-python method for a short hex
                 # identifier.
                 random_suffix=random.randrange(
