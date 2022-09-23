@@ -19,12 +19,12 @@
       You haven't created any hooks yet for this project.
     </div>
     {% else %}
-    <table class="table table-vertical table-striped">
+    <table class="table table-vertical">
       <thead>
         <tr>
           <th>Service Name</th>
-          <th>Hook URL</th>
           <th>Created</th>
+          <th>Hook</th>
           <th style="text-align: center;">Messages</th>
           <th></th>
         </tr>
@@ -34,16 +34,15 @@
         <tr>
           <td>{{ hook.hook.SERVICE_NAME }}</td>
           <td>
-            {% if hook.absolute_url() %}
-            <a href="{{ hook.absolute_url() }}">
-            {% else %}
-            <a href="{{ url_for('.hook_receive', pid=project.id, key=hook.key) }}">
-            {% endif %}
-              Link
-            </a>
+            {{ hook.created.strftime("%Y-%m-%d") }}
           </td>
           <td>
-            {{ hook.created.strftime("%Y-%m-%d") }}
+            <input
+              name="hook"
+              type="text"
+              value="{{ url_for('.hook_receive', pid=project.id, key=hook.key, _external=True) }}"
+              readonly
+            />
           </td>
           <td style="text-align: center;">
             {{ hook.message_count }}
