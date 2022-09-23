@@ -121,11 +121,3 @@ class HookService(abc.ABC):
                 f.data = config[f.id]
 
         return form
-
-    @classmethod
-    def absolute_url(cls, hook):
-        """
-        Returns an absolute URL used as this hooks endpoint if it does
-        not use the standard hook-receive endpoint.
-        """
-        raise NotImplementedError()
