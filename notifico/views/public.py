@@ -9,9 +9,9 @@ from flask_sqlalchemy import Pagination
 from sqlalchemy import func, text
 
 from notifico import db
+from notifico.service import available_services
 from notifico.services import stats
 from notifico.models import User, Channel, Project
-from notifico.services.hook import HookService
 
 public = Blueprint('public', __name__, template_folder='templates')
 
@@ -30,7 +30,7 @@ def landing():
     ).paginate(1, 10, False)
 
     return render_template(
-        'landing.html',
+        'public/landing.html',
         new_projects=new_projects,
         top_networks=stats.top_networks(limit=10),
         total_networks=stats.total_networks(),
@@ -57,7 +57,7 @@ def networks():
     pagination = Pagination(q, page, per_page, total, items)
 
     return render_template(
-        'networks.html',
+        'public/networks.html',
         pagination=pagination,
         per_page=per_page
     )
@@ -76,7 +76,7 @@ def network(network):
     pagination = q.paginate(page, per_page, False)
 
     return render_template(
-        'channels.html',
+        'public/channels.html',
         per_page=per_page,
         network=network,
         pagination=pagination
@@ -98,7 +98,7 @@ def projects(page=1):
     pagination = q.paginate(page, per_page, False)
 
     return render_template(
-        'projects.html',
+        'public/projects.html',
         pagination=pagination,
         per_page=per_page
     )
@@ -118,7 +118,7 @@ def users(page=1):
     pagination = q.paginate(page, per_page, False)
 
     return render_template(
-        'users.html',
+        'public/users.html',
         pagination=pagination,
         per_page=per_page
     )
@@ -126,8 +126,7 @@ def users(page=1):
 
 @public.route('/s/services')
 def services():
-    services = HookService.services
     return render_template(
-        'services.html',
-        services=services
+        'public/services.html',
+        services=available_services()
     )

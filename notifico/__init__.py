@@ -56,7 +56,6 @@ def create_app():
     """
     Construct a new Flask instance and return it.
     """
-    import os
 
     app = Flask(__name__)
     # app.config.from_object('notifico.config')
@@ -94,13 +93,13 @@ def create_app():
     celery.config_from_object(app.config)
 
     # Import and register all of our blueprints.
-    from notifico.views.account import account
-    from notifico.views.public import public
-    from notifico.views.projects import projects
+    from notifico.views import account
+    from notifico.views import public
+    from notifico.views import projects
 
-    app.register_blueprint(account, url_prefix='/u')
-    app.register_blueprint(projects)
-    app.register_blueprint(public)
+    app.register_blueprint(account.account, url_prefix='/u')
+    app.register_blueprint(projects.projects)
+    app.register_blueprint(public.public)
 
     # Register our custom error handlers.
     from notifico.views import errors

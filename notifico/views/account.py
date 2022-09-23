@@ -12,7 +12,7 @@ from flask import (
 from notifico import db, user_required
 from notifico.models import User
 from notifico.services import reset, background
-from notifico.views.account.forms import (
+from notifico.views.account_forms import (
     UserLoginForm,
     UserRegisterForm,
     UserDeleteForm,
@@ -52,7 +52,7 @@ def login():
         session['_uu'] = u.username
         return redirect(url_for('projects.dashboard', u=u.username))
 
-    return render_template('login.html', form=form)
+    return render_template('account/login.html', form=form)
 
 
 @account.route('/logout')
@@ -106,7 +106,7 @@ def forgot_password():
             # We're already using Jinja2, so we might as well use
             # it to render our email templates as well.
             html=render_template(
-                'email_reset.html',
+                'account/email_reset.html',
                 user=user,
                 reset_link=url_for(
                     '.reset_password',
@@ -122,7 +122,7 @@ def forgot_password():
         flash('A reset email has been sent.', category='success')
         return redirect(url_for('.login'))
 
-    return render_template('forgot.html', form=form)
+    return render_template('account/forgot.html', form=form)
 
 
 @account.route('/reset')
@@ -181,7 +181,7 @@ def reset_pick_password():
         )
         return redirect(url_for('.login'))
 
-    return render_template('reset.html', form=form)
+    return render_template('account/reset.html', form=form)
 
 
 @account.route('/register', methods=['GET', 'POST'])
@@ -206,7 +206,7 @@ def register():
         # ... and send them back to the login screen.
         return redirect(url_for('.login'))
 
-    return render_template('register.html', form=form)
+    return render_template('account/register.html', form=form)
 
 
 @account.route('/settings', methods=['GET', 'POST'])
@@ -239,7 +239,7 @@ def settings(do=None):
         return redirect(url_for('.login'))
 
     return render_template(
-        'settings.html',
+        'account/settings.html',
         password_form=password_form,
         delete_form=delete_form
     )

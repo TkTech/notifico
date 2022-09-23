@@ -120,7 +120,8 @@ def dashboard(u):
         # display public projects.
         projects = projects.filter_by(public=True)
 
-    return render_template('dashboard.html',
+    return render_template(
+        'projects/dashboard.html',
         user=u,
         is_owner=is_owner,
         projects=projects,
@@ -141,7 +142,7 @@ def new():
         p = Project.by_name_and_owner(form.name.data, g.user)
         if p:
             form.name.errors = [
-                wtf.ValidationError('Project name must be unique.')
+                validators.ValidationError('Project name must be unique.')
             ]
         else:
             p = Project.new(
@@ -168,7 +169,7 @@ def new():
 
             return redirect(url_for('.details', u=g.user.username, p=p.name))
 
-    return render_template('new_project.html', form=form)
+    return render_template('projects/new_project.html', form=form)
 
 
 @projects.route('/<u>/<p>/edit', methods=['GET', 'POST'])
@@ -188,7 +189,7 @@ def edit_project(u, p):
         old_p = Project.by_name_and_owner(form.name.data, g.user)
         if old_p and old_p.id != p.id:
             form.name.errors = [
-                wtf.ValidationError('Project name must be unique.')
+                validators.ValidationError('Project name must be unique.')
             ]
         else:
             p.name = form.name.data
@@ -198,7 +199,8 @@ def edit_project(u, p):
             db.session.commit()
             return redirect(url_for('.dashboard', u=u.username))
 
-    return render_template('edit_project.html',
+    return render_template(
+        'projects/edit_project.html',
         project=p,
         form=form
     )
@@ -221,7 +223,7 @@ def delete_project(u, p):
         db.session.commit()
         return redirect(url_for('.dashboard', u=u.username))
 
-    return render_template('delete_project.html', project=p)
+    return render_template('projects/delete_project.html', project=p)
 
 
 @projects.route('/<u>/<p>')
@@ -240,7 +242,7 @@ def details(u, p):
         visible_channels = visible_channels.filter_by(public=True)
 
     return render_template(
-        'project_details.html',
+        'projects/project_details.html',
         project=p,
         user=u,
         visible_channels=visible_channels,
@@ -281,7 +283,8 @@ def new_hook(u, p, sid):
         db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
 
-    return render_template('new_hook.html',
+    return render_template(
+        'projects/new_hook.html',
         project=p,
         services=available_services(),
         service=hook,
@@ -322,7 +325,8 @@ def edit_hook(u, p, hid):
     elif form:
         hook_service.load_form(form, h.config)
 
-    return render_template('edit_hook.html',
+    return render_template(
+        'projects/edit_hook.html',
         project=p,
         services=available_services(),
         service=hook_service,
@@ -382,7 +386,8 @@ def delete_hook(u, p, hid):
         db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
 
-    return render_template('delete_hook.html',
+    return render_template(
+        'projects/delete_hook.html',
         project=p,
         hook=h
     )
@@ -421,11 +426,14 @@ def new_channel(u, p):
             db.session.commit()
             return redirect(url_for('.details', p=p.name, u=u.username))
         else:
-            form.channel.errors = [wtf.ValidationError(
-                'You cannot have a project in the same channel twice.'
-            )]
+            form.channel.errors = [
+                validators.ValidationError(
+                    'You cannot have a project in the same channel twice.'
+                )
+            ]
 
-    return render_template('new_channel.html',
+    return render_template(
+        'projects/new_channel.html',
         project=p,
         form=form
     )
@@ -458,7 +466,8 @@ def delete_channel(u, p, cid):
         db.session.commit()
         return redirect(url_for('.details', p=p.name, u=u.username))
 
-    return render_template('delete_channel.html',
+    return render_template(
+        'projects/delete_channel.html',
         project=c.project,
         channel=c
     )
