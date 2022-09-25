@@ -79,11 +79,7 @@ def create_app():
             sentry.init_app(app)
 
     # Setup our redis connection (which is already thread safe)
-    app.redis = Redis(
-        host=app.config['REDIS_HOST'],
-        port=app.config['REDIS_PORT'],
-        db=app.config['REDIS_DB']
-    )
+    app.redis = Redis.from_url(app.config['REDIS'])
     cache.init_app(app)
     mail.init_app(app)
     db.init_app(app)

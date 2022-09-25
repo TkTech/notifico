@@ -19,12 +19,7 @@ class Settings(BaseSettings):
     #: Just keep this disabled.
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
-    #: Redis Hostname
-    REDIS_HOST: str = 'localhost'
-    #: Redis Port
-    REDIS_PORT: int = 6379
-    #: Redis DB to use for caching.
-    REDIS_DB: int = 0
+    REDIS: str = Field(default='redis://localhost:6379/0')
 
     BROKER_URL: str = 'redis://'
     CELERY_RESULT_BACKEND: str = 'redis://localhost:6379/0'

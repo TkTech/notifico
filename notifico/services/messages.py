@@ -5,7 +5,7 @@ import json
 
 class MessageService(object):
     #: Key name for the outgoing message queue.
-    key_queue_messages = 'queue_message'
+    key_queue_messages = 'messages'
     #: Key name for recent messages.
     key_recent_messages = 'recent_messages'
 

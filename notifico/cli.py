@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import datetime
 
 import click
@@ -94,8 +96,10 @@ def bots_start():
     """
     Start the IRC bot manager.
     """
-    from notifico.bots import start_manager
-    start_manager()
+    from notifico.services.irc_bot import wait_for_events
+
+    logging.basicConfig(level=logging.DEBUG)
+    asyncio.run(wait_for_events())
 
 
 if __name__ == '__main__':
