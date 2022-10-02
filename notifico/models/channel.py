@@ -19,9 +19,15 @@ class Channel(db.Model):
     public = db.Column(db.Boolean, default=False)
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    project = db.relationship('Project', backref=db.backref(
-        'channels', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
-    ))
+    project = db.relationship(
+        'Project',
+        backref=db.backref(
+            'channels',
+            order_by=id,
+            lazy='dynamic',
+            cascade='all, delete-orphan'
+        )
+    )
 
     @classmethod
     def new(cls, channel, host, port=6667, ssl=False, public=False):

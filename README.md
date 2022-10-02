@@ -1,103 +1,42 @@
 # Notifico!
 
-Notifico is my personal open source ([MIT](http://en.wikipedia.org/wiki/MIT_License))
-replacement to the now-defunct http://cia.vc service with my own little spin on things.
+Notifico is a small open-source ([MIT][]) replacement to the now-defunct
+(since 2012) cia.vc service. It relays webhooks from common services to IRC
+networks, such as GitHub, JIRA, Gitea, Jenkins, and Bitbucket.
 
-## Installation
+Notifico is/has been used by [CPython][], [FreeBSD][], [Godot][],
+[Qutebrowser][], [NASA][], and thousands of other projects.
 
-### Dependencies 
+## Development
 
-* python 2.x / virtualenv / pip
-* redis
-* Either:
-  * Install python C headers and a working C compiler and let pip take care of it.
-  * Install the following python libraries through your package manager: `gevent sqlalchemy pycrypto markupsafe celery`
+### Getting Started
 
-For debian based systems, that would be:
+The easiest way to get started with the codebase is with docker:
 
-    apt-get install python python-dev python-pip python-virtualenv redis-server
-    apt-get install python-gevent python-sqlalchemy python-crypto python-markupsafe python-celery
+```shell
+git clone https://github.com/TkTech/notifico.git
+cd notifico
+docker-compose up
+```
 
-For RHEL/CentOS:
+This will start redis, postgres, IRC bots, and the frontend on port 5000.
 
-    yum install epel-release
-    yum install redis git python python-devel python-pip python-virtualenv
-    yum install python-gevent python-sqlalchemy python-markupsafe python-celery python-crypto2.6
+## FAQ
 
-### Setup
+### Why doesn't this project use X?
 
-First, create a virtualenv:
+Odds are X (like React or Typescript) didn't exist a decade ago when this
+project was created!
 
-    virtualenv2 --system-site-packages notifico-env
-    # or "virtualenv" instead of "virtualenv2"
+### Is this project still maintained?
 
-    source ./notifico-env/bin/activate
+Yes! The project is currently going through modernization. It has remained
+largely unchanged for the last 8-9 years, as IRC and the services feeding into
+it are largely stable and unchanging themselves.
 
-The virtualenv step can be skipped to install all dependencies globally.
-However, this is not recommended, and requires running the following step as
-root.
-
-Next, install notifico and all its dependencies.
-
-    python setup.py install
-
-### Initial configuration
-
-Copy the notifico config file to `local_config.py`
-
-    cp notifico/config.py local_config.py
-
-Edit:
-
-* `SECRET_KEY` - set it to some random long string (you can generate one with,
-  e.g. `openssl rand -base64 48`)
-* Optional: `NOTIFICO_NEW_USERS` should be set to False for private servers
-  **after** having registered one user through the web UI.
-* Optional: `NOTIFICO_PASSWORD_RESET`, requires configuring Flask-Mail
-  (`MAIL_SERVER`, `MAIL_PORT`, etc)
-
-Initialize the database:
-
-    python -m notifico init
-
-### Starting
-
-The following commands need to be run:
-
-    python -m notifico www         # add "--host 0.0.0.0" to make it public
-    python -m notifico bots
-    python -m notifico worker      # not needed if password resets are disabled
-
-You can do this in three separate screen/tmux windows, or use the provided
-supervisor config in `misc/deploy/supervisord.conf`.
-
-You can now go to `your-server:5000` with a web browser, register and set up
-webhooks if you wish, or do the next step to access through port 80.
-
-### Testing
-
-Install the test dependencies with:
-
-    pip install -e ".[tests]"
-
-and then run the tests with:
-
-    pytest
-
-### Nginx proxying
-
-Use the following nginx config to have notifico in a subdomain and have it
-handle static files:
-
-    server {
-        # change these two
-        server_name notifico.example.com;
-        root /path/to/notifico/static;
-
-        try_files $uri @notifico;
-        location @notifico {
-            proxy_pass http://127.0.0.1:5000;
-        }
-    }
-
-`NOTIFICO_ROUTE_STATIC` can be set to False with this.
+[MIT]: http://en.wikipedia.org/wiki/MIT_License
+[cpython]: github.com/python/cpython
+[FreeBSD]: https://www.freebsd.org/
+[godot]: https://godotengine.org/
+[qutebrowser]: https://www.qutebrowser.org/
+[NASA]: https://nasa.gov

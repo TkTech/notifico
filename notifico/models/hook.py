@@ -1,38 +1,33 @@
-# -*- coding: utf8 -*-
-__all__ = ('Hook',)
-import os
-import base64
 import datetime
+import secrets
 
 from notifico import db
-from notifico.services.hooks import HookService
+from notifico.service import available_services
 
 
 class Hook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
-    key = db.Column(db.String(255), nullable=False)
+    key = db.Column(
+        db.String(255),
+        nullable=False,
+        default=lambda: secrets.token_hex(24)
+    )
     service_id = db.Column(db.Integer)
     config = db.Column(db.PickleType)
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    project = db.relationship('Project', backref=db.backref(
-        'hooks', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
-    ))
+    project = db.relationship(
+        'Project',
+        backref=db.backref(
+            'hooks',
+            order_by=id,
+            lazy='dynamic',
+            cascade='all, delete-orphan'
+        )
+    )
 
     message_count = db.Column(db.Integer, default=0)
-
-    @classmethod
-    def new(cls, service_id, config=None):
-        p = cls()
-        p.service_id = service_id
-        p.key = cls._new_key()
-        p.config = config
-        return p
-
-    @staticmethod
-    def _new_key():
-        return base64.urlsafe_b64encode(os.urandom(24))[:24]
 
     @classmethod
     def by_service_and_project(cls, service_id, project_id):
@@ -43,12 +38,4 @@ class Hook(db.Model):
 
     @property
     def hook(self):
-        return HookService.services[self.service_id]
-
-    def absolute_url(self):
-        hook = self.hook
-        try:
-            hook_url = hook.absolute_url(self)
-            return hook_url
-        except NotImplementedError:
-            return None
+        return available_services()[self.service_id]

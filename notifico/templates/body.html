@@ -23,6 +23,7 @@
     {% block style %}
     {% endblock style %}
     <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="/css/custom.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -70,11 +71,6 @@
                     <li>
                       <a href="{{ url_for('account.settings') }}">
                         <i class="icon-cog"></i> Settings
-                      </a>
-                    </li>
-                    <li>
-                      <a href="{{ url_for('account.tokens') }}">
-                        <i class="icon-key"></i> OAuth Tokens
                       </a>
                     </li>
                     <li class="divider"></li>

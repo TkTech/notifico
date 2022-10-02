@@ -1,0 +1,28 @@
+{% extends "layouts/main.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block content_page %}
+  <h2>Login</h2>
+  <div class="section-content">
+    <form class="form form-horizontal" method="POST">
+      {{ form.hidden_tag() }}
+      {{ forms.render_field(form.username) }}
+      {{ forms.render_field(form.password) }}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success">
+          <i class="icon-signin"></i> Login
+        </button>
+        &nbsp;
+        <a href="{{ url_for('.register') }}" class="btn btn-primary">
+          <i class="icon-plus"></i> Sign Up
+        </a>
+        {% if config.PASSWORD_RESET %}
+        <br />
+        <small class="muted">
+          <a href="{{ url_for('.forgot_password') }}">Lost your password?</a>
+        </small>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+{% endblock %}

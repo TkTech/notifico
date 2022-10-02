@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7.0
+    volumes:
+      - .:/code
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: notifico
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - .:/code
+
+  bots:
+    build: .
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:notifico@db/postgres
+      REDIS_URL: "redis://redis/0"
+    command: poetry run notifico bots start
+
+  frontend:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+      - db
+    environment:
+      FLASK_DEBUG: 1
+      DATABASE_URL: postgresql://postgres:notifico@db/postgres
+      REDIS_URL: "redis://redis/0"
+      FLASK_APP: "notifico:create_app"
+    command: poetry run notifico run --host 0.0.0.0
+
+volumes:
+  postgres:

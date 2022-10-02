@@ -61,3 +61,4 @@ nosetests.xml
 testing.db
 local_config.py
 notifico-env
+.env
