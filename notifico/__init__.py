@@ -13,6 +13,7 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from raven.contrib.flask import Sentry
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from notifico.settings import Settings
 from notifico.util import pretty
@@ -106,5 +107,9 @@ def create_app():
     app.jinja_env.filters['pretty_date'] = pretty.pretty_date
     app.jinja_env.filters['plural'] = pretty.plural
     app.jinja_env.filters['fix_link'] = pretty.fix_link
+
+    if app.config['USE_PROXY_HEADERS']:
+        count = app.config['USE_PROXY_HEADERS']
+        app = ProxyFix(app, x_for=count, x_proto=count)
 
     return app
