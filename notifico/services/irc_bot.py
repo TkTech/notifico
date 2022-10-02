@@ -1,10 +1,17 @@
+"""
+Contains the main Notifico IRC bot implementation built on top of Botifico.
+"""
 import json
 
 import redis.asyncio as redis
+from redis.asyncio.retry import Retry
+from redis.backoff import NoBackoff
 
+from notifico import create_app
 from notifico.botifico.bot import Bot, Network
 from notifico.botifico.contrib.plugins.identity import identity_plugin
 from notifico.botifico.contrib.plugins.logging import log_plugin
+from notifico.botifico.contrib.plugins.rate_limit import rate_limit_plugin
 from notifico.botifico.plugin import Plugin
 from notifico.botifico.manager import Manager, Channel
 from notifico.botifico.contrib.plugins.ping import ping_plugin
@@ -14,6 +21,16 @@ from notifico.settings import Settings
 
 
 handshake = Plugin('handshake')
+
+
+def _get_channel(j):
+    channel = j['channel']
+    return Channel(channel['channel'], password=channel.get('channel_password'))
+
+
+def _get_network(j):
+    channel = j['channel']
+    return Network(channel['host'], channel['port'], channel['ssl'])
 
 
 async def process_messages(r, manager: Manager):
@@ -29,25 +46,15 @@ async def process_messages(r, manager: Manager):
 
         match j['type']:
             case 'message':
-                # We've received a message destined for an IRC channel.
-                channel = j['channel']
-
-                c = await manager.channel(
-                    Network(
-                        channel['host'],
-                        channel['port'],
-                        channel['ssl']
-                    ),
-                    Channel(
-                        channel['channel'],
-                        password=channel.get('channel_password')
-                    )
-                )
-
+                # Incoming message destined for a specific IRC channel.
+                c = await manager.channel(_get_network(j), _get_channel(j))
                 await c.private_message(j['payload']['msg'])
-            case 'cnc':
-                # We've received a command-and-control message.
-                pass
+            case 'start-logging':
+                # Enable logging on an already-connected channel.
+                raise NotImplementedError()
+            case 'stop-logging':
+                # Disable logging on an already-connected channel.
+                raise NotImplementedError()
 
 
 async def wait_for_events():
@@ -63,30 +70,42 @@ async def wait_for_events():
         [K]eyspace events for [l]ist commands.
     """
     settings = Settings()
+    app = create_app()
 
-    manager = Manager('botifico')
-    manager.register_plugin(ping_plugin)
-    manager.register_plugin(identity_plugin)
-    manager.register_plugin(log_plugin)
+    with app.app_context():
+        manager = Manager('botifico')
+        manager.register_plugin(ping_plugin)
+        manager.register_plugin(identity_plugin)
+        manager.register_plugin(log_plugin)
+        manager.register_plugin(rate_limit_plugin)
 
-    r = await redis.from_url(settings.REDIS)
+        r = await redis.from_url(
+            settings.REDIS,
+            retry=Retry(
+                NoBackoff(),
+                50
+            )
+        )
 
-    # Before we start waiting for events, process anything already in the
-    # queue.
-    await process_messages(r, manager)
+        # TODO: Proactively retrieve all channels which have logging setup,
+        #       and ensure we join them ASAP.
 
-    notifications: redis.client.PubSub = r.pubsub()
-    # We listen to a special notifications PubSub channel which will trigger
-    # whenever an operation occurs on our messages queue.
-    await notifications.subscribe('__keyspace@0__:messages')
+        # Before we start waiting for events, process anything already in the
+        # queue.
+        await process_messages(r, manager)
 
-    async for message in notifications.listen():
-        match message['type']:
-            case 'subscribe':
-                continue
-            case 'message':
-                match message['data']:
-                    case b'rpush':
-                        # New data has been pushed to the messages queue, try
-                        # to snag it.
-                        await process_messages(r, manager)
+        notifications: redis.client.PubSub = r.pubsub()
+        # We listen to a special notifications PubSub channel which will trigger
+        # whenever an operation occurs on our messages queue.
+        await notifications.subscribe('__keyspace@0__:messages')
+
+        async for message in notifications.listen():
+            match message['type']:
+                case 'subscribe':
+                    continue
+                case 'message':
+                    match message['data']:
+                        case b'rpush':
+                            # New data has been pushed to the messages queue,
+                            # try to snag it.
+                            await process_messages(r, manager)

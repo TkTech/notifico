@@ -18,7 +18,7 @@ class Plugin:
         self.event_receivers = defaultdict(set)
         self.name = name
 
-    def on(self, event: Union[str, Event]):
+    def on(self, event: Union[str, Event], block: bool = False):
         """
         A decorator which registers an event handler for `message`.
         """
@@ -26,6 +26,7 @@ class Plugin:
 
         def _f(f):
             f.plugin = self
+            f.plugin_should_block = block
             self.event_receivers[event].add(f)
             return f
         return _f

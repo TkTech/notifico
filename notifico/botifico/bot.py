@@ -22,6 +22,8 @@ class Bot:
     event_receivers: Dict[str, Set[Callable]]
     event_emitters: Dict[str, asyncio.Event]
     plugin_metadata: Dict[str, dict]
+    _writer_task: Optional[asyncio.Task]
+    _reader_task: Optional[asyncio.Task]
 
     def __init__(self, network: Network, *, max_buffer_size=0x100000):
         """
@@ -37,6 +39,9 @@ class Bot:
         self.plugin_metadata = defaultdict(dict)
         self.max_buffer_size = max_buffer_size
 
+        self._writer_task = None
+        self._reader_task = None
+
     async def connect(self):
         """
         Attempts to connect the bot to its network and starts processing
@@ -50,64 +55,59 @@ class Bot:
         )
         await self.emit_event(Event.on_connected)
 
+        self._reader_task = asyncio.create_task(self._read(reader))
+        self._writer_task = asyncio.create_task(self._write(writer))
+
+    async def _read(self, reader: asyncio.StreamReader):
+        """
+        Subtask used to read incoming messages from the socket.
+        """
         message_so_far = ''
 
-        read_chunk = asyncio.create_task(reader.read(512))
-        get_queue = asyncio.create_task(self.message_queue.get())
         while True:
-            # Wait until either there's network traffic to read, or there's a
-            # message waiting to be sent.
-            done, pending = await asyncio.wait(
-                [read_chunk, get_queue],
-                return_when=asyncio.FIRST_COMPLETED
-            )
+            chunk = await reader.read(512)
 
-            if read_chunk in done:
-                chunk: Optional[bytes] = read_chunk.result()
+            # Remote server closed the connection.
+            if chunk is None:
+                self.message_queue.empty()
+                await self.emit_event(Event.on_disconnect)
+                self._writer_task.cancel()
+                return
 
-                # Remote server closed the connection.
-                if chunk is None:
-                    self.message_queue.empty()
-                    await self.emit_event(Event.on_disconnect)
+            message_so_far += chunk.decode('utf-8')
+            if len(message_so_far) > self.max_buffer_size:
+                # Realistically, the only time this is actually going to
+                # happen is when connection to a malicious server, so lets
+                # just die.
+                raise ReadExceededError()
 
-                    for task in pending:
-                        if not task.cancelled():
-                            task.cancel()
+            while '\r\n' in message_so_far:
+                line, message_so_far = message_so_far.split('\r\n', 1)
+                prefix, command, args = unpack_message(line)
+                await self.emit_event(
+                    Event.on_message,
+                    command=command.upper(),
+                    args=args,
+                    prefix=prefix
+                )
+                await self.emit_event(
+                    command.upper(),
+                    args=args,
+                    prefix=prefix
+                )
 
-                    return
-
-                message_so_far += chunk.decode('utf-8')
-                if len(message_so_far) > self.max_buffer_size:
-                    # Realistically, the only time this is actually going to
-                    # happen is when connection to a malicious server, so lets
-                    # just die.
-                    raise ReadExceededError()
-
-                while '\r\n' in message_so_far:
-                    line, message_so_far = message_so_far.split('\r\n', 1)
-                    prefix, command, args = unpack_message(line)
-                    await self.emit_event(
-                        Event.on_message,
-                        command=command.upper(),
-                        args=args,
-                        prefix=prefix
-                    )
-                    await self.emit_event(
-                        command.upper(),
-                        args=args,
-                        prefix=prefix
-                    )
-
-                read_chunk = asyncio.create_task(reader.read(512))
-
-            if get_queue in done:
-                to_be_sent = get_queue.result()
-                writer.write(to_be_sent)
-                # We should probably write what we can and then continue our
-                # loop to ensure we're always reading, but for now we wait
-                # until we've written everything.
-                await writer.drain()
-                get_queue = asyncio.create_task(self.message_queue.get())
+    async def _write(self, writer: asyncio.StreamWriter):
+        """
+        Subtask used to write pending messages to the socket.
+        """
+        while True:
+            to_be_sent = await self.message_queue.get()
+            await self.emit_event(Event.on_write, message=to_be_sent)
+            writer.write(to_be_sent)
+            # We should probably write what we can and then continue our
+            # loop to ensure we're always reading, but for now we wait
+            # until we've written everything.
+            await writer.drain()
 
     async def emit_event(self, event: Union[str, Event], **kwargs):
         """
@@ -125,14 +125,22 @@ class Bot:
             # When event handlers are registered on a plugin, we store the
             # registering plugin on the function as `plugin`.
             kwargs['plugin'] = getattr(handler, 'plugin', None)
+            should_block = getattr(handler, 'plugin_should_block', False)
 
-            asyncio.create_task(
-                handler(**{
+            if should_block:
+                await handler(**{
                     k: v for k, v in kwargs.items()
                     if k in sig.parameters
                 })
-            )
+            else:
+                asyncio.create_task(
+                    handler(**{
+                        k: v for k, v in kwargs.items()
+                        if k in sig.parameters
+                    })
+                )
 
+        # Trigger and immediately clear anything waiting on events.
         ev = self.event_emitters[event]
         ev.set()
         ev.clear()
