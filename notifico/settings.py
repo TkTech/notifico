@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     #: DSN for optional Sentry error reporting.
     SENTRY_DSN: Optional[str] = None
 
+    #: Default to serving by https when it can't be sniffed from the request.
+    PREFERRED_URL_SCHEME = 'https'
+
     class Config:
         case_sensitive = True
         env_prefix = 'NOTIFICO_'
