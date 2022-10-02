@@ -13,13 +13,16 @@ class Settings(BaseSettings):
     CSRF_ENABLED: bool = True
 
     SQLALCHEMY_DATABASE_URI: str = Field(
-        env='NOTIFICO_DB',
-        default='postgresql://localhost/notifico'
+        env='DATABASE_URL',
+        default='postgresql://localhost/notifico',
     )
     #: Just keep this disabled.
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
-    REDIS: str = Field(default='redis://localhost:6379/0')
+    REDIS: str = Field(
+        env='REDIS_URL',
+        default='redis://localhost:6379/0'
+    )
 
     BROKER_URL: str = 'redis://'
     CELERY_RESULT_BACKEND: str = 'redis://localhost:6379/0'

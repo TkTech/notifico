@@ -22,8 +22,8 @@ services:
       - redis
       - db
     environment:
-      NOTIFICO_DB: postgresql://postgres:notifico@db/postgres
-      NOTIFICO_REDIS: "redis://redis/0"
+      DATABASE_URL: postgresql://postgres:notifico@db/postgres
+      REDIS_URL: "redis://redis/0"
     command: poetry run notifico bots start
 
   frontend:
@@ -37,8 +37,8 @@ services:
       - db
     environment:
       FLASK_DEBUG: 1
-      NOTIFICO_DB: postgresql://postgres:notifico@db/postgres
-      NOTIFICO_REDIS: "redis://redis/0"
+      DATABASE_URL: postgresql://postgres:notifico@db/postgres
+      REDIS_URL: "redis://redis/0"
       FLASK_APP: "notifico:create_app"
     command: poetry run notifico run --host 0.0.0.0
 

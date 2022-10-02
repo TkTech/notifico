@@ -21,11 +21,16 @@ class Plugin:
     def on(self, event: Union[str, Event], block: bool = False):
         """
         A decorator which registers an event handler for `message`.
+
+        If `block` is `True`, the event handler will be called synchronously
+        instead of executed in its own task.
         """
         event = event.value if isinstance(event, Event) else event.upper()
 
         def _f(f):
+            # We should probably just store this in the set.
             f.plugin = self
+            # Yep this too.
             f.plugin_should_block = block
             self.event_receivers[event].add(f)
             return f

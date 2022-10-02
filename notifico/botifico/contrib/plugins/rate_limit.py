@@ -1,3 +1,6 @@
+"""
+The :py:`rate_limit_plugin` provides a simple way rate limit sending messages.
+"""
 import asyncio
 import time
 
