@@ -4,7 +4,7 @@
 {% block content_page %}
   <h2>Register</h2>
   <div class="section-content">
-    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
+    <form class="form form-horizontal" method="POST">
       {{ form.hidden_tag() }}
       {{ forms.render_field(form.username) }}
       {{ forms.render_field(form.email) }}
