@@ -51,6 +51,7 @@ notifico = "notifico.cli:cli"
 "jira" = "notifico.contrib.services.jira:JIRAHook"
 "plain" = "notifico.contrib.services.plain:PlainTextHook"
 "travisci" = "notifico.contrib.services.travisci:TravisHook"
+"gitea" = "notifico.contrib.services.gitea:GiteaHook"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
