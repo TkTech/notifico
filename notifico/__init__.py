@@ -110,6 +110,6 @@ def create_app():
 
     if app.config['USE_PROXY_HEADERS']:
         count = app.config['USE_PROXY_HEADERS']
-        app = ProxyFix(app, x_for=count, x_proto=count)
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=count, x_proto=count)
 
     return app
