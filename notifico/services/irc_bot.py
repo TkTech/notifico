@@ -72,6 +72,10 @@ async def wait_for_events():
     settings = Settings()
     app = create_app()
 
+    if settings.SENTRY_DSN:
+        import sentry_sdk
+        sentry_sdk.init(dsn=settings.SENTRY_DSN)
+
     with app.app_context():
         manager = Manager('botifico')
         manager.register_plugin(ping_plugin)

@@ -6,6 +6,7 @@ from typing import Optional, Dict, Set, Callable, Union, Iterable
 
 from notifico.botifico.errors import ReadExceededError
 from notifico.botifico.events import Event
+from notifico.botifico.logger import logger
 from notifico.botifico.parsing import unpack_message
 from notifico.botifico.plugin import Plugin
 
@@ -47,6 +48,8 @@ class Bot:
         Attempts to connect the bot to its network and starts processing
         events.
         """
+        logger.info(f'[Core] Attempting to connect to {self.network!r}')
+
         reader, writer = await asyncio.open_connection(
             host=self.network.host,
             port=self.network.port,

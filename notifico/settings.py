@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     IRC_USERNAME: str = 'notifico'
     IRC_REALNAME: str = 'Notifico! - https://github.com/tktech/notifico'
 
-    #: DSN for optional Sentry error reporting.
+    #: An optional Sentry DSN for error reporting.
     SENTRY_DSN: Optional[str] = None
 
     #: Set to n-# of proxies in front of this server setting X-Forwarded-For

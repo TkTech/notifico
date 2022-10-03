@@ -1,6 +1,8 @@
 import asyncio
 import dataclasses
+import ssl
 from collections import defaultdict
+from functools import partial
 from typing import Dict, Set, Type, Optional, Iterable
 
 from notifico.botifico.bot import Network, Bot
@@ -105,6 +107,15 @@ class Manager(Plugin):
             for bot in bots:
                 bot.register_plugin(plugin)
 
+    def _done_callback(self, future: asyncio.Future, *, bot: ChannelBot,
+                       network: Network):
+        try:
+            self.bots[network].remove(bot)
+        except KeyError:
+            # We don't care if some other source has already removed the
+            # bot.
+            pass
+
     async def bots_by_network(self, network: Network) -> Iterable[ChannelBot]:
         """
         Return all bots on the given network.
@@ -117,7 +128,15 @@ class Manager(Plugin):
             bot = self.bot_class(network)
             bot.register_plugin(self)
             bots.add(bot)
-            asyncio.create_task(bot.connect())
+
+            task = asyncio.create_task(bot.connect())
+            task.add_done_callback(
+                partial(
+                    self._done_callback,
+                    bot=bot,
+                    network=network
+                )
+            )
 
         return bots
 
