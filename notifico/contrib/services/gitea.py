@@ -73,7 +73,7 @@ class EventSelectField(SelectMultipleField):
         return SelectMultipleField.__call__(self, *args, **kwargs)
 
 
-class GiteaConfigForm(wtf.Form):
+class GiteaConfigForm(wtf.FlaskForm):
     branches = fields.StringField('Branches', validators=[
         validators.Optional(),
         validators.Length(max=1024)
