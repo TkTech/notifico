@@ -1,8 +1,6 @@
 import asyncio
 import dataclasses
-import ssl
 from collections import defaultdict
-from functools import partial
 from typing import Dict, Set, Type, Optional, Iterable
 
 from notifico.botifico.bot import Network, Bot
@@ -55,9 +53,10 @@ class ChannelProxy:
 
 
 class ChannelBot(Bot):
-    def __init__(self, network: Network, **kwargs):
+    def __init__(self, manager: 'Manager', network: Network, **kwargs):
         super().__init__(network=network, **kwargs)
         self.channels = {}
+        self.manager = manager
 
     def __getitem__(self, channel: Channel):
         # FIXME: This is missing the logic to handle 005 messages for channel
@@ -72,6 +71,14 @@ class ChannelBot(Bot):
                 channel=channel
             )
         )
+
+    def task_exception(self, ex: Exception):
+        try:
+            self.manager.bots[self.network].remove(self)
+        except KeyError:
+            # We don't care if some other source has already removed us from
+            # our manager's tracking set.
+            pass
 
 
 class Manager(Plugin):
@@ -107,15 +114,6 @@ class Manager(Plugin):
             for bot in bots:
                 bot.register_plugin(plugin)
 
-    def _done_callback(self, future: asyncio.Future, *, bot: ChannelBot,
-                       network: Network):
-        try:
-            self.bots[network].remove(bot)
-        except KeyError:
-            # We don't care if some other source has already removed the
-            # bot.
-            pass
-
     async def bots_by_network(self, network: Network) -> Iterable[ChannelBot]:
         """
         Return all bots on the given network.
@@ -125,18 +123,10 @@ class Manager(Plugin):
         """
         bots = self.bots[network]
         if not bots:
-            bot = self.bot_class(network)
+            bot = self.bot_class(self, network)
             bot.register_plugin(self)
+            await bot.connect()
             bots.add(bot)
-
-            task = asyncio.create_task(bot.connect())
-            task.add_done_callback(
-                partial(
-                    self._done_callback,
-                    bot=bot,
-                    network=network
-                )
-            )
 
         return bots
 

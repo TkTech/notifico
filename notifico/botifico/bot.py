@@ -43,6 +43,9 @@ class Bot:
         self._writer_task = None
         self._reader_task = None
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__}({self.network!r})>'
+
     async def connect(self):
         """
         Attempts to connect the bot to its network and starts processing
@@ -56,10 +59,14 @@ class Bot:
             ssl=self.network.ssl,
             limit=self.max_buffer_size
         )
+
         await self.emit_event(Event.on_connected)
 
         self._reader_task = asyncio.create_task(self._read(reader))
         self._writer_task = asyncio.create_task(self._write(writer))
+
+    def task_exception(self, ex: Exception):
+        raise ex
 
     async def _read(self, reader: asyncio.StreamReader):
         """
@@ -67,50 +74,56 @@ class Bot:
         """
         message_so_far = ''
 
-        while True:
-            chunk = await reader.read(512)
+        try:
+            while True:
+                chunk = await reader.read(512)
 
-            # Remote server closed the connection.
-            if chunk is None:
-                self.message_queue.empty()
-                await self.emit_event(Event.on_disconnect)
-                self._writer_task.cancel()
-                return
+                # Remote server closed the connection.
+                if chunk is None:
+                    self.message_queue.empty()
+                    await self.emit_event(Event.on_disconnect)
+                    self._writer_task.cancel()
+                    return
 
-            message_so_far += chunk.decode('utf-8')
-            if len(message_so_far) > self.max_buffer_size:
-                # Realistically, the only time this is actually going to
-                # happen is when connection to a malicious server, so lets
-                # just die.
-                raise ReadExceededError()
+                message_so_far += chunk.decode('utf-8')
+                if len(message_so_far) > self.max_buffer_size:
+                    # Realistically, the only time this is actually going to
+                    # happen is when connection to a malicious server, so lets
+                    # just die.
+                    raise ReadExceededError()
 
-            while '\r\n' in message_so_far:
-                line, message_so_far = message_so_far.split('\r\n', 1)
-                prefix, command, args = unpack_message(line)
-                await self.emit_event(
-                    Event.on_message,
-                    command=command.upper(),
-                    args=args,
-                    prefix=prefix
-                )
-                await self.emit_event(
-                    command.upper(),
-                    args=args,
-                    prefix=prefix
-                )
+                while '\r\n' in message_so_far:
+                    line, message_so_far = message_so_far.split('\r\n', 1)
+                    prefix, command, args = unpack_message(line)
+                    await self.emit_event(
+                        Event.on_message,
+                        command=command.upper(),
+                        args=args,
+                        prefix=prefix
+                    )
+                    await self.emit_event(
+                        command.upper(),
+                        args=args,
+                        prefix=prefix
+                    )
+        except Exception as exception:
+            self.task_exception(exception)
 
     async def _write(self, writer: asyncio.StreamWriter):
         """
         Subtask used to write pending messages to the socket.
         """
-        while True:
-            to_be_sent = await self.message_queue.get()
-            await self.emit_event(Event.on_write, message=to_be_sent)
-            writer.write(to_be_sent)
-            # We should probably write what we can and then continue our
-            # loop to ensure we're always reading, but for now we wait
-            # until we've written everything.
-            await writer.drain()
+        try:
+            while True:
+                to_be_sent = await self.message_queue.get()
+                await self.emit_event(Event.on_write, message=to_be_sent)
+                writer.write(to_be_sent)
+                # We should probably write what we can and then continue our
+                # loop to ensure we're always reading, but for now we wait
+                # until we've written everything.
+                await writer.drain()
+        except Exception as exception:
+            self.task_exception(exception)
 
     async def emit_event(self, event: Union[str, Event], **kwargs):
         """

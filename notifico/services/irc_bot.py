@@ -3,6 +3,7 @@ Contains the main Notifico IRC bot implementation built on top of Botifico.
 """
 import json
 
+import sentry_sdk
 import redis.asyncio as redis
 from redis.asyncio.retry import Retry
 from redis.backoff import NoBackoff
@@ -47,8 +48,13 @@ async def process_messages(r, manager: Manager):
         match j['type']:
             case 'message':
                 # Incoming message destined for a specific IRC channel.
-                c = await manager.channel(_get_network(j), _get_channel(j))
-                await c.private_message(j['payload']['msg'])
+                network = _get_network(j)
+                channel = _get_channel(j)
+                try:
+                    c = await manager.channel(network, channel)
+                    await c.private_message(j['payload']['msg'])
+                except Exception as exception:
+                    sentry_sdk.capture_exception(exception)
             case 'start-logging':
                 # Enable logging on an already-connected channel.
                 raise NotImplementedError()
@@ -73,7 +79,6 @@ async def wait_for_events():
     app = create_app()
 
     if settings.SENTRY_DSN:
-        import sentry_sdk
         sentry_sdk.init(dsn=settings.SENTRY_DSN)
 
     with app.app_context():
