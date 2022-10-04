@@ -2,6 +2,7 @@
 The :py:`rate_limit_plugin` provides a simple way rate limit sending messages.
 """
 import asyncio
+import random
 import time
 
 from notifico.botifico.bot import Bot
@@ -33,6 +34,10 @@ async def on_write(bot: Bot):
             f'[rate_limit_plugin] Sleeping for {how_long} seconds to comply'
             ' with rate limit requirements.'
         )
-        await asyncio.sleep(last_message + time_between_messages - now)
+        await asyncio.sleep(
+            (last_message + time_between_messages - now) + random.randint(
+                0, time_between_messages * 2
+            )
+        )
 
     rate_limit_plugin.set(bot, 'last_message', time.monotonic())

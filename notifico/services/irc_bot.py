@@ -47,7 +47,12 @@ async def _handle_single_message(j: Dict[str, Any], manager: Manager):
                 c = await manager.channel(network, channel)
                 await c.private_message(j['payload']['msg'])
             except Exception as exception:
-                sentry_sdk.capture_exception(exception)
+                with sentry_sdk.push_scope() as scope:
+                    scope.set_extra('host', network.host)
+                    scope.set_extra('port', network.port)
+                    scope.set_extra('ssl', network.ssl)
+                    scope.set_extra('channel', channel.name)
+                    sentry_sdk.capture_exception(exception)
                 traceback.print_exc()
         case 'start-logging':
             # Enable logging on an already-connected channel.
