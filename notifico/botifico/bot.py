@@ -61,28 +61,30 @@ class Bot:
         )
 
         await self.emit_event(Event.on_connected)
-
-        self._reader_task = asyncio.create_task(self._read(reader))
-        self._writer_task = asyncio.create_task(self._write(writer))
-
-    def task_exception(self, ex: Exception):
-        raise ex
-
-    async def _read(self, reader: asyncio.StreamReader):
-        """
-        Subtask used to read incoming messages from the socket.
-        """
         message_so_far = ''
 
-        try:
-            while True:
-                chunk = await reader.read(512)
+        read_chunk = asyncio.create_task(reader.read(512))
+        get_queue = asyncio.create_task(self.message_queue.get())
+        while True:
+            # Wait until either there's network traffic to read, or there's a
+            # message waiting to be sent.
+            done, pending = await asyncio.wait(
+                [read_chunk, get_queue],
+                return_when=asyncio.FIRST_COMPLETED
+            )
+
+            if read_chunk in done:
+                chunk: Optional[bytes] = read_chunk.result()
 
                 # Remote server closed the connection.
                 if chunk is None:
                     self.message_queue.empty()
                     await self.emit_event(Event.on_disconnect)
-                    self._writer_task.cancel()
+
+                    for task in pending:
+                        if not task.cancelled():
+                            task.cancel()
+
                     return
 
                 message_so_far += chunk.decode('utf-8')
@@ -106,24 +108,21 @@ class Bot:
                         args=args,
                         prefix=prefix
                     )
-        except Exception as exception:
-            self.task_exception(exception)
 
-    async def _write(self, writer: asyncio.StreamWriter):
-        """
-        Subtask used to write pending messages to the socket.
-        """
-        try:
-            while True:
-                to_be_sent = await self.message_queue.get()
+                read_chunk = asyncio.create_task(reader.read(512))
+
+            if get_queue in done:
+                to_be_sent = get_queue.result()
                 await self.emit_event(Event.on_write, message=to_be_sent)
                 writer.write(to_be_sent)
                 # We should probably write what we can and then continue our
                 # loop to ensure we're always reading, but for now we wait
                 # until we've written everything.
                 await writer.drain()
-        except Exception as exception:
-            self.task_exception(exception)
+                get_queue = asyncio.create_task(self.message_queue.get())
+
+    def task_exception(self, ex: Exception):
+        raise ex
 
     async def emit_event(self, event: Union[str, Event], **kwargs):
         """
@@ -141,20 +140,11 @@ class Bot:
             # When event handlers are registered on a plugin, we store the
             # registering plugin on the function as `plugin`.
             kwargs['plugin'] = getattr(handler, 'plugin', None)
-            should_block = getattr(handler, 'plugin_should_block', False)
 
-            if should_block:
-                await handler(**{
-                    k: v for k, v in kwargs.items()
-                    if k in sig.parameters
-                })
-            else:
-                asyncio.create_task(
-                    handler(**{
-                        k: v for k, v in kwargs.items()
-                        if k in sig.parameters
-                    })
-                )
+            await handler(**{
+                k: v for k, v in kwargs.items()
+                if k in sig.parameters
+            })
 
         # Trigger and immediately clear anything waiting on events.
         ev = self.event_emitters[event]
@@ -172,13 +162,14 @@ class Bot:
             event = event.value
         return await self.event_emitters[event].wait()
 
-    async def wait_for_any(self, events: Iterable[Union[str, Event]]):
+    async def wait_for_any(self, events: Iterable[Union[str, Event]], *,
+                           timeout: Optional[int] = None):
         return asyncio.wait([
             self.event_emitters[
                 event.value if isinstance(event, Event) else event
             ].wait()
             for event in events
-        ], return_when=asyncio.FIRST_COMPLETED)
+        ], return_when=asyncio.FIRST_COMPLETED, timeout=timeout)
 
     def register_plugin(self, plugin: Plugin):
         """

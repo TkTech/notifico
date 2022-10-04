@@ -28,7 +28,7 @@ class ChannelProxy:
 
         self.joined = asyncio.Event()
 
-    async def join(self, *, wait=True):
+    async def join(self, *, wait=True, timeout: int = 10):
         """
         JOINs the channel.
         """
@@ -36,11 +36,19 @@ class ChannelProxy:
             return
 
         logger.info(f'[manager] Waiting on ready status for {self.bot}')
-        await ready_plugin.is_ready(self.bot).wait()
+
+        await asyncio.wait_for(
+            ready_plugin.is_ready(self.bot).wait(),
+            timeout=timeout
+        )
 
         await self.bot.send('JOIN', self.channel.name)
         if wait:
-            await self.joined.wait()
+            logger.info(
+                f'[manager] Waiting on joined status for {self.bot}'
+                f' on channel {self.channel!r}.'
+            )
+            await asyncio.wait_for(self.joined.wait(), timeout=timeout)
 
     async def private_message(self, message: str):
         await self.join()
@@ -127,8 +135,8 @@ class Manager(Plugin):
         if not bots:
             bot = self.bot_class(self, network)
             bot.register_plugin(self)
-            await bot.connect()
             bots.add(bot)
+            await bot.connect()
 
         return bots
 

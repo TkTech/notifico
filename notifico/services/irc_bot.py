@@ -1,7 +1,10 @@
 """
 Contains the main Notifico IRC bot implementation built on top of Botifico.
 """
+import asyncio
 import json
+import traceback
+from typing import Any, Dict
 
 import sentry_sdk
 import redis.asyncio as redis
@@ -34,6 +37,26 @@ def _get_network(j):
     return Network(channel['host'], channel['port'], channel['ssl'])
 
 
+async def _handle_single_message(j: Dict[str, Any], manager: Manager):
+    match j['type']:
+        case 'message':
+            # Incoming message destined for a specific IRC channel.
+            network = _get_network(j)
+            channel = _get_channel(j)
+            try:
+                c = await manager.channel(network, channel)
+                await c.private_message(j['payload']['msg'])
+            except Exception as exception:
+                sentry_sdk.capture_exception(exception)
+                traceback.print_exc()
+        case 'start-logging':
+            # Enable logging on an already-connected channel.
+            raise NotImplementedError()
+        case 'stop-logging':
+            # Disable logging on an already-connected channel.
+            raise NotImplementedError()
+
+
 async def process_messages(r, manager: Manager):
     """
     Process as many messages on the message queue as possible.
@@ -44,23 +67,7 @@ async def process_messages(r, manager: Manager):
             return
 
         j = json.loads(v.decode('utf-8'))
-
-        match j['type']:
-            case 'message':
-                # Incoming message destined for a specific IRC channel.
-                network = _get_network(j)
-                channel = _get_channel(j)
-                try:
-                    c = await manager.channel(network, channel)
-                    await c.private_message(j['payload']['msg'])
-                except Exception as exception:
-                    sentry_sdk.capture_exception(exception)
-            case 'start-logging':
-                # Enable logging on an already-connected channel.
-                raise NotImplementedError()
-            case 'stop-logging':
-                # Disable logging on an already-connected channel.
-                raise NotImplementedError()
+        asyncio.create_task(_handle_single_message(j, manager))
 
 
 async def wait_for_events():
