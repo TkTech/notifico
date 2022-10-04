@@ -62,6 +62,16 @@ def create_app():
     # app.config.from_object('notifico.config')
     app.config.from_mapping(Settings().dict())
 
+    if app.config.get('SENTRY_DSN'):
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+        sentry_sdk.init(
+            dsn=app.config['SENTRY_DSN'],
+            integrations=[
+                FlaskIntegration()
+            ]
+        )
+
     if app.config.get('ROUTE_STATIC'):
         # We should handle routing for static assets ourself (handy for
         # small and quick deployments).
