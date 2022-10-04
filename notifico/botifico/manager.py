@@ -5,6 +5,7 @@ from typing import Dict, Set, Type, Optional, Iterable
 
 from notifico.botifico.bot import Network, Bot
 from notifico.botifico.contrib.plugins.ready import ready_plugin
+from notifico.botifico.logger import logger
 from notifico.botifico.plugin import Plugin
 
 
@@ -34,6 +35,7 @@ class ChannelProxy:
         if self.joined.is_set():
             return
 
+        logger.info(f'[manager] Waiting on ready status for {self.bot}')
         await ready_plugin.is_ready(self.bot).wait()
 
         await self.bot.send('JOIN', self.channel.name)
