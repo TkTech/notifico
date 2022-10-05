@@ -1,25 +1,30 @@
 import datetime
 import secrets
 
-from notifico import db
+import sqlalchemy as sa
+from sqlalchemy import orm
+
+from notifico.database import Base
 from notifico.service import available_services
 
 
-class Hook(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
-    key = db.Column(
-        db.String(255),
+class Hook(Base):
+    __tablename__ = 'hook'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    created = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
+    key = sa.Column(
+        sa.String(255),
         nullable=False,
         default=lambda: secrets.token_hex(24)
     )
-    service_id = db.Column(db.Integer)
-    config = db.Column(db.PickleType)
+    service_id = sa.Column(sa.Integer)
+    config = sa.Column(sa.PickleType)
 
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    project = db.relationship(
+    project_id = sa.Column(sa.Integer, sa.ForeignKey('project.id'))
+    project = orm.relationship(
         'Project',
-        backref=db.backref(
+        backref=orm.backref(
             'hooks',
             order_by=id,
             lazy='dynamic',
@@ -27,7 +32,7 @@ class Hook(db.Model):
         )
     )
 
-    message_count = db.Column(db.Integer, default=0)
+    message_count = sa.Column(sa.Integer, default=0)
 
     @classmethod
     def by_service_and_project(cls, service_id, project_id):

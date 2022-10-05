@@ -1,28 +1,36 @@
-# -*- coding: utf8 -*-
-__all__ = ('Project',)
 import datetime
 
-from sqlalchemy import or_
+import sqlalchemy as sa
+from sqlalchemy import or_, orm
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from notifico import db
+from notifico.database import Base
 from notifico.models import CaseInsensitiveComparator
 
 
-class Project(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), nullable=False)
-    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
-    public = db.Column(db.Boolean, default=True)
-    website = db.Column(db.String(1024))
+class Project(Base):
+    __tablename__ = 'project'
 
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    owner = db.relationship('User', backref=db.backref(
-        'projects', order_by=id, lazy='dynamic', cascade='all, delete-orphan'
-    ))
+    id = sa.Column(sa.Integer, primary_key=True)
 
-    full_name = db.Column(db.String(101), nullable=False, unique=True)
-    message_count = db.Column(db.Integer, default=0)
+    name = sa.Column(sa.String(128), nullable=False)
+    created = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
+    public = sa.Column(sa.Boolean, default=True)
+    website = sa.Column(sa.String(1024))
+
+    owner_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    owner = orm.relationship(
+        'User',
+        backref=orm.backref(
+            'projects',
+            order_by=id,
+            lazy='dynamic',
+            cascade='all, delete-orphan'
+        )
+    )
+
+    full_name = sa.Column(sa.String(101), nullable=False, unique=True)
+    message_count = sa.Column(sa.Integer, default=0)
 
     @classmethod
     def new(cls, name, public=True, website=None):

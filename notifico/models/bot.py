@@ -1,22 +1,24 @@
-# -*- coding: utf8 -*-
-__all__ = ('BotEvent',)
 import datetime
 
-from notifico import db
+import sqlalchemy as sa
+
+from notifico.database import Base
 
 
-class BotEvent(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
+class BotEvent(Base):
+    __tablename__ = 'bot_event'
 
-    channel = db.Column(db.String(80))
-    host = db.Column(db.String(255), nullable=False)
-    port = db.Column(db.Integer, default=6667)
-    ssl = db.Column(db.Boolean, default=False)
+    id = sa.Column(sa.Integer, primary_key=True)
+    created = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
 
-    message = db.Column(db.Text())
-    status = db.Column(db.String(30))
-    event = db.Column(db.String(255))
+    channel = sa.Column(sa.String(80))
+    host = sa.Column(sa.String(255), nullable=False)
+    port = sa.Column(sa.Integer, default=6667)
+    ssl = sa.Column(sa.Boolean, default=False)
+
+    message = sa.Column(sa.Text())
+    status = sa.Column(sa.String(30))
+    event = sa.Column(sa.String(255))
 
     @classmethod
     def new(cls, host, port, ssl, message, status, event, channel=None):

@@ -1,27 +1,28 @@
-# -*- coding: utf8 -*-
-__all__ = ('Channel',)
 import datetime
 
-from sqlalchemy import func, text
+import sqlalchemy as sa
+from sqlalchemy import func, text, orm
 
-from notifico import db
+from notifico.database import Base, db_session
 from notifico.models.bot import BotEvent
 
 
-class Channel(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    created = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
+class Channel(Base):
+    __tablename__ = 'channel'
 
-    channel = db.Column(db.String(80), nullable=False)
-    host = db.Column(db.String(255), nullable=False)
-    port = db.Column(db.Integer, default=6667)
-    ssl = db.Column(db.Boolean, default=False)
-    public = db.Column(db.Boolean, default=False)
+    id = sa.Column(sa.Integer, primary_key=True)
+    created = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
 
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    project = db.relationship(
+    channel = sa.Column(sa.String(80), nullable=False)
+    host = sa.Column(sa.String(255), nullable=False)
+    port = sa.Column(sa.Integer, default=6667)
+    ssl = sa.Column(sa.Boolean, default=False)
+    public = sa.Column(sa.Boolean, default=False)
+
+    project_id = sa.Column(sa.Integer, sa.ForeignKey('project.id'))
+    project = orm.relationship(
         'Project',
-        backref=db.backref(
+        backref=orm.backref(
             'channels',
             order_by=id,
             lazy='dynamic',
@@ -42,7 +43,7 @@ class Channel(db.Model):
     @classmethod
     def channel_count_by_network(cls):
         q = (
-            db.session.query(
+            db_session.query(
                 Channel.host, func.count(Channel.channel).label('count')
             )
             .filter_by(public=True)
@@ -78,8 +79,8 @@ class Channel(db.Model):
             pass
         else:
             q = q.join(Channel.project).filter(
-                Project.public == True,
-                Channel.public == True
+                Project.public.is_(True),
+                Channel.public.is_(True)
             )
 
         return q

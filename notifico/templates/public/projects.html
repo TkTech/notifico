@@ -1,5 +1,4 @@
 {% extends "layouts/main.html" %}
-{% from 'ui/page.html' import render_pagination %}
 
 {% block content_page %}
   <h3>All Projects</h3>
@@ -13,7 +12,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for project in pagination.items %}
+        {% for project in projects %}
         <tr>
           <td nowrap>{{ project.created|pretty_date }}</td>
           <td style="width: 100%;">
@@ -24,6 +23,8 @@
         {% endfor %}
       </tbody>
     </table>
-    {{ render_pagination(pagination, '.projects', **request.args) }}
+    {% if next_page %}
+    <a href="{{ next_page }}">Next</a>
+    {% endif %}
   </div>
 {% endblock %}

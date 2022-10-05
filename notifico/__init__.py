@@ -10,20 +10,17 @@ from flask import (
 )
 from flask_caching import Cache
 from flask_mail import Mail
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from raven.contrib.flask import Sentry
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from notifico.database import db_session
 from notifico.settings import Settings
 from notifico.util import pretty
 
-db = SQLAlchemy()
 sentry = Sentry()
 cache = Cache()
 mail = Mail()
 celery = Celery()
-migrate = Migrate()
 
 
 def user_required(f):
@@ -82,19 +79,14 @@ def create_app():
             '/': os.path.join(os.path.dirname(__file__), 'static')
         })
 
-    if not app.debug:
-        # If sentry (http://getsentry.com) is configured for
-        # error collection we should use it.
-        if app.config.get('SENTRY_DSN'):
-            sentry.dsn = app.config.get('SENTRY_DSN')
-            sentry.init_app(app)
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db_session.remove()
 
     # Setup our redis connection (which is already thread safe)
     app.redis = Redis.from_url(app.config['REDIS'])
     cache.init_app(app)
     mail.init_app(app)
-    db.init_app(app)
-    migrate.init_app(app, db)
 
     # Update celery's configuration with our application config.
     celery.config_from_object(app.config)

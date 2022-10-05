@@ -5,7 +5,8 @@ import datetime
 import click
 from flask.cli import FlaskGroup
 
-from notifico import create_app, db
+from notifico import create_app
+from notifico.database import db_session
 from notifico.models import Project
 from notifico.models.user import User
 
@@ -45,8 +46,8 @@ def create(username, email, password, superuser=False):
     if superuser:
         user.add_group('admin')
 
-    db.session.add(user)
-    db.session.commit()
+    db_session.add(user)
+    db_session.commit()
 
 
 @tools.command()
@@ -69,10 +70,10 @@ def purge(make_changes=False):
         print(f'- [project] {project.name}')
 
         if make_changes:
-            db.session.delete(project)
+            db_session.delete(project)
 
     if make_changes:
-        db.session.commit()
+        db_session.commit()
 
     users_to_purge = User.query.filter(
         ~User.projects.any(),
@@ -85,10 +86,10 @@ def purge(make_changes=False):
         print(f'- [user] {user.username}')
 
         if make_changes:
-            db.session.delete(user)
+            db_session.delete(user)
 
     if make_changes:
-        db.session.commit()
+        db_session.commit()
 
 
 @bots.command('start')

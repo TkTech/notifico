@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 """
 A collection of utility methods for common site statistics.
 """
 from sqlalchemy import func, text
 
-from notifico import db, cache
+from notifico import cache
+from notifico.database import db_session
 from notifico.models import Project, Channel, User
 
 
@@ -13,7 +13,7 @@ def total_messages(user=None):
     """
     Sum the total number of messages across all projects.
     """
-    q = db.session.query(
+    q = db_session.query(
         func.sum(Project.message_count)
     )
     if user:
@@ -34,14 +34,14 @@ def total_projects():
 
 @cache.memoize(timeout=60 * 5)
 def total_networks():
-    return db.session.query(
+    return db_session.query(
         func.count(func.distinct(Channel.host)).label('count')
     ).scalar()
 
 
 @cache.memoize(timeout=60 * 5)
 def total_channels():
-    return db.session.query(
+    return db_session.query(
         func.count(Channel).label('count')
     ).scalar()
 
@@ -49,13 +49,13 @@ def total_channels():
 @cache.memoize(timeout=60 * 5)
 def top_networks(limit=20):
     return (
-        db.session.query(
+        db_session.query(
             Channel.host,
             func.count(func.distinct(Channel.channel)).label('count'),
         )
         .join(Channel.project).filter(
-            Project.public == True,
-            Channel.public == True
+            Project.public.is_(True),
+            Channel.public.is_(True)
         )
         .group_by(Channel.host)
         .order_by(text('count desc'))

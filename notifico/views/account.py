@@ -9,7 +9,8 @@ from flask import (
     request,
     flash
 )
-from notifico import db, user_required
+from notifico import user_required
+from notifico.database import db_session
 from notifico.models import User
 from notifico.services import reset, background
 from notifico.views.account_forms import (
@@ -164,7 +165,7 @@ def reset_pick_password():
     form = UserResetForm()
     if form.validate_on_submit():
         u.set_password(form.password.data)
-        db.session.commit()
+        db_session.commit()
 
         # The user has successfully reset their password,
         # so we want to clean up any other reset tokens as
@@ -201,8 +202,8 @@ def register():
     if form.validate_on_submit():
         # Checks out, go ahead and create our new user.
         u = User.new(form.username.data, form.email.data, form.password.data)
-        db.session.add(u)
-        db.session.commit()
+        db_session.add(u)
+        db_session.commit()
         # ... and send them back to the login screen.
         return redirect(url_for('.login'))
 
@@ -222,7 +223,7 @@ def settings(do=None):
     if do == 'p' and password_form.validate_on_submit():
         # Change the users password.
         g.user.set_password(password_form.password.data)
-        db.session.commit()
+        db_session.commit()
         return redirect(url_for('.settings'))
     elif do == 'd' and delete_form.validate_on_submit():
         # Delete this users account and all related data.
@@ -233,8 +234,8 @@ def settings(do=None):
             del session['_ue']
         # Remove the user from the DB.
         g.user.projects.order_by(False).delete()
-        db.session.delete(g.user)
-        db.session.commit()
+        db_session.delete(g.user)
+        db_session.commit()
 
         return redirect(url_for('.login'))
 

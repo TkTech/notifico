@@ -1,33 +1,35 @@
-# -*- coding: utf8 -*-
-__all__ = ('User', 'Group')
 import hashlib
 import datetime
 import secrets
 
+import sqlalchemy as sa
+from sqlalchemy import orm
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from notifico import db
 from notifico.models import CaseInsensitiveComparator
+from notifico.database import Base
 
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class User(Base):
+    __tablename__ = 'user'
+
+    id = sa.Column(sa.Integer, primary_key=True)
 
     # ---
     # Required Fields
     # ---
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(255), nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    salt = db.Column(db.String(64), nullable=False)
-    joined = db.Column(db.TIMESTAMP(), default=datetime.datetime.utcnow)
+    username = sa.Column(sa.String(50), unique=True, nullable=False)
+    email = sa.Column(sa.String(255), nullable=False)
+    password = sa.Column(sa.String(255), nullable=False)
+    salt = sa.Column(sa.String(64), nullable=False)
+    joined = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
 
     # ---
     # Public Profile Fields
     # ---
-    company = db.Column(db.String(255))
-    website = db.Column(db.String(255))
-    location = db.Column(db.String(255))
+    company = sa.Column(sa.String(255))
+    website = sa.Column(sa.String(255))
+    location = sa.Column(sa.String(255))
 
     @classmethod
     def new(cls, username, email, password):
@@ -93,7 +95,7 @@ class User(db.Model):
 
     def active_projects(self, limit=5):
         """
-        Return this users most active projets (by descending message count).
+        Return this users most active projects (by descending message count).
         """
         q = self.projects.order_by(False).order_by('-message_count')
         q = q.limit(limit)
@@ -118,18 +120,22 @@ class User(db.Model):
         self.groups.append(Group.get_or_create(name=name))
 
 
-class Group(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Group(Base):
+    __tablename__ = 'group'
 
-    name = db.Column(db.String(255), unique=True, nullable=False)
+    id = sa.Column(sa.Integer, primary_key=True)
 
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    owner = db.relationship('User', backref=db.backref(
-        'groups', order_by=id, lazy='joined'
-    ))
+    name = sa.Column(sa.String(255), unique=True, nullable=False)
 
-    def __init__(self, name):
-        self.name = name
+    owner_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    owner = orm.relationship(
+        'User',
+        backref=orm.backref(
+            'groups',
+            order_by=id,
+            lazy='joined'
+        )
+    )
 
     def __repr__(self):
         return '<Group({name!r})>'.format(name=self.name)
