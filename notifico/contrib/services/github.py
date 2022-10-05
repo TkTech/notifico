@@ -161,6 +161,7 @@ class GithubConfigForm(wtf.FlaskForm):
         ('watch_started',              'Repo: starred'),
         ('gollum_created',             'Wiki: created page'),
         ('gollum_edited',              'Wiki: edited page'),
+        ('discussion_comment',         'Discussion: Comment')
     ])
     use_colors = fields.BooleanField('Use Colors', validators=[
         validators.Optional()
@@ -244,9 +245,8 @@ def _create_push_summary(project_name, j, config):
         modified=len(j['files']['modified'])
     ))
 
-    # The shortened URL linking to the compare page.
     line.append(u'{PINK}{compare_link}{RESET}'.format(
-        compare_link=GithubHook.shorten(original['compare']),
+        compare_link=original['compare'],
         **BundledService.colors
     ))
 
@@ -410,7 +410,7 @@ class GithubHook(BundledService):
             action=json['action'],
             num=json['issue']['number'],
             title=json['issue']['title'],
-            url=GithubHook.shorten(json['issue']['html_url']),
+            url=json['issue']['html_url'],
             **BundledService.colors
         )
 
@@ -434,7 +434,7 @@ class GithubHook(BundledService):
             issue_type='pull request' if 'pull_request' in json['issue'] else 'issue',
             num=json['issue']['number'],
             title=json['issue']['title'],
-            url=GithubHook.shorten(json['comment']['html_url']),
+            url=json['comment']['html_url'],
             **BundledService.colors
         )
 
@@ -456,7 +456,7 @@ class GithubHook(BundledService):
             who=json['comment']['user']['login'],
             action=action,
             commit=json['comment']['commit_id'],
-            url=GithubHook.shorten(json['comment']['html_url']),
+            url=json['comment']['html_url'],
             **BundledService.colors
         )
 
@@ -477,7 +477,7 @@ class GithubHook(BundledService):
             who=json['sender']['login'],
             ref_type=json['ref_type'],
             ref=json['ref'],
-            url=GithubHook.shorten(json['repository']['html_url']),
+            url=json['repository']['html_url'],
             **BundledService.colors
         )
 
@@ -495,7 +495,7 @@ class GithubHook(BundledService):
             who=json['sender']['login'],
             ref_type=json['ref_type'],
             ref=json['ref'],
-            url=GithubHook.shorten(json['repository']['html_url']),
+            url=json['repository']['html_url'],
             **BundledService.colors
         )
 
@@ -513,7 +513,7 @@ class GithubHook(BundledService):
             action=json['action'],
             num=json['number'],
             title=json['pull_request']['title'],
-            url=GithubHook.shorten(json['pull_request']['html_url']),
+            url=json['pull_request']['html_url'],
             **BundledService.colors
         )
 
@@ -531,7 +531,7 @@ class GithubHook(BundledService):
             name=json['repository']['name'],
             who=json['comment']['user']['login'],
             num=num,
-            url=GithubHook.shorten(json['comment']['html_url']),
+            url=json['comment']['html_url'],
             **BundledService.colors
         )
 
@@ -563,7 +563,7 @@ class GithubHook(BundledService):
                     name=name,
                     pname=page['page_name'],
                     action=page['action'],
-                    url=GithubHook.shorten(page['html_url']),
+                    url=page['html_url'],
                     **BundledService.colors
                 )
         else:
@@ -578,7 +578,7 @@ class GithubHook(BundledService):
                 who=json['sender']['login'],
                 pname=json['pages'][0]['page_name'],
                 action=json['pages'][0]['action'],
-                url=GithubHook.shorten(json['pages'][0]['html_url']),
+                url=json['pages'][0]['html_url'],
                 **BundledService.colors
             )
 
@@ -593,7 +593,7 @@ class GithubHook(BundledService):
         yield fmt_string.format(
             name=json['repository']['name'],
             who=json['sender']['login'],
-            url=GithubHook.shorten(json['sender']['html_url']),
+            url=json['sender']['html_url'],
             **BundledService.colors
         )
 
@@ -611,7 +611,7 @@ class GithubHook(BundledService):
             action=json['action'],
             tag_name=json['release']['tag_name'],
             title=json['release']['name'],
-            url=GithubHook.shorten(json['release']['html_url']),
+            url=json['release']['html_url'],
             **BundledService.colors
         )
 
@@ -627,7 +627,7 @@ class GithubHook(BundledService):
         yield fmt_string.format(
             name=json['repository']['name'],
             who=json['forkee']['owner']['login'],
-            url=GithubHook.shorten(json['forkee']['owner']['html_url']),
+            url=json['forkee']['owner']['html_url'],
             **BundledService.colors
         )
 
@@ -644,7 +644,7 @@ class GithubHook(BundledService):
             who=json['sender']['login'],
             action=json['action'],
             whom=json['member']['login'],
-            url=GithubHook.shorten(json['member']['html_url']),
+            url=json['member']['html_url'],
             **BundledService.colors
         )
 
@@ -719,7 +719,6 @@ class GithubHook(BundledService):
                 '{ORANGE}{description}{RESET} {status}. '
                 '{PINK}{url}{RESET}'
             )
-
 
         yield fmt_string.format(
             name=json['repository']['name'],
@@ -890,45 +889,12 @@ class GithubHook(BundledService):
             ))
 
         if original['head_commit']:
-            # The shortened URL linking to the head commit.
             line.append(u'{PINK}{link}{RESET}'.format(
-                link=GithubHook.shorten(original['head_commit']['url']),
+                link=original['head_commit']['url'],
                 **BundledService.colors
             ))
 
         return u' '.join(line)
-
-    @classmethod
-    def shorten(cls, url):
-        # Make sure the URL hasn't already been shortened, since github
-        # may does this in the future for web hooks. Better safe than silly.
-        if re.search(r'^https?://git.io', url):
-            return url
-
-        # Only github URLs can be shortened by the git.io service, which
-        # will return a 201 created on success and return the new url
-        # in the Location header.
-        try:
-            r = requests.post('https://git.io', data={
-                'url': url
-            }, timeout=4.0)
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            # Ignore these errors since we can't do anything about them.
-            return url
-        except Exception:
-            # Send the others to Sentry.
-            from notifico import sentry
-            if sentry.client:
-                sentry.client.captureException()
-            return url
-
-        # Something went wrong, usually means we're being throttled.
-        # TODO: If we are being throttled, handle this smarter instead
-        #       of trying again on the next message.
-        if r.status_code != 201:
-            return url
-
-        return r.headers['Location']
 
     @classmethod
     def form(cls):
