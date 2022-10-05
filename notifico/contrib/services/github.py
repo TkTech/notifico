@@ -1,3 +1,4 @@
+import fnmatch
 import re
 import json
 import requests
@@ -108,7 +109,8 @@ class GithubConfigForm(wtf.FlaskForm):
         validators.Length(max=1024)
     ], description=(
         'A comma-separated list of branches to forward, or blank for all.'
-        ' Ex: "master, dev"'
+        ' Supports basic wildcards.'
+        ' Ex: "master,dev,feature_*,v?.?"'
     ))
     events = EventSelectField('Events', choices=[
         ('commit_comment_created',     'Commit comment'),
@@ -760,10 +762,16 @@ class GithubHook(BundledService):
 
         if branches:
             # The user wants to filter by branch name.
-            branches = [b.strip().lower() for b in branches.split(',')]
-            if j['branch'] and j['branch'].lower() not in branches:
-                # This isn't a branch the user wants.
-                return
+            branches = {b.strip() for b in branches.split(',')}
+            if j['branch']:
+                source_branch = j['branch']
+                for branch in branches:
+                    if fnmatch.fnmatch(source_branch, branch):
+                        break
+                else:
+                    # If we get here, we didn't find a branch that matched
+                    # one of the user-provided patterns.
+                    return
 
         if not original['commits']:
             if show_tags and j['tag']:
