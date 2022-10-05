@@ -8,6 +8,11 @@ from wtforms.fields import SelectMultipleField
 from notifico.contrib.services import BundledService
 
 
+def _is_first_commit(v: str):
+    # If the before branch is all 0s, it was just created.
+    return all(c == '0' for c in v)
+
+
 def simplify_payload(payload):
     result = {
         'branch': None,
@@ -182,7 +187,7 @@ def _create_push_summary(project_name, j, config):
 
     # Build a compare url.
     # If this is the first push, link to the after commit.
-    if re.match(r'0+', original['before']):
+    if _is_first_commit(original['before']):
         link = '{0}/commit/{1}'.format(
             original['project']['web_url'],
             original['after']
@@ -503,7 +508,7 @@ class GitlabHook(BundledService):
             if j['branch'] and j['branch'].lower() not in branches:
                 return
 
-        if not original['commits'] or re.match(r'0+', original['before']):
+        if not original['commits'] or _is_first_commit(original['before']):
             if show_tags and j['tag']:
                 yield cls.message(
                     cls._create_non_commit_summary(j, config),
@@ -565,7 +570,7 @@ class GitlabHook(BundledService):
         ))
 
         if j['tag']:
-            if re.match(r'0+', original['after']):
+            if _is_first_commit(original['after']):
                 if not is_event_allowed(config, 'delete', 'tag'):
                     return ''
                 line.append(u'deleted tag')
@@ -582,7 +587,7 @@ class GitlabHook(BundledService):
                 **BundledService.colors
             ))
         elif j['branch']:
-            if re.match(r'0+', original['after']):
+            if _is_first_commit(original['after']):
                 if not is_event_allowed(config, 'delete', 'branch'):
                     return ''
                 line.append(u'deleted branch')
