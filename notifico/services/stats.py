@@ -42,7 +42,7 @@ def total_networks():
 @cache.memoize(timeout=60 * 5)
 def total_channels():
     return db_session.query(
-        func.count(Channel).label('count')
+        func.count(Channel.id).label('count')
     ).scalar()
 
 
