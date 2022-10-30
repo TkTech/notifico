@@ -1,0 +1,80 @@
+{% extends "settings/base.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block main_content %}
+  <div class="card mt-4">
+    <form method="POST">
+      <div class="card-header">
+        {{ _('New Network') if action == 'new' else _('Edit Network') }}
+      </div>
+      <div class="card-body">
+        <div class="card-text">
+          {{ network_form.hidden_tag() }}
+          {{ forms.render_field(network_form.host) }}
+          {{ forms.render_field(network_form.port) }}
+          {{ forms.render_field(network_form.ssl) }}
+        </div>
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary" name="action" value="edit">
+          {{ _('Save') }}
+        </button>
+        <a class="btn btn-warning"
+           href="{{ url_for('.irc') }}">
+            {{ _('Cancel') }}</a>
+      </div>
+    </form>
+  </div>
+  {% if action == 'edit' and network %}
+    <div class="card mt-4">
+      <div class="card-header">
+        {{ _('Channels') }}
+      </div>
+      <div class="card-body">
+        <div class="card-text">
+          {% trans %}
+            Edits to this network will immediately apply to these channels.
+            Deleting the network will delete these channels.
+          {% endtrans %}
+        </div>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for channel in network.channels %}
+          <li class="list-group-item">
+            {% trans name=channel.channel, project=channel.project.name, url=channel.project.url() %}
+              <strong>{{ name }}</strong> (<a href="{{ url }}" class="stretched-link">{{ project }}</a>).
+            {% endtrans %}
+          </li>
+        {% else %}
+          <li class="list-group-item">
+            <em>{{ _('No channels use this network yet.') }}</em>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card mt-4">
+      <form method="POST">
+        <div class="card-header">
+          {{ _('Delete Network') }}
+        </div>
+        <div class="card-body">
+          <div class="card-text">
+            {% trans %}
+              Are you sure you want to delete this network? All associated channels
+              will also be deleted. Type the hostname to confirm you want to delete it.
+            {% endtrans %}
+          </div>
+          <div class="card-text mt-4">
+            {{ delete_form.hidden_tag() }}
+            {{ forms.render_field(delete_form.confirm_host) }}
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-danger" type="submit" name="action" value="delete">
+            {{ _('Delete') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}

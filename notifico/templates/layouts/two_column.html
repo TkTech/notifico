@@ -1,0 +1,21 @@
+{% extends "layouts/main.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block content_page %}
+  <div class="py-3">
+    <h1 class="display-6 fw-bold">
+      {% block header %}
+      {% endblock %}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-sm-12 col-lg-3">
+      {% block sidebar %}
+      {% endblock %}
+    </div>
+    <div class="col-sm-12 col-lg-9">
+      {% block main_content %}
+      {% endblock %}
+    </div>
+  </div>
+{% endblock %}

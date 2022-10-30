@@ -1,0 +1,48 @@
+{% extends "settings/base.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block main_content %}
+  <a id="change-password"></a>
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('Change Password') }}
+    </div>
+    <div class="card-body">
+      <div class="card-text">
+        <form method="POST">
+          {{ password_form.hidden_tag() }}
+          {{ forms.render_field(password_form.old) }}
+          {{ forms.render_field(password_form.password) }}
+          {{ forms.render_field(password_form.confirm) }}
+          <button type="submit" class="btn btn-primary" name="action" value="change-password">
+              {{ _('Change Password') }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <a id="delete-account"></a>
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('Delete Account') }}
+    </div>
+    <div class="card-body">
+      <div class="card-text">
+        <form method="POST">
+          <p>
+            {% trans %}
+            Deleting your account is irreversible. All projects, hooks, and bots under
+            your account will be <strong>purged</strong>.
+            {% endtrans %}
+          </p>
+          {{ delete_form.hidden_tag() }}
+          {{ forms.render_field(delete_form.password) }}
+          {{ forms.render_field(delete_form.confirm) }}
+            <button type="submit" class="btn btn-danger" name="action" value="delete-account">
+                {{ _('Delete Account') }}
+            </button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

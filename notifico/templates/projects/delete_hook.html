@@ -1,15 +1,28 @@
-{% extends "layouts/main.html" %}
+{% extends "projects/project_base.html" %}
 {% import "ui/forms.html" as forms %}
 
-{% block content_page %}
-  <h2>Delete Hook</h2>
-  <div class="section-content">
-    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-      <p>Are you sure you want to delete this hook? You will not be able to create one with the same URL, and will have to reconfigure any services you have setup to use it.</p>
-      <div class="form-actions">
-        <button type="submit" class="btn btn-danger" value='d' name='do'>Delete Hook</button>
-        <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn btn-success">Cancel</a>
+{% block main_content %}
+  <div class="card mt-4">
+    <div class="card-body">
+      <h5 class="card-title border-bottom border-1 pb-2 mb-2">
+        {{ _('Delete Hook') }}
+      </h5>
+      <div class="card-text">
+        <form class="form form-horizontal" method="POST">
+          <p>
+          {% trans %}
+            Are you sure you want to delete this hook? You will not be able to create one with the same URL, and will
+            have to reconfigure any services you have setup to use it.
+          {% endtrans %}
+          </p>
+          <button type="submit" class="btn btn-danger" value='d' name='do'>
+            {{ _('Delete Hook') }}
+          </button>
+          <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn btn-success">
+            {{ _('Cancel') }}
+          </a>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 {% endblock %}

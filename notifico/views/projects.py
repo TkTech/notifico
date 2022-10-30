@@ -10,31 +10,53 @@ from flask import (
     request
 )
 import flask_wtf as wtf
+from flask_babel import lazy_gettext as _
 from wtforms import fields, validators
 
 from notifico import user_required
 from notifico.database import db_session
-from notifico.models import User, Project, Hook, Channel
+from notifico.models import User, Project, Hook, Channel, IRCNetwork
+from notifico.permissions import Action
 from notifico.service import available_services
 
 projects = Blueprint('projects', __name__, template_folder='templates')
 
 
 class ProjectDetailsForm(wtf.FlaskForm):
-    name = fields.StringField('Project Name', validators=[
-        validators.InputRequired(),
-        validators.Length(1, 50),
-        validators.Regexp(r'^[a-zA-Z0-9_\-\.]*$', message=(
-            'Project name must only contain a to z, 0 to 9, dashes'
-            ' and underscores.'
-        ))
-    ])
-    public = fields.BooleanField('Public', default=True)
-    website = fields.StringField('Project URL', validators=[
-        validators.Optional(),
-        validators.Length(max=1024),
-        validators.URL()
-    ])
+    name = fields.StringField(
+        _('Project Name'),
+        validators=[
+            validators.InputRequired(),
+            validators.Length(1, 50),
+            validators.Regexp(r'^[a-zA-Z0-9_\-\.]*$', message=_(
+                'Project name must only contain a to z, 0 to 9, dashes'
+                ' and underscores.'
+            )),
+        ],
+        description=_(
+            'A descriptive name for your project.'
+        )
+    )
+    public = fields.BooleanField(
+        _('Public'),
+        default=True,
+        description=_(
+            'Should others be able to see your project? A public project will'
+            ' show up in the community and in search engines.'
+        )
+    )
+    website = fields.StringField(
+        _('Project URL'),
+        validators=[
+            validators.Optional(),
+            validators.Length(max=1024),
+            validators.URL()
+        ],
+        description=_(
+            'Project URLs are not public. They may be used to confirm'
+            ' ownership of a project in the case of lost credentials.'
+        )
+    )
 
 
 class HookDetailsForm(wtf.FlaskForm):
@@ -43,32 +65,28 @@ class HookDetailsForm(wtf.FlaskForm):
     ], coerce=int)
 
 
-class PasswordConfirmForm(wtf.FlaskForm):
-    password = fields.PasswordField('Password', validators=[
-        validators.InputRequired()
-    ])
-
-    def validate_password(form, field):
-        if not User.login(g.user.username, field.data):
-            raise validators.ValidationError('Your password is incorrect.')
-
-
 class ChannelDetailsForm(wtf.FlaskForm):
-    channel = fields.StringField('Channel', validators=[
-        validators.InputRequired(),
-        validators.Length(min=1, max=80)
-    ])
-    host = fields.StringField('Host', validators=[
-        validators.InputRequired(),
-        validators.Length(min=1, max=255)
-    ], default='irc.libera.chat')
-    port = fields.IntegerField('Port', validators=[
-        validators.NumberRange(1024, 66552)
-    ], default=6697)
-    ssl = fields.BooleanField('Use SSL', default=True)
-    public = fields.BooleanField('Public', default=True, description=(
-        'Allow others to see that this channel exists.'
-    ))
+    channel = fields.StringField(
+        _('Channel'),
+        validators=[
+            validators.InputRequired(),
+            validators.Length(min=1, max=80)
+        ],
+        description=_(
+            'The channel to join, including any prefixes, such as'
+            ' #commits or ##my-project.'
+        )
+    )
+    network = fields.SelectField(
+        _('Network')
+    )
+    public = fields.BooleanField(
+        _('Public'),
+        default=True,
+        description=_(
+            'Allow others to see that this channel exists.'
+        )
+    )
 
 
 def project_action(f):
@@ -98,34 +116,28 @@ def project_action(f):
 
 
 @projects.route('/<u>/')
-def dashboard(u):
+def dashboard(u: User):
     """
     Display an overview of all the user's projects with summary
     statistics.
     """
     u = User.by_username(u)
     if not u:
-        # No such user exists.
         return abort(404)
 
-    is_owner = (g.user and g.user.id == u.id)
+    if not User.can(Action.READ, obj=u):
+        return abort(403)
 
-    # Get all projects by decending creation date.
-    projects = (
+    user_projects = (
         u.projects
         .order_by(False)
         .order_by(Project.created.desc())
     )
-    if not is_owner:
-        # If this isn't the users own page, only
-        # display public projects.
-        projects = projects.filter_by(public=True)
 
     return render_template(
         'projects/dashboard.html',
         user=u,
-        is_owner=is_owner,
-        projects=projects,
+        projects=user_projects,
         page_title='Notifico! - {u.username}\'s Projects'.format(
             u=u
         )
@@ -138,6 +150,9 @@ def new():
     """
     Create a new project.
     """
+    if not Project.can(Action.CREATE):
+        return abort(403)
+
     form = ProjectDetailsForm()
     if form.validate_on_submit():
         p = Project.by_name_and_owner(form.name.data, g.user)
@@ -151,21 +166,8 @@ def new():
                 public=form.public.data,
                 website=form.website.data
             )
-            p.full_name = '{0}/{1}'.format(g.user.username, p.name)
             g.user.projects.append(p)
             db_session.add(p)
-
-            if p.public:
-                # New public projects get added to #commits by default.
-                c = Channel.new(
-                    '#commits',
-                    'irc.libera.chat',
-                    6697,
-                    ssl=True,
-                    public=True
-                )
-                p.channels.append(c)
-
             db_session.commit()
 
             return redirect(url_for('.details', u=g.user.username, p=p.name))
@@ -176,13 +178,11 @@ def new():
 @projects.route('/<u>/<p>/edit', methods=['GET', 'POST'])
 @user_required
 @project_action
-def edit_project(u, p):
+def edit_project(u, p: Project):
     """
     Edit an existing project.
     """
-    if p.owner.id != g.user.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
+    if not Project.can(Action.UPDATE, obj=p):
         return abort(403)
 
     form = ProjectDetailsForm(obj=p)
@@ -196,7 +196,6 @@ def edit_project(u, p):
             p.name = form.name.data
             p.website = form.website.data
             p.public = form.public.data
-            p.full_name = '{0}/{1}'.format(g.user.username, p.name)
             db_session.commit()
             return redirect(url_for('.dashboard', u=u.username))
 
@@ -210,13 +209,11 @@ def edit_project(u, p):
 @projects.route('/<u>/<p>/delete', methods=['GET', 'POST'])
 @user_required
 @project_action
-def delete_project(u, p):
+def delete_project(u, p: Project):
     """
     Delete an existing project.
     """
-    if p.owner.id != g.user.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
+    if not Project.can(Action.DELETE, obj=p):
         return abort(403)
 
     if request.method == 'POST' and request.form.get('do') == 'd':
@@ -229,25 +226,17 @@ def delete_project(u, p):
 
 @projects.route('/<u>/<p>')
 @project_action
-def details(u, p):
+def details(u, p: Project):
     """
     Show the details for an existing project.
     """
-    if not p.can_see(g.user):
-        return redirect(url_for('public.landing'))
-
-    can_modify = p.can_modify(g.user)
-
-    visible_channels = p.channels
-    if not can_modify:
-        visible_channels = visible_channels.filter_by(public=True)
+    if not Project.can(Action.READ, obj=p):
+        return abort(403)
 
     return render_template(
         'projects/project_details.html',
         project=p,
         user=u,
-        visible_channels=visible_channels,
-        can_modify=can_modify,
         page_title='Notifico! - {u.username}/{p.name}'.format(
             u=u,
             p=p
@@ -260,10 +249,8 @@ def details(u, p):
 @projects.route('/<u>/<p>/hook/new/<int:sid>', methods=['GET', 'POST'])
 @user_required
 @project_action
-def new_hook(u, p, sid):
-    if p.owner.id != g.user.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
+def new_hook(u, p: Project, sid):
+    if not Project.can(Action.UPDATE, obj=p):
         return abort(403)
 
     hook = available_services()[sid]
@@ -289,25 +276,22 @@ def new_hook(u, p, sid):
         project=p,
         services=available_services(),
         service=hook,
-        form=form
+        form=form,
+        action='new'
     )
 
 
 @projects.route('/<u>/<p>/hook/edit/<int:hid>', methods=['GET', 'POST'])
 @user_required
 @project_action
-def edit_hook(u, p, hid):
-    if p.owner.id != g.user.id:
+def edit_hook(u, p: Project, hid):
+    if not Project.can(Action.UPDATE, obj=p):
         return abort(403)
 
     h = Hook.query.get(hid)
     if h is None:
         # You can't edit a hook that doesn't exist!
         return abort(404)
-
-    if h.project.owner.id != g.user.id:
-        # You can't edit a hook that isn't yours!
-        return abort(403)
 
     hook_service = h.hook()
     form = hook_service.form()
@@ -327,11 +311,12 @@ def edit_hook(u, p, hid):
         hook_service.load_form(form, h.config)
 
     return render_template(
-        'projects/edit_hook.html',
+        'projects/new_hook.html',
         project=p,
         services=available_services(),
         service=hook_service,
-        form=form
+        form=form,
+        action='edit'
     )
 
 
@@ -367,19 +352,17 @@ def hook_receive(pid, key):
 @projects.route('/<u>/<p>/hook/delete/<int:hid>', methods=['GET', 'POST'])
 @user_required
 @project_action
-def delete_hook(u, p, hid):
+def delete_hook(u, p: Project, hid):
     """
     Delete an existing service hook.
     """
+    if not Project.can(Action.UPDATE, obj=p):
+        return abort(403)
+
     h = Hook.query.get(hid)
     if not h:
         # Project doesn't exist (404 Not Found)
         return abort(404)
-
-    if p.owner.id != g.user.id or h.project.id != p.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
-        return abort(403)
 
     if request.method == 'POST' and request.form.get('do') == 'd':
         p.hooks.remove(h)
@@ -397,29 +380,38 @@ def delete_hook(u, p, hid):
 @projects.route('/<u>/<p>/channel/new', methods=['GET', 'POST'])
 @user_required
 @project_action
-def new_channel(u, p):
-    if p.owner.id != g.user.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
+def new_channel(u, p: Project):
+    if not Project.can(Action.UPDATE, obj=p):
         return abort(403)
 
+    # Get the networks the current user has used for any of their projects,
+    # and all public networks.
+    networks = IRCNetwork.only_readable(
+        db_session.query(IRCNetwork)
+    ).order_by(
+        IRCNetwork.public.asc()
+    ).all()
+
     form = ChannelDetailsForm()
+    form.network.choices = [
+        (network.id, f'{network.host}:{network.port} (SSL:{network.ssl})')
+        for network in networks
+    ]
+
     if form.validate_on_submit():
-        host = form.host.data.strip().lower()
-        channel = form.channel.data.strip().lower()
+        network = IRCNetwork.query.get(form.network.data)
+        channel = form.channel.data
 
         # Make sure this isn't a duplicate channel before we create it.
         c = Channel.query.filter_by(
-            host=host,
             channel=channel,
+            network=network,
             project_id=p.id
         ).first()
         if not c:
-            c = Channel.new(
-                channel,
-                host,
-                port=form.port.data,
-                ssl=form.ssl.data,
+            c = Channel(
+                channel=channel,
+                network=network,
                 public=form.public.data
             )
             p.channels.append(c)
@@ -436,6 +428,7 @@ def new_channel(u, p):
     return render_template(
         'projects/new_channel.html',
         project=p,
+        networks=networks,
         form=form
     )
 
@@ -443,10 +436,13 @@ def new_channel(u, p):
 @projects.route('/<u>/<p>/channel/delete/<int:cid>', methods=['GET', 'POST'])
 @user_required
 @project_action
-def delete_channel(u, p, cid):
+def delete_channel(u, p: Project, cid):
     """
     Delete an existing service hook.
     """
+    if not Project.can(Action.UPDATE, obj=p):
+        return abort(403)
+
     c = Channel.query.filter_by(
         id=cid,
         project_id=p.id
@@ -455,11 +451,6 @@ def delete_channel(u, p, cid):
     if not c:
         # Project or channel doesn't exist (404 Not Found)
         return abort(404)
-
-    if c.project.owner.id != g.user.id or c.project.id != p.id:
-        # Project isn't public and the viewer isn't the project owner.
-        # (403 Forbidden)
-        return abort(403)
 
     if request.method == 'POST' and request.form.get('do') == 'd':
         c.project.channels.remove(c)

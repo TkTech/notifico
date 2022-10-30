@@ -1,19 +1,31 @@
-{% extends "layouts/main.html" %}
+{% extends "projects/project_base.html" %}
 {% import "ui/forms.html" as forms %}
 
-{% block content_page %}
-  <h2>New Channel</h2>
-  <div class="section-content">
-    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-      {{ form.hidden_tag() }}
-      {{ forms.render_field(form.channel) }}
-      {{ forms.render_field(form.host) }}
-      {{ forms.render_field(form.port) }}
-      {{ forms.render_field(form.ssl) }}
-      {{ forms.render_field(form.public) }}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Add Channel</button>
-        <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
+{% block main_content %}
+  <div class="card mt-4">
+    <form method="POST">
+      <div class="card-body">
+        <h5 class="card-title border-bottom border-1 border-accent2 pb-2 mb-2">
+          {{ _('New IRC Channel') }}
+        </h5>
+        <div class="card-text">
+          {{ form.hidden_tag() }}
+          {{ forms.render_field(form.channel) }}
+          {{ forms.render_field(form.public) }}
+          {{ forms.render_field(form.network) }}
+          {% trans new_network=url_for('settings.irc') %}
+            Don't see your network? <a href="{{ new_network }}">Add a new one</a> under
+            your account settings.
+          {% endtrans %}
+        </div>
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">
+          {{ _('Save') }}
+        </button>
+        <a class="btn btn-warning"
+           href="{{ url_for('.details', u=g.user.username, p=project.name) }}">
+            {{ _('Cancel') }}</a>
       </div>
     </form>
   </div>

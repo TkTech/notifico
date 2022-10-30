@@ -1,4 +1,4 @@
-from functools import wraps
+from functools import wraps, partial
 
 from redis import Redis
 from celery import Celery
@@ -10,10 +10,12 @@ from flask import (
 )
 from flask_caching import Cache
 from flask_mail import Mail
+from flask_babel import Babel
 from raven.contrib.flask import Sentry
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from notifico.database import db_session
+from notifico.permissions import has_permission, Action, Permission
 from notifico.settings import Settings
 from notifico.util import pretty
 
@@ -21,6 +23,7 @@ sentry = Sentry()
 cache = Cache()
 mail = Mail()
 celery = Celery()
+babel = Babel()
 
 
 def user_required(f):
@@ -33,21 +36,6 @@ def user_required(f):
             return redirect(url_for('account.login'))
         return f(*args, **kwargs)
     return _wrapped
-
-
-def group_required(name):
-    """
-    A decorator for views which required a user to be member
-    to a particular group.
-    """
-    def _wrap(f):
-        @wraps(f)
-        def _wrapped(*args, **kwargs):
-            if g.user is None or not g.user.in_group(name):
-                return redirect(url_for('account.login'))
-            return f(*args, **kwargs)
-        return _wrapped
-    return _wrap
 
 
 def create_app():
@@ -70,7 +58,7 @@ def create_app():
         )
 
     if app.config.get('ROUTE_STATIC'):
-        # We should handle routing for static assets ourself (handy for
+        # We should handle routing for static assets ourselves (handy for
         # small and quick deployments).
         import os.path
         from werkzeug.middleware.shared_data import SharedDataMiddleware
@@ -80,13 +68,14 @@ def create_app():
         })
 
     @app.teardown_appcontext
-    def shutdown_session(exception=None):
+    def shutdown_session(exception=None): # noqa
         db_session.remove()
 
-    # Setup our redis connection (which is already thread safe)
+    # Set up our redis connection (which is already thread safe)
     app.redis = Redis.from_url(app.config['REDIS'])
     cache.init_app(app)
     mail.init_app(app)
+    babel.init_app(app)
 
     # Update celery's configuration with our application config.
     celery.config_from_object(app.config)
@@ -95,20 +84,44 @@ def create_app():
     from notifico.views import account
     from notifico.views import public
     from notifico.views import projects
+    from notifico.views import settings
 
     app.register_blueprint(account.account, url_prefix='/u')
+    app.register_blueprint(settings.settings_view, url_prefix='/u/settings')
     app.register_blueprint(projects.projects)
     app.register_blueprint(public.public)
 
     # Register our custom error handlers.
     from notifico.views import errors
 
-    app.register_error_handler(500, errors.error_500)
+    app.register_error_handler(
+        500,
+        partial(errors.generic_error, error_code=500)
+    )
+    app.register_error_handler(
+        403,
+        partial(errors.generic_error, error_code=403)
+    )
+    app.register_error_handler(
+        404,
+        partial(errors.generic_error, error_code=404)
+    )
 
     # Setup some custom Jinja2 filters.
-    app.jinja_env.filters['pretty_date'] = pretty.pretty_date
-    app.jinja_env.filters['plural'] = pretty.plural
-    app.jinja_env.filters['fix_link'] = pretty.fix_link
+    app.jinja_env.filters.update({
+        'pretty_date': pretty.pretty_date,
+        'plural': pretty.plural,
+        'service_name': pretty.service_name
+    })
+
+    @app.context_processor
+    def update_context_variables():
+        # Adds some globally-available variables to templates.
+        return {
+            'has_permission': has_permission,
+            'Action': Action,
+            'Permission': Permission
+        }
 
     if app.config['USE_PROXY_HEADERS']:
         count = app.config['USE_PROXY_HEADERS']

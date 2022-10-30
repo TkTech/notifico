@@ -1,35 +1,57 @@
 import hashlib
 import datetime
 import secrets
+from typing import Optional
 
+from flask import g, current_app
 import sqlalchemy as sa
 from sqlalchemy import orm
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import Query
 
-from notifico.models import CaseInsensitiveComparator
+from notifico.models.util import CaseInsensitiveComparator
 from notifico.database import Base
+from notifico.permissions import HasPermissions, Action
+
+role_association = sa.Table(
+    'role_association',
+    Base.metadata,
+    sa.Column('user_id', sa.ForeignKey('user.id')),
+    sa.Column('role_id', sa.ForeignKey('role.name'))
+)
+
+permission_association = sa.Table(
+    'permission_association',
+    Base.metadata,
+    sa.Column('role_id', sa.ForeignKey('role.name')),
+    sa.Column('permission_id', sa.ForeignKey('permission.name'))
+)
 
 
-class User(Base):
+class User(Base, HasPermissions):
     __tablename__ = 'user'
 
     id = sa.Column(sa.Integer, primary_key=True)
 
-    # ---
-    # Required Fields
-    # ---
     username = sa.Column(sa.String(50), unique=True, nullable=False)
     email = sa.Column(sa.String(255), nullable=False)
     password = sa.Column(sa.String(255), nullable=False)
     salt = sa.Column(sa.String(64), nullable=False)
     joined = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
 
-    # ---
-    # Public Profile Fields
-    # ---
-    company = sa.Column(sa.String(255))
-    website = sa.Column(sa.String(255))
-    location = sa.Column(sa.String(255))
+    roles = orm.relationship(
+        'Role',
+        secondary=role_association
+    )
+    permissions = orm.relationship(
+        'Permission',
+        secondary=(
+            'join(role_association, permission_association,'
+            'role_association.c.role_id == permission_association.c.role_id)'
+        ),
+        viewonly=True,
+        lazy='joined'
+    )
 
     @classmethod
     def new(cls, username, email, password):
@@ -93,59 +115,37 @@ class User(Base):
     def username_i(cls):
         return CaseInsensitiveComparator(cls.username)
 
-    def active_projects(self, limit=5):
-        """
-        Return this users most active projects (by descending message count).
-        """
-        q = self.projects.order_by(False).order_by('-message_count')
-        q = q.limit(limit)
+    @classmethod
+    def only_readable(cls, q: Query) -> Query:
+        # We allow user listing by default.
         return q
 
-    def in_group(self, name):
-        """
-        Returns ``True`` if this user is in the group `name`, otherwise
-        ``False``.
-        """
-        return any(g.name == name.lower() for g in self.groups)
-
-    def add_group(self, name):
-        """
-        Adds this user to the group `name` if not already in it. The group
-        will be created if needed.
-        """
-        if self.in_group(name):
-            # We're already in this group.
-            return
-
-        self.groups.append(Group.get_or_create(name=name))
-
-
-class Group(Base):
-    __tablename__ = 'group'
-
-    id = sa.Column(sa.Integer, primary_key=True)
-
-    name = sa.Column(sa.String(255), unique=True, nullable=False)
-
-    owner_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
-    owner = orm.relationship(
-        'User',
-        backref=orm.backref(
-            'groups',
-            order_by=id,
-            lazy='joined'
-        )
-    )
-
-    def __repr__(self):
-        return '<Group({name!r})>'.format(name=self.name)
-
     @classmethod
-    def get_or_create(cls, name):
-        name = name.lower()
+    def can(cls, action: Action, *, obj: Optional['User'] = None):
+        if super().can(action, obj=obj):
+            return True
 
-        g = cls.query.filter_by(name=name).first()
-        if not g:
-            g = Group(name=name)
+        match action:
+            case Action.CREATE:
+                return current_app.config.get('NEW_USERS', True)
+            case Action.READ | Action.DELETE | Action.UPDATE:
+                if obj and g.user and g.user.id == obj.id:
+                    return True
 
-        return g
+        return False
+
+
+class Permission(Base):
+    __tablename__ = 'permission'
+
+    name = sa.Column(sa.String(255), primary_key=True)
+
+
+class Role(Base):
+    __tablename__ = 'role'
+
+    name = sa.Column(sa.String(255), primary_key=True)
+    permissions = orm.relationship(
+        'Permission',
+        secondary=permission_association
+    )

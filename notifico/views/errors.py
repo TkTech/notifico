@@ -1,20 +1,14 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""errors.py
-"""
-__all__ = (
-    'error_500'
-)
 from flask import render_template
+from werkzeug.http import HTTP_STATUS_CODES
 
 
-def error_500(error):
+def generic_error(error, *, error_code=500):
     """
-    Called when an internel server error (500) occured when
-    responding to a request.
+    Called when an internal server error occurred during a request.
     """
     return render_template(
-        'errors/500.html',
-        error_code=500,
+        'errors/generic.html',
+        error_code=error_code,
+        error_message=HTTP_STATUS_CODES.get(error_code),
         e=error
-    ), 500
+    ), error_code

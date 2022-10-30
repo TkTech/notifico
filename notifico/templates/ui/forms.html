@@ -1,23 +1,31 @@
 {% macro render_field(field) %}
-<div class="control-group {% if field.errors %}error{% endif %}">
-    <label for="{{ field.id }}" class="control-label">
+  <div class="mb-3">
+    {% if field.type == "BooleanField" %}
+      <div class="form-check">
+        {{ field(class_='form-check-input ' + ('is-invalid' if field.errors else ''), **kwargs)|safe }}
+        <label for="{{ field.id }}" class="form-check-label">
+          {{ field.label.text }}
+          {%- if field.flags.required -%}
+            <span class="required text-danger">*</span>
+          {% endif %}
+        </label>
+      </div>
+    {% else %}
+      <label for="{{ field.id }}" class="form-label">
         {{ field.label.text }}
-        {% if field.flags.required %}
-        <span class="required">*</span>
+        {%- if field.flags.required -%}
+          <span class="required text-danger">*</span>
         {% endif %}
-    </label>
-    <div class="controls">
-        {{ field(**kwargs)|safe }}
-        {% if field.errors %}
-        {% for error in field.errors %}
-        <span class="help-inline">{{ error }}</span>
-        {% endfor %}
-        {% endif %}
-        {% if field.description %}
-        <span class="help-block" style="color: black;">
-            {{ field.description|safe }}
-        </span>
-        {% endif %}
+      </label>
+      {{ field(class_='form-control ' + ('is-invalid' if field.errors else ''), **kwargs)|safe }}
+    {% endif %}
+    {% for error in field.errors %}
+      <div class="invalid-feedback">
+        {{ error }}
+      </div>
+    {% endfor %}
+    <div class="text-muted small pt-2">
+      {{ field.description|safe }}
     </div>
-</div>
+  </div>
 {% endmacro %}

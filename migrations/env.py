@@ -20,11 +20,8 @@ logger = logging.getLogger('alembic.env')
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-config.set_main_option(
-    'sqlalchemy.url',
-    str(current_app.extensions['migrate'].db.get_engine().url).replace(
-        '%', '%%'))
-target_metadata = current_app.extensions['migrate'].db.metadata
+from notifico import database, models
+target_metadata = database.Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -71,14 +68,11 @@ def run_migrations_online():
                 directives[:] = []
                 logger.info('No changes in schema detected.')
 
-    connectable = current_app.extensions['migrate'].db.get_engine()
-
-    with connectable.connect() as connection:
+    with database.engine.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            process_revision_directives=process_revision_directives,
-            **current_app.extensions['migrate'].configure_args
+            process_revision_directives=process_revision_directives
         )
 
         with context.begin_transaction():

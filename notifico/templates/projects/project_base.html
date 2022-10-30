@@ -1,0 +1,19 @@
+{% extends "layouts/two_column.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block header %}
+  {{ project.owner.username }}
+  <span class="text-accent1">/</span>
+  {{ project.name }}
+{% endblock %}
+
+{% block sidebar %}
+  <div class="list-group py-4">
+    <a class="list-group-item list-group-item-action"
+       href="{{ url_for('.details', u=g.user.username, p=project.name, _anchor="webhooks") }}">
+      {{ _('Webhooks') }}</a>
+    <a class="list-group-item list-group-item-action"
+       href="{{ url_for('.details', u=g.user.username, p=project.name, _anchor="irc-channels") }}">
+      {{ _('IRC Channels') }}</a>
+  </div>
+{% endblock %}

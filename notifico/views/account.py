@@ -9,23 +9,28 @@ from flask import (
     request,
     flash
 )
+from flask_babel import lazy_gettext as lg
+
 from notifico import user_required
 from notifico.database import db_session
 from notifico.models import User
+from notifico.permissions import Action
 from notifico.services import reset, background
 from notifico.views.account_forms import (
     UserLoginForm,
     UserRegisterForm,
-    UserDeleteForm,
     UserForgotForm,
-    UserResetForm,
-    UserPasswordForm
+    UserResetForm
 )
 
 account = Blueprint('account', __name__, template_folder='templates')
 # Usernames that cannot be registered because they clash with internal
 # routes.
-_reserved = ('new',)
+_reserved = (
+    'new',
+    'dashboard',
+    'settings'
+)
 
 
 @account.before_app_request
@@ -194,8 +199,11 @@ def register():
     if g.user:
         return redirect(url_for('public.landing'))
 
-    # Make sure this instance is allowing new users.
-    if not current_app.config.get('NEW_USERS', True):
+    if not User.can(Action.CREATE):
+        flash(
+            lg('Registration of new accounts is disabled.'),
+            category='warning'
+        )
         return redirect(url_for('public.landing'))
 
     form = UserRegisterForm()
@@ -207,40 +215,4 @@ def register():
         # ... and send them back to the login screen.
         return redirect(url_for('.login'))
 
-    return render_template('account/register.html', form=form)
-
-
-@account.route('/settings', methods=['GET', 'POST'])
-@account.route('/settings/<do>', methods=['GET', 'POST'])
-@user_required
-def settings(do=None):
-    """
-    Provides forms allowing a user to change various settings.
-    """
-    password_form = UserPasswordForm()
-    delete_form = UserDeleteForm()
-
-    if do == 'p' and password_form.validate_on_submit():
-        # Change the users password.
-        g.user.set_password(password_form.password.data)
-        db_session.commit()
-        return redirect(url_for('.settings'))
-    elif do == 'd' and delete_form.validate_on_submit():
-        # Delete this users account and all related data.
-        # Clear the session.
-        if '_u' in session:
-            del session['_u']
-        if '_ue' in session:
-            del session['_ue']
-        # Remove the user from the DB.
-        g.user.projects.order_by(False).delete()
-        db_session.delete(g.user)
-        db_session.commit()
-
-        return redirect(url_for('.login'))
-
-    return render_template(
-        'account/settings.html',
-        password_form=password_form,
-        delete_form=delete_form
-    )
+    return render_template('account/register.html', form=form, User=User)

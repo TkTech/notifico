@@ -1,4 +1,4 @@
-{% extends "layouts/main.html" %}
+{% extends "projects/project_base.html" %}
 {% import "ui/forms.html" as forms %}
 
 {% block style %}
@@ -10,50 +10,60 @@
 {{ super() }}
 <script type="text/javascript" src="/js/prettify.js"></script>
 <script type="text/javascript">
-$(document).ready(function(){
   prettyPrint();
-})
 </script>
 {% endblock %}
 
-{% block content_page %}
-  <h2>New Hook</h2>
-  <div class="section-content">
-    <div class="row-fluid">
-      <div class="span4">
-        <ul class="nav nav-list">
-          <li class="nav-header">Available Services</li>
-          {% for s in services.values() %}
-          <li {% if s.SERVICE_ID == service.SERVICE_ID %}class="active"{% endif %}>
-            <a href="{{ url_for('.new_hook', u=g.user.username, p=project.name, sid=s.SERVICE_ID) }}">
-              {{ s.SERVICE_NAME }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
+{% block sidebar %}
+  {{ super() }}
+  {% if action == 'new' %}
+    <div class="pb-4">
+      {{ _('Available Services') }}
+    </div>
+    <ul class="list-group">
+      {% for s in services.values() %}
+        <a class="list-group-item {% if s.SERVICE_ID == service.SERVICE_ID %}active{% endif %}"
+          href="{{ url_for('.new_hook', u=g.user.username, p=project.name, sid=s.SERVICE_ID) }}">
+          {{ s.SERVICE_NAME }}
+        </a>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}
+
+{% block main_content %}
+  <div class="card mt-4">
+    <form method="POST">
+      <div class="card-header">
+        {{ _('New Hook') if action == 'new' else _('Edit Hook') }}
+        <span class="text-accent1">/</span>
+        {{ service.SERVICE_NAME }}
       </div>
-      <div class="span8">
-        <h2>{{ service.SERVICE_NAME }}</h2>
-        {{ service.service_description()|safe }}
-        <div class="row-fluid" style="margin-top: 20px;">
-          <div class="span12">
-            <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-              {% if form %}
-              {{ form.hidden_tag() }}
-              {% for field in form %}
-                {% if field.id != 'csrf_token' %}
-                  {{ forms.render_field(field) }}
-                {% endif %}
-              {% endfor %}
+      <div class="card-body">
+        <div class="card-text">
+          {% set service_description = service.service_description() %}
+          {% if service_description %}
+            <div class="pb-4 pt-3">
+              {{ service_description|safe }}
+            </div>
+          {% endif %}
+          {% if form %}
+            {{ form.hidden_tag() }}
+            {% for field in form %}
+              {% if field.id != 'csrf_token' %}
+                {{ forms.render_field(field) }}
               {% endif %}
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Create Hook</button>
-                <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
-              </div>
-            </form>
-          </div>
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
-    </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">
+          {{ _('Save') }}</button>
+        <a class="btn btn-warning"
+           href="{{ url_for('.details', u=g.user.username, p=project.name) }}">
+          {{ _('Cancel') }}</a>
+      </div>
+    </form>
   </div>
 {% endblock %}

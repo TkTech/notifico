@@ -1,14 +1,23 @@
 import datetime
+import enum
+from typing import Optional
 
+from flask import g, url_for
 import sqlalchemy as sa
 from sqlalchemy import or_, orm
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import Query
 
+from notifico import has_permission
 from notifico.database import Base
-from notifico.models import CaseInsensitiveComparator
+from notifico.models.util import CaseInsensitiveComparator
+from notifico.permissions import HasPermissions, Action, Permission
 
 
-class Project(Base):
+class Project(Base, HasPermissions):
+    class Page(enum.IntEnum):
+        DETAILS = 10
+
     __tablename__ = 'project'
 
     id = sa.Column(sa.Integer, primary_key=True)
@@ -29,7 +38,8 @@ class Project(Base):
         )
     )
 
-    full_name = sa.Column(sa.String(101), nullable=False, unique=True)
+    #: The total number of messages received by all hooks under this project,
+    #: over all time.
     message_count = sa.Column(sa.Integer, default=0)
 
     @classmethod
@@ -59,54 +69,48 @@ class Project(Base):
         return q.first()
 
     @classmethod
-    def visible(cls, q, user=None):
-        """
-        Modifies the sqlalchemy query `q` to only show projects accessible
-        to `user`. If `user` is ``None``, only shows public projects.
-        """
-        if user and user.in_group('admin'):
-            # We don't do any filtering for admins,
-            # who should have full visibility.
-            pass
-        elif user:
-            # We only show the projects that are either public,
-            # or are owned by `user`.
-            q = q.filter(or_(
-                Project.owner_id == user.id,
-                Project.public == True
-            ))
+    def only_readable(cls, q: Query) -> Query:
+        if has_permission(Permission.SUPERUSER):
+            return q
+
+        if g.user:
+            q = q.filter(
+                or_(
+                    Project.public.is_(True),
+                    Project.owner_id == g.user.id
+                )
+            )
         else:
-            q = q.filter(Project.public == True)
+            q = q.filter(Project.public.is_(True))
 
         return q
 
-    def is_owner(self, user):
-        """
-        Returns ``True`` if `user` is the owner of this project.
-        """
-        return user and user.id == self.owner.id
+    @classmethod
+    def can(cls, action: Action, *, obj: Optional['Project'] = None):
+        if super().can(action, obj=obj):
+            return True
 
-    def can_see(self, user):
-        if self.public:
-            # Public projects are always visible.
-            return True
-        if user and user.in_group('admin'):
-            # Admins can always see projects.
-            return True
-        elif self.is_owner(user):
-            # The owner of the project can always see it.
-            return True
+        match action:
+            case Action.CREATE:
+                return True
+            case Action.READ:
+                if obj and g.user and obj.owner_id == g.user.id:
+                    return True
+            case Action.UPDATE | Action.DELETE:
+                if obj and g.user and obj.owner_id == g.user.id:
+                    return True
 
         return False
 
-    def can_modify(self, user):
-        """
-        Returns ``True`` if `user` can modify this project.
-        """
-        if user and user.in_group('admin'):
-            # Admins can always modify projects.
-            return True
-        elif self.is_owner(user):
-            return True
-
-        return False
+    def url(self, of: Page = Page.DETAILS) -> str:
+        match of:
+            case self.Page.DETAILS:
+                return url_for(
+                    'projects.details',
+                    u=self.owner.username,
+                    p=self.name
+                )
+            case _:
+                raise ValueError(
+                    f'Don\'t know how to generate a URL for {of=}.'
+                )

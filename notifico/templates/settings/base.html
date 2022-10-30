@@ -1,0 +1,17 @@
+{% extends "layouts/two_column.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block header %}
+  {{ _("Settings") }}
+{% endblock %}
+
+{% block sidebar %}
+  <div class="list-group py-4">
+    <a class="list-group-item list-group-item-action"
+       href="{{ url_for('settings.security') }}">
+      {{ _('Account & Security') }}</a>
+    <a class="list-group-item list-group-item-action"
+       href="{{ url_for('settings.irc') }}">
+      {{ _('IRC') }}</a>
+  </div>
+{% endblock %}

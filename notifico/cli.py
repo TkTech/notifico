@@ -7,7 +7,7 @@ from flask.cli import FlaskGroup
 
 from notifico import create_app
 from notifico.database import db_session
-from notifico.models import Project
+from notifico.models import Project, Role, Permission
 from notifico.models.user import User
 
 
@@ -46,6 +46,48 @@ def create(username, email, password, superuser=False):
     if superuser:
         user.add_group('admin')
 
+    db_session.add(user)
+    db_session.commit()
+
+
+@users.command('grant-role')
+@click.argument('username')
+@click.argument('role')
+def grant_role(username: str, role: str):
+    """
+    Grants a user a specific role. Does nothing if the user already has the
+    role.
+    """
+    user = db_session.query(User).filter(User.username == username).first()
+    if not user:
+        click.echo('No such user.')
+        return
+
+    role = db_session.query(Role).filter(Role.name == role).first()
+    if not role:
+        click.echo('No such role.')
+        return
+
+    user.roles.append(role)
+    db_session.add(user)
+    db_session.commit()
+
+
+@users.command('revoke-role')
+@click.argument('username')
+@click.argument('role')
+def revoke_role(username: str, role: str):
+    user = db_session.query(User).filter(User.username == username).first()
+    if not user:
+        click.echo('No such user.')
+        return
+
+    role = db_session.query(Role).filter(Role.name == role).first()
+    if not role:
+        click.echo('No such role.')
+        return
+
+    user.roles.remove(role)
     db_session.add(user)
     db_session.commit()
 
@@ -90,6 +132,39 @@ def purge(make_changes=False):
 
     if make_changes:
         db_session.commit()
+
+
+@tools.command('add-role')
+@click.argument('name')
+def add_role(name: str):
+    """
+    Add a new user role.
+    """
+    role = db_session.merge(Role(name=name))
+    db_session.add(role)
+    db_session.commit()
+
+
+@tools.command('add-permission')
+@click.argument('name')
+def add_permission(name: str):
+    """
+    Add a new role permission.
+    """
+    permission = db_session.merge(Permission(name=name))
+    db_session.add(permission)
+    db_session.commit()
+
+
+@tools.command('add-default-roles')
+def add_default_roles():
+    admin: Role = db_session.merge(Role(name='admin'))
+    superuser: Permission = db_session.merge(Permission(name='superuser'))
+
+    admin.permissions.append(superuser)
+
+    db_session.add(admin)
+    db_session.commit()
 
 
 @bots.command('start')

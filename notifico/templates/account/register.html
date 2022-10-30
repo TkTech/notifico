@@ -2,22 +2,35 @@
 {% import "ui/forms.html" as forms %}
 
 {% block content_page %}
-  <h2>Register</h2>
-  <div class="section-content">
-    <form class="form form-horizontal" method="POST">
-      {{ form.hidden_tag() }}
-      {{ forms.render_field(form.username) }}
-      {{ forms.render_field(form.email) }}
-      {{ forms.render_field(form.password) }}
-      {{ forms.render_field(form.confirm) }}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-success">
-          <i class="icon-plus"></i> Create Account
-        </button>
-        <a href="{{ url_for('public.landing') }}" class="btn btn-danger">
-          <i class="icon-remove"></i> Cancel
-        </a>
+  <h6 class="display-6 py-3 fw-bold">
+    {{ _("Register") }}
+  </h6>
+  {% if User.can(Action.CREATE) %}
+    <div class="card mt-4 constrained-500">
+      <div class="card-body">
+        <div class="card-text">
+          <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ forms.render_field(form.username) }}
+            {{ forms.render_field(form.email) }}
+            {{ forms.render_field(form.password) }}
+            {{ forms.render_field(form.confirm) }}
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+              <i class="icon-plus"></i> Create Account
+            </button>
+            <div class="py-2 small text-muted">
+              Already have an account?
+              <a href="{{ url_for('.login') }}">
+                Login instead.
+              </a>
+            </div>
+          </form>
+        </div>
       </div>
-    </form>
-  </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning">
+      {{ _('User registration is currently disabled.') }}
+    </div>
+  {% endif %}
 {% endblock %}

@@ -1,130 +1,86 @@
-{% extends "layouts/main.html" %}
+{% extends "projects/project_base.html" %}
 {% import "ui/forms.html" as forms %}
 
-{% block content_page %}
-  <h2>{{ repo_link(project) }}</h2>
-  <ul class="unstyled">
-    <li>
-      <i class="icon-time"></i> Created {{ project.created|pretty_date }}
-    </li>
-  </ul>
-
-{% if can_modify %}
-  <a id="hooks"></a>
-  <h2>Message Hooks</h2>
-  <div class="section-content">
-    <p><em>Hooks</em> are endpoints for 3rd party services (and scripts) capable of making a HTTP POST request. Hooks receive messages, which are then formatted and forwarded to <a href="#channels">IRC channels</a>.</p>
-    {% if not project.hooks.count() %}
-    <div class="alert alert-block">
-      You haven't created any hooks yet for this project.
+{% block main_content %}
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('Webhooks') }}
     </div>
-    {% else %}
-    <table class="table table-vertical">
-      <thead>
-        <tr>
-          <th>Service Name</th>
-          <th>Created</th>
-          <th>Hook</th>
-          <th style="text-align: center;">Messages</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for hook in project.hooks %}
-        <tr>
-          <td>{{ hook.hook.SERVICE_NAME }}</td>
-          <td>
-            {{ hook.created.strftime("%Y-%m-%d") }}
-          </td>
-          <td>
-            <input
-              name="hook"
-              type="text"
-              value="{{ url_for('.hook_receive', pid=project.id, key=hook.key, _external=True) }}"
-              readonly
-            />
-          </td>
-          <td style="text-align: center;">
-            {{ hook.message_count }}
-          </td>
-          <td>
-            <div class="pull-right">
-              <a href="{{ url_for('.edit_hook', p=project.name, u=user.username, hid=hook.id) }}" class="btn btn-small">
-                <i class="icon-pencil"></i> Edit Hook
-              </a>
-              <a href="{{ url_for('.delete_hook', p=project.name, u=user.username, hid=hook.id) }}" class="btn btn-small btn-danger">
-                <i class="icon-trash icon-white"></i> Delete
-              </a>
+    <div class="card-body">
+      <div class="card-text">
+        <a id="webhooks"></a>
+        {% trans %}
+        Webhooks are endpoints for 3rd party services (and scripts) capable of making HTTP POST requests.
+        Messages received on these webhooks will be formatted and forwarded to your configured channels.
+        {% endtrans %}
+      </div>
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for hook in project.hooks %}
+        <li class="list-group-item">
+          <div class="d-flex w-100 justify-content-between">
+            <span>
+              {{ hook.hook.SERVICE_NAME }}
+              <span class="badge rounded-pill text-bg-secondary">
+                {{ hook.message_count }}
+              </span>
+            </span>
+            <div>
+              <a class="btn btn-sm btn-secondary"
+                href="{{ url_for('.edit_hook', p=project.name, u=user.username, hid=hook.id) }}">
+                {{ _("Edit") }}</a>
+              <a class="btn btn-sm btn-danger"
+                href="{{ url_for('.delete_hook', p=project.name, u=user.username, hid=hook.id) }}">
+                {{ _("Delete") }}</a>
             </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% endif %}
-    {% if can_modify %}
-    <a href="{{ url_for('.new_hook', p=project.name, u=user.username) }}" class="btn btn-success">
-      <i class="icon-plus"></i> Create New Hook
-    </a>
-    {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="card-footer">
+      <a class="btn btn-success"
+        href="{{ url_for('.new_hook', p=project.name, u=user.username) }}">
+        {{ _("Create New Webhook") }}
+      </a>
+    </div>
   </div>
-{% endif %}
-{#
-  Anyone can see what channels the project is announced to, so
-  long as they're marked public.
-#}
-  <a id="channels"></a>
-  <h2>IRC Channels</h2>
-  <div class="section-content">
-    <p>Any messages received by this project will be forwarded to any of the IRC channels that have been added to them. An operator of the channel may blacklist the project, or ban the bot from entering their channel to prevent abuse.</p>
-    {% if not visible_channels.count() %}
-    <div class="alert alert-block">
-      No public channels have been added to this project.
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('IRC Channels') }}
     </div>
-    {% else %}
-    <table class="table table-striped table-vertical">
-      <thead>
-        <tr>
-          <th>Channel</th>
-          <th>Host</th>
-          <th>Port</th>
-          <th>SSL</th>
-          {% if can_modify %}
-          <th style="text-align: center;">Public</th>
-          <th></th>
-          {% endif %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for channel in visible_channels %}
-        <tr>
-          <td>{{ channel.channel }}</td>
-          <td>{{ channel.host }}</td>
-          <td>{{ channel.port }}</td>
-          <td><i class="icon-{% if channel.ssl %}ok{% else %}remove{% endif %}"></i></td>
-          {% if can_modify %}
-          <td style="text-align: center;">
-            <i class="icon-{% if channel.public %}ok{% else %}lock{% endif %}"></i>
-          </td>
-          <td>
-            <div class="pull-right">
-              <div class="pull-right">
-              <a href="{{ url_for('.delete_channel', p=project.name, u=user.username, cid=channel.id) }}" class="btn btn-small btn-danger">
-                <i class="icon-trash icon-white"></i> Delete
-              </a>
+    <div class="card-body">
+      <div class="card-text">
+        <a id="irc-channels"></a>
+        {% trans %}
+          Messages generated by webhooks can be forwarded to any number of IRC channels.
+        {% endtrans %}
+      </div>
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for channel in project.channels %}
+        <li class="list-group-item">
+          <div class="d-flex w-100 justify-content-between">
+            <span>
+              {{ channel.channel }}
+              <span class="text-accent1">/</span>
+              {{ channel.network.host }}
+              <span class="text-accent1">/</span>
+              {{ channel.network.port }}
+            </span>
+            <div>
+              <a class="btn btn-sm btn-danger"
+                 href="{{ url_for('.delete_channel', p=project.name, u=user.username, cid=channel.id) }}">
+                {{ _('Delete') }}</a>
             </div>
-            </div>
-          </td>
-          {% endif %}
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% endif %}
-    {% if can_modify %}
-    <a href="{{ url_for('.new_channel', p=project.name, u=user.username) }}" class="btn btn-success">
-      <i class="icon-plus"></i> Add New Channel
-    </a>
-    {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="card-footer">
+      <a class="btn btn-success"
+        href="{{ url_for('.new_channel', p=project.name, u=user.username) }}">
+        {{ _("Create New Channel") }}
+      </a>
+    </div>
   </div>
 {% endblock %}

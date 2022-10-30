@@ -2,16 +2,24 @@
 {% import "ui/forms.html" as forms %}
 
 {% block content_page %}
-  <h2>New Project</h2>
-  <div class="section-content">
-    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-      {{ form.hidden_tag() }}
-      {{ forms.render_field(form.name) }}
-      {{ forms.render_field(form.website ) }}
-      {{ forms.render_field(form.public) }}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Create Project</button>
-        <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn">Cancel</a>
+  <h6 class="display-6 py-3 fw-bold">
+    {{ _("New Project") }}
+  </h6>
+  <div class="card">
+    <form method="POST">
+      <div class="card-body">
+        {{ form.hidden_tag() }}
+        {{ forms.render_field(form.name) }}
+        {{ forms.render_field(form.website ) }}
+        {{ forms.render_field(form.public) }}
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">
+          {{ _("Create Project") }}
+        </button>
+        <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-warning">
+          {{ _("Cancel") }}
+        </a>
       </div>
     </form>
   </div>

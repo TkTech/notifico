@@ -15,119 +15,72 @@
   <head>
     <meta charset="utf-8">
     <title>{{ page_title|default('Notifico!') }}</title>
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <link href="/css/bootstrap.css?v=3" rel="stylesheet">
+    <link href="/css/bootstrap.min.css?v=3" rel="stylesheet">
     <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     {% block style %}
     {% endblock style %}
-    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="/css/custom.css" rel="stylesheet">
-
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    {% if config.GOOGLE %}
-    <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', '{{ config.GOOGLE }}']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-
-    </script>
-    {% endif %}
   </head>
 
-  <body>
-    <div class="wrapper">
-      <div class="nav-container">
-        <div class="container">
-          <div class="navbar nav-top">
-            <div class="navbar-inner">
-              <a class="brand" href="/">Notifico</a>
-              <ul class="nav pull-right">
-                <li class="{{ active('public.landing') }}">
-                  <a href="/"><i class="icon-home"></i> Home</a>
-                </li>
-                {% if g.user %}
-                <li class="{{ active('projects.') }}">
-                  <a href="{{ url_for('projects.dashboard', u=g.user.username) }}">
-                    <i class="icon-th"></i> Projects
-                  </a>
-                </li>
-                <!-- User settings and actions  -->
-                <li class="dropdown {{ active('account.') }}">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                      <i class="icon-user"></i> {{ g.user.username }} <i class="icon-angle-down"></i> 
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li>
-                      <a href="{{ url_for('account.settings') }}">
-                        <i class="icon-cog"></i> Settings
-                      </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href="{{ url_for('account.logout') }}">
-                            <i class="icon-signout"></i> Logout
-                        </a>
-                    </li>
-                  </ul>
-                </li>
-                {% else %}
-                <li>
-                  <a href="{{ url_for('account.login') }}">
-                    <i class="icon-signin"></i> Login
-                  </a>
-                </li>
-                <li>
-                  <a href="{{ url_for('account.register') }}">
-                    <i class="icon-plus"></i> Register
-                  </a>
-                </li>
-                {% endif %}
-              </ul>
-            </div>
-          </div>
-        </div>
+  <body class="d-flex flex-column min-vh-100 bg-light text-dark">
+    <nav class="py-2">
+      <div class="container d-flex flex-wrap">
+        <ul class="nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link link-dark px-2" href="{{ url_for('public.landing') }}">
+              {{ _('Home') }}
+            </a>
+          </li>
+          {% if g.user %}
+          <li class="nav-item">
+            <a class="nav-link link-dark px-2"
+               href="{{ url_for('projects.dashboard', u=g.user.username) }}">
+              {{ _('Projects') }}
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+        <ul class="nav">
+          {% if g.user %}
+            <li class="nav-item">
+              <a class="nav-link link-dark px-2" href="{{ url_for('settings.security') }}">
+                {{ _('Settings') }}
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link link-dark px-2" href="{{ url_for('account.logout') }}">
+                {{ _('Logout') }}
+              </a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link link-dark px-2" href="{{ url_for('account.login') }}">
+                {{ _('Login') }}
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link link-dark px-2" href="{{ url_for('account.register') }}">
+                {{ _('Register') }}
+              </a>
+            </li>
+          {% endif %}
+        </ul>
       </div>
-      <div class="container content">
-        {% block content %}
-        {% endblock content %}
-      </div>
+    </nav>
+    <div class="container content">
+      {% block content %}
+      {% endblock content %}
     </div>
-    <div class="footer">
-      <div class="container">
-        <div class="row-fluid">
-          <div class="span12 footer-copyright">
-            Copyright &copy; <span class="current_year">2013</span> Tyler Kennedy
-          </div>
+    <div class="footer mt-auto py-3 text-center text-muted container small">
+      <div class="row">
+        <div class="col">
+          Copyright &copy; 2012-2022 <a href="https://tkte.ch">Tyler Kennedy</a>
         </div>
       </div>
     </div>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="/js/jquery.min.js"><\/script>')</script>
-    <script src="/js/bootstrap.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
     {% block script %}
-    <script>
-      $(function(){
-          // Focus on the username box, but only if
-          // the user hasn't already focused on something else.
-          if($(document.activeElement).is('body')) {
-              $('.focus').focus();
-          }
-
-          $('.current_year').text(new Date().getFullYear());
-      });
-    </script>
     {% endblock %}
   </body>
 </html>

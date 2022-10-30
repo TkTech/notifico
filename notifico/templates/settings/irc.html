@@ -1,0 +1,51 @@
+{% extends "settings/base.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block main_content %}
+<div class="card mt-4">
+  <div class="card-header">
+    {{ _('Custom IRC Networks') }}
+  </div>
+  <div class="card-body">
+    <div class="card-text">
+      {% trans %}
+        Add custom IRC networks to use with any of your projects.
+      {% endtrans %}
+      <div class="alert alert-info py-2 my-3">
+        {% trans %}
+          Note that your custom networks may disappear over time if the system determines
+          they are duplicates of global networks, or they're popular enough to become
+          global networks.
+        {% endtrans %}
+      </div>
+    </div>
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for network in networks %}
+      <li class="list-group-item">
+        <div class="d-flex w-100 justify-content-between">
+            <span>
+              {{ network.host }}
+              <span class="text-accent1">/</span>
+              {{ network.port }}
+              {% if network.ssl %}
+              <span class="text-accent1">/</span>
+              {{ _('Using SSL') }}
+              {% endif %}
+            </span>
+          <div>
+            <a class="btn btn-sm btn-secondary"
+               href="{{ url_for('.irc_network_edit', network_id=network.id) }}">
+                {{ _("Edit") }}</a>
+          </div>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="card-footer">
+    <a class="btn btn-primary" href="{{ url_for('.irc_network_new') }}">
+      {{ _('Add Network') }}
+    </a>
+  </div>
+</div>
+{% endblock %}

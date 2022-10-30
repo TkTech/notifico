@@ -1,77 +1,74 @@
 {% extends "layouts/main.html" %}
 
 {% block content_page %}
-<div class="landing-unit">
-  <h1 class="landing-unit-title">Notifico</h1>
-  <p class="lead">
-    Notifico is an open-source project that relays webhooks from common services to IRC
-    networks, such as GitHub, JIRA, Gitea, Jenkins, and Bitbucket.
-  </p>
-  {% if not g.user %}
-  <p>
-    <a class="btn btn-success btn-large" href="{{ url_for('account.register') }}">
-      <i class="icon-plus"></i> Sign Up
-    </a>
-  </p>
-  <p>
-    <small class="muted">
-      Already have an account? <a href="{{ url_for('account.login') }}">Login</a> instead.
-    </small>
-  </p>
-  {% endif %}
-</div>
-<div class="row-fluid">
-  <div class="span4">
-    <div class="stats-box">
-      <div class="stats-value">
-        {{ total_messages }}
+  <div class="text-center py-3">
+    <h1 class="display-5 fw-bold">
+      Notifico
+    </h1>
+    <div class="col-lg-6 mx-auto">
+      <p class="fs-5 mb-4">
+        {% trans url="https://github.com/tktech/notifico" %}
+        Notifico is an <a href="{{ url }}">open-source</a> project that relays webhooks from common services to IRC
+        networks, such as GitHub, JIRA, Gitea, Jenkins, and Bitbucket.
+        {% endtrans %}
+      </p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        {% if not g.user %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('account.register') }}">
+          {{ _('Sign Up') }}
+        </a>
+        {% endif %}
       </div>
-      <span class="muted">Messages Delivered</span>
     </div>
   </div>
-  <div class="span4">
-    <div class="stats-box">
-      <div class="stats-value">
-        {{ total_users }}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 mb-4 g-3">
+    <div class="col">
+      <div class="p-4 bg-white text-center">
+        <div class="stats-value py-1 text-accent1">
+          {{ total_messages }}
+        </div>
+        <span>{{ _('Messages Delivered') }}</span>
       </div>
-      <span class="muted">Users</span>
+    </div>
+    <div class="col">
+      <div class="p-4 bg-white text-center">
+        <div class="stats-value py-1 text-accent1">
+          {{ total_users }}
+        </div>
+        <span>{{ _('Users') }}</span>
+      </div>
+    </div>
+    <div class="col">
+      <div class="p-4 bg-white text-center">
+        <div class="stats-value py-1 text-accent1">
+          {{ total_projects }}
+        </div>
+        <span>{{ _('Projects') }}</span>
+      </div>
+    </div>
+    <div class="col">
+      <div class="p-4 bg-white text-center">
+        <div class="stats-value py-1 text-accent1">
+          {{ services|length }}
+        </div>
+        <span>{{ _('Supported Services') }}</span>
+      </div>
+    </div>
+    <div class="col">
+      <div class="p-4 bg-white text-center">
+        <div class="stats-value py-1 text-accent1">
+          {{ total_networks }}
+        </div>
+        <span>{{ _('IRC Networks') }}</span>
+      </div>
+    </div>
+    <div class="col">
+      <div class="p-4 bg-white text-center">
+        <div class="stats-value py-1 text-accent1">
+          {{ total_channels }}
+        </div>
+        <span>{{ _('IRC Channels') }}</span>
+      </div>
     </div>
   </div>
-  <div class="span4">
-    <div class="stats-box">
-      <div class="stats-value">
-        {{ total_networks }}
-      </div>
-      <span class="muted">IRC Networks</span>
-    </div>
-  </div>
-</div>
-<div class="row-fluid">
-  <div class="span4">
-    <div class="stats-box">
-      <div class="stats-value">
-        {{ total_projects }}
-      </div>
-      <span class="muted">Projects</span>
-    </div>
-  </div>
-  <div class="span4">
-    <div class="stats-box">
-      <div class="stats-value">
-        {{ total_channels }}
-      </div>
-      <span class="muted">Channels</span>
-    </div>
-  </div>
-</div>
-<h4>Supported Services</h4>
-{% for row in services.values()|slice(3) %}
-<div class="row-fluid">
-  {% for service in row %}
-    <div class="span4">
-      {{ service.SERVICE_NAME }}
-    </div>
-  {% endfor %}
-</div>
-{% endfor %}
 {% endblock %}

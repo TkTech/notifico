@@ -16,15 +16,26 @@ class UserRegisterForm(wtf.FlaskForm):
     ], description=(
         'Your username is public and used as part of your project name.'
     ))
-    email = fields.StringField('Email', validators=[
-        validators.InputRequired(),
-        validators.Email()
-    ])
-    password = fields.PasswordField('Password', validators=[
-        validators.InputRequired(),
-        validators.Length(5),
-        validators.EqualTo('confirm', 'Passwords do not match.'),
-    ])
+    email = fields.StringField(
+        'Email',
+        validators=[
+            validators.InputRequired(),
+            validators.Email()
+        ],
+        description=(
+            'Your email is private, and will never be visible to others.'
+            ' We\'ll only send you emails if you ask us to, such as a password'
+            ' reset.'
+        )
+    )
+    password = fields.PasswordField(
+        'Password',
+        validators=[
+            validators.InputRequired(),
+            validators.Length(5),
+            validators.EqualTo('confirm', 'Passwords do not match.'),
+        ]
+    )
     confirm = fields.PasswordField('Confirm Password')
 
     def validate_username(form, field):
@@ -38,12 +49,18 @@ class UserRegisterForm(wtf.FlaskForm):
 
 
 class UserLoginForm(wtf.FlaskForm):
-    username = fields.StringField('Username', validators=[
-        validators.InputRequired()
-    ])
-    password = fields.PasswordField('Password', validators=[
-        validators.InputRequired()
-    ])
+    username = fields.StringField(
+        'Username',
+        validators=[
+            validators.InputRequired()
+        ]
+    )
+    password = fields.PasswordField(
+        'Password',
+        validators=[
+            validators.InputRequired()
+        ]
+    )
 
     def validate_password(form, field):
         if not User.login(form.username.data, field.data):

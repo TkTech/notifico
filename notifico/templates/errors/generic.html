@@ -1,0 +1,13 @@
+{% extends "layouts/main.html" %}
+
+{% block content_page %}
+  <h6 class="display-6 py-3 fw-bold">
+    {{ _("Whoops!") }} - {{ error_code|default(_('An error has occurred.')) }}
+  </h6>
+  <p>
+    {{ error_message|default(_('An error has occurred.')) }}
+  </p>
+    <a href="{{ url_for('public.landing') }}">
+      &larr; {{ _('Home') }}
+    </a>
+{% endblock %}

@@ -1,15 +1,14 @@
-# -*- coding: utf8 -*-
-from sqlalchemy import func
-from sqlalchemy.ext.hybrid import Comparator
+from notifico.models.user import User, Role, Permission
+from notifico.models.channel import Channel, IRCNetwork
+from notifico.models.hook import Hook
+from notifico.models.project import Project
 
-
-class CaseInsensitiveComparator(Comparator):
-    def __eq__(self, other):
-        return func.lower(self.__clause_element__()) == func.lower(other)
-
-
-from notifico.models.user import *
-from notifico.models.bot import *
-from notifico.models.channel import *
-from notifico.models.hook import *
-from notifico.models.project import *
+ALL_MODELS = [
+    User,
+    Role,
+    Permission,
+    Channel,
+    IRCNetwork,
+    Hook,
+    Project
+]

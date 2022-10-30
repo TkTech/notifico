@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
 Utilities for pretty-printing data[types].
 """
-__all__ = ('pretty_date', 'plural', 'trim', 'fix_link')
-import re
 import sys
 from datetime import datetime
+
+from notifico.service import available_services
 
 
 def pretty_date(time=False):
@@ -76,11 +75,8 @@ def trim(docstring):
     return '\n'.join(trimmed)
 
 
-def fix_link(s):
-    """
-    If the string `s` (which is a link) does not begin with http or
-    https, append http and return it.
-    """
-    if not re.match(r'^https?://', s):
-        s = 'http://{0}'.format(s)
-    return s
+def service_name(service_id):
+    try:
+        return available_services()[service_id].SERVICE_NAME
+    except KeyError:
+        return 'Unknown'

@@ -1,13 +1,11 @@
-.stats-box {
-    text-align: center;
-    padding: 24px;
-    background: #f9f9f9;
-    border: 1px solid #CCC;
-    margin-top: 8px;
-    margin-bottom: 8px;
+.constrained-300 {
+    max-width: 300px;
 }
 
-.stats-value {
-    font-size: 120%;
+.constrained-500 {
+    max-width: 500px;
+}
+
+.card-header {
     font-weight: bold;
 }
