@@ -4,10 +4,10 @@
 {% block main_content %}
   <div class="card mt-4">
     <form method="POST">
+      <div class="card-header">
+        {{ _('New IRC Channel') }}
+      </div>
       <div class="card-body">
-        <h5 class="card-title border-bottom border-1 border-accent2 pb-2 mb-2">
-          {{ _('New IRC Channel') }}
-        </h5>
         <div class="card-text">
           {{ form.hidden_tag() }}
           {{ forms.render_field(form.channel) }}
