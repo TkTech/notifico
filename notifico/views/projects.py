@@ -413,6 +413,9 @@ def new_channel(u, p: Project):
 
     if form.validate_on_submit():
         network = IRCNetwork.query.get(form.network.data)
+        if not IRCNetwork.can(Action.READ, obj=network):
+            abort(403)
+
         channel = form.channel.data
 
         # Make sure this isn't a duplicate channel before we create it.
