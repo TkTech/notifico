@@ -85,9 +85,11 @@ def create_app():
     from notifico.views import public
     from notifico.views import projects
     from notifico.views import settings
+    from notifico.views import admin
 
     app.register_blueprint(account.account, url_prefix='/u')
     app.register_blueprint(settings.settings_view, url_prefix='/u/settings')
+    app.register_blueprint(admin.admin_view, url_prefix='/a')
     app.register_blueprint(projects.projects)
     app.register_blueprint(public.public)
 

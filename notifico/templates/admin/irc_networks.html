@@ -1,0 +1,47 @@
+{% extends "admin/base.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block main_content %}
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('IRC Networks') }}
+    </div>
+    <div class="card-body text-bg-info text-dark">
+      <div class="card-text">
+        {{ _('This is a temporary view.') }}
+      </div>
+    </div>
+    <table class="table table-table-hover table-light table-borderless table-striped">
+      <thead>
+        <tr>
+          <th scope="col" class="text-center">{{ _('Channels') }}</th>
+          <th scope="col" class="text-center">{{ _('ID') }}</th>
+          <th scope="col">{{ _('Host') }}</th>
+          <th scope="col" class="text-center">{{ _('Port') }}</th>
+          <th scope="col" class="text-center">{{ _('SSL') }}</th>
+          <th scope="col" class="text-center">{{ _('Public') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for network, count in networks %}
+        <tr>
+          <td class="text-center">{{ count }}</td>
+          <td class="text-center">{{ network.id }}</td>
+          <td>
+            <a href="{{ network.url(network.Page.EDIT) }}" class="text-light">
+              {{ network.host }}
+            </a>
+          </td>
+          <td class="text-center">{{ network.port }}</td>
+          <td class="text-center {{ 'text-bg-warning' if not network.ssl }}">
+            {{ network.ssl }}
+          </td>
+          <td class="text-center">
+            {{ network.public|default(_('No'), True) }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

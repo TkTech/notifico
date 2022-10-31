@@ -1,8 +1,9 @@
 import datetime
+import enum
 from datetime import timezone
 from typing import Optional
 
-from flask import g
+from flask import g, url_for
 import sqlalchemy as sa
 from sqlalchemy import func, text, orm, or_
 from sqlalchemy.orm import Query
@@ -13,6 +14,10 @@ from notifico.permissions import HasPermissions, Permission
 
 
 class IRCNetwork(Base, HasPermissions):
+    class Page(enum.IntEnum):
+        DETAILS = 10
+        EDIT = 20
+
     __tablename__ = 'irc_network'
 
     id = sa.Column(sa.Integer, primary_key=True)
@@ -78,6 +83,18 @@ class IRCNetwork(Base, HasPermissions):
                 return True
 
         return False
+
+    def url(self, of: Page = Page.DETAILS) -> str:
+        match of:
+            case self.Page.EDIT:
+                return url_for(
+                    'settings.irc_network_edit',
+                    network_id=self.id
+                )
+            case _:
+                raise ValueError(
+                    f'Don\'t know how to generate a URL for {of=}.'
+                )
 
 
 class Channel(Base, HasPermissions):

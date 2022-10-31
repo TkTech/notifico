@@ -1,15 +1,16 @@
 import enum
+from functools import wraps
 
-from flask import g
+from flask import g, redirect, url_for
+
+
+class NotAllowed(Exception):
+    pass
 
 
 class Permission(enum.Enum):
     #: The superuser permission ignores all other permission checks.
     SUPERUSER = 'superuser'
-
-
-class NotAllowed(Exception):
-    pass
 
 
 class Action(enum.IntEnum):
@@ -51,3 +52,17 @@ class HasPermissions:
         be allowed to see.
         """
 
+
+def require_permission(permission: Permission):
+    """
+    A decorator which requires that there be a current user with the given
+    permission, otherwise it redirects to the login page.
+    """
+    def _decorator(f):
+        @wraps(f)
+        def _wrapped(*args, **kwargs):
+            if not has_permission(permission):
+                return redirect(url_for('account.login'))
+            return f(*args, **kwargs)
+        return _wrapped
+    return _decorator

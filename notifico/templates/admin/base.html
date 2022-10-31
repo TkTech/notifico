@@ -1,0 +1,14 @@
+{% extends "layouts/two_column.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block header %}
+  {{ _("Admin") }}
+{% endblock %}
+
+{% block sidebar %}
+  <div class="list-group py-4">
+    <a class="list-group-item list-group-item-action"
+       href="{{ url_for('.irc_networks') }}">
+      {{ _('IRC Networks') }}</a>
+  </div>
+{% endblock %}

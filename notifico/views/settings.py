@@ -7,7 +7,8 @@ from flask_babel import lazy_gettext as lg
 from wtforms import fields, validators
 from sqlalchemy import func, or_
 
-from notifico import user_required, db_session, Action
+from notifico import user_required, db_session, Action, has_permission, \
+    Permission
 from notifico.models import IRCNetwork
 from notifico.views.account_forms import UserPasswordForm, UserDeleteForm
 
@@ -125,9 +126,14 @@ def security():
 @user_required
 def irc():
     """
-    Allows a user to manage their custom IRC networks.
+    Allows a user to manage their custom IRC networks. For superusers, this
+    displays all networks and not just custom networks.
     """
-    networks = g.user.networks
+    if has_permission(Permission.SUPERUSER):
+        networks = db_session.query(IRCNetwork).all()
+    else:
+        networks = g.user.networks
+
     return render_template('settings/irc.html', networks=networks)
 
 

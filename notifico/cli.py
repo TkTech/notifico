@@ -1,13 +1,15 @@
 import asyncio
 import logging
 import datetime
+from typing import List
 
 import click
 from flask.cli import FlaskGroup
+from sqlalchemy import update, delete
 
 from notifico import create_app
 from notifico.database import db_session
-from notifico.models import Project, Role, Permission
+from notifico.models import Project, Role, Permission, IRCNetwork, Channel
 from notifico.models.user import User
 
 
@@ -31,6 +33,11 @@ def tools():
 @cli.group()
 def bots():
     """Bot management commands."""
+
+
+@cli.group()
+def irc():
+    """IRC utility commands."""
 
 
 @users.command()
@@ -158,6 +165,9 @@ def add_permission(name: str):
 
 @tools.command('add-default-roles')
 def add_default_roles():
+    """
+    Create the default user roles and permissions if they're missing.
+    """
     admin: Role = db_session.merge(Role(name='admin'))
     superuser: Permission = db_session.merge(Permission(name='superuser'))
 
@@ -176,6 +186,74 @@ def bots_start():
 
     logging.basicConfig(level=logging.DEBUG)
     asyncio.run(wait_for_events())
+
+
+@irc.command('set-public')
+@click.argument('network-id', type=int)
+@click.argument('public', type=int)
+def irc_set_public(network_id: int, public: int):
+    """
+    Sets the `public` value on a network
+    """
+    network: IRCNetwork = db_session.query(
+        IRCNetwork
+    ).filter(
+        IRCNetwork.id == network_id
+    ).first()
+
+    if not network:
+        click.echo('No such network.')
+        return
+
+    network.public = public
+    if public > 0:
+        # If a network is becoming global, it should no longer be associated
+        # with a specific user.
+        network.owner_id = None
+
+    db_session.add(network)
+    db_session.commit()
+
+
+@irc.command('merge')
+@click.argument('network-id', type=int)
+@click.argument('other-network', nargs=-1, type=int)
+def irc_merge(network_id: int, other_network: List[int]):
+    """
+    Merges the provided networks into `network_id`, and deletes the
+    now-redundant networks.
+    """
+    network: IRCNetwork = db_session.query(
+        IRCNetwork
+    ).filter(
+        IRCNetwork.id == network_id
+    ).first()
+
+    confirm = click.confirm(
+        f'This will merge {other_network} into {network_id}.'
+    )
+    if not confirm:
+        return
+
+    db_session.execute(
+        update(
+            Channel
+        ).where(
+            Channel.network_id.in_(other_network)
+        ).values(
+            network_id=network.id
+        )
+    )
+
+    db_session.execute(
+        delete(
+            IRCNetwork
+        ).where(
+            IRCNetwork.id.in_(other_network)
+        )
+    )
+
+    db_session.commit()
 
 
 if __name__ == '__main__':

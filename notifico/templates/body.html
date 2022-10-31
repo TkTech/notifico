@@ -42,6 +42,13 @@
         </ul>
         <ul class="nav">
           {% if g.user %}
+            {% if has_permission(Permission.SUPERUSER) %}
+              <li class="nav-item">
+                <a class="nav-link link-accent3 px-2" href="{{ url_for('admin.dashboard') }}">
+                  {{ _('Admin') }}
+                </a>
+              </li>
+            {% endif %}
             <li class="nav-item">
               <a class="nav-link link-dark px-2" href="{{ url_for('settings.security') }}">
                 {{ _('Settings') }}

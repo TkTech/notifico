@@ -39,7 +39,7 @@
         </div>
       </div>
       <ul class="list-group list-group-flush">
-        {% for channel in network.channels %}
+        {% for channel in network.channels[:10] %}
           <li class="list-group-item">
             {% trans name=channel.channel, project=channel.project.name, url=channel.project.url() %}
               <strong>{{ name }}</strong> (<a href="{{ url }}" class="stretched-link">{{ project }}</a>).
@@ -50,6 +50,13 @@
             <em>{{ _('No channels use this network yet.') }}</em>
           </li>
         {% endfor %}
+        {% if network.channels.count() > 10 %}
+          <li class="list-group-item">
+            {% trans count=network.channels.count() - 10 %}
+              <em>...and {{ count }} other channels.</em>
+            {% endtrans %}
+          </li>
+        {% endif %}
       </ul>
     </div>
     <div class="card mt-4">

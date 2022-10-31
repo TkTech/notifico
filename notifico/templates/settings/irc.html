@@ -11,14 +11,14 @@
       {% trans %}
         Add custom IRC networks to use with any of your projects.
       {% endtrans %}
-      <div class="alert alert-info py-2 my-3">
-        {% trans %}
-          Note that your custom networks may disappear over time if the system determines
-          they are duplicates of global networks, or they're popular enough to become
-          global networks.
-        {% endtrans %}
-      </div>
     </div>
+  </div>
+  <div class="alert alert-info py-2 my-3">
+    {% trans %}
+      Note that your custom networks may disappear over time if the system determines
+      they are duplicates of global networks, or they're popular enough to become
+      global networks.
+    {% endtrans %}
   </div>
   <ul class="list-group list-group-flush">
     {% for network in networks %}
