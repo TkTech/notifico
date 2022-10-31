@@ -39,11 +39,26 @@
         <span class="text-accent1">/</span>
         {{ service.SERVICE_NAME }}
       </div>
+      {% if action == 'edit' and hook %}
+        <div class="alert alert-info">
+          <div class="pb-2">
+            {% trans %}
+              Here's your configured webhook URL.
+            {% endtrans %}
+          </div>
+          <label class="visually-hidden" for="webhook">{{ _('Webhook URL') }}</label>
+          <input
+            id="webhook"
+            class="w-100"
+            readonly
+            value="{{ hook.url(hook.Page.TRIGGER, _external=True) }}" />
+        </div>
+      {% endif %}
       <div class="card-body">
         <div class="card-text">
           {% set service_description = service.service_description() %}
           {% if service_description %}
-            <div class="pb-4 pt-3">
+            <div class="pb-4 pt-1">
               {{ service_description|safe }}
             </div>
           {% endif %}

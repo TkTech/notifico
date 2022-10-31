@@ -316,7 +316,8 @@ def edit_hook(u, p: Project, hid):
         services=available_services(),
         service=hook_service,
         form=form,
-        action='edit'
+        action='edit',
+        hook=h
     )
 
 
