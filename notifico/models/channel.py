@@ -129,19 +129,6 @@ class Channel(Base, HasPermissions):
     )
 
     @classmethod
-    def channel_count_by_network(cls):
-        q = (
-            db_session.query(
-                Channel.host, func.count(Channel.channel).label('count')
-            )
-            .filter_by(public=True)
-            .group_by(Channel.host)
-            .order_by(text('-count'))
-        )
-        for network, channel_count in q:
-            yield network, channel_count
-
-    @classmethod
     def only_readable(cls, q: Query) -> Query:
         if has_permission(Permission.SUPERUSER):
             return q

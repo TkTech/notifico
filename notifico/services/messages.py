@@ -1,5 +1,3 @@
-# -*- coding: utf8 -*-
-__all__ = ('MessageService',)
 import json
 
 
@@ -29,7 +27,7 @@ class MessageService(object):
             )
         ]
 
-    def send_message(self, message, channel):
+    def send_message(self, message: str, channel):
         """
         Sends `message` to `channel`.
         """
@@ -43,9 +41,9 @@ class MessageService(object):
             # Destination.
             'channel': {
                 'channel': channel.channel,
-                'host': channel.host,
-                'port': channel.port,
-                'ssl': channel.ssl
+                'host': channel.network.host,
+                'port': channel.network.port,
+                'ssl': channel.network.ssl
             }
         }
         message_dump = json.dumps(final_message)
