@@ -393,10 +393,23 @@ def new_channel(u, p: Project):
     ).all()
 
     form = ChannelDetailsForm()
-    form.network.choices = [
-        (network.id, f'{network.host}:{network.port} (SSL:{network.ssl})')
-        for network in networks
-    ]
+    form.network.choices = []
+
+    for network in networks:
+        if network.public > 0:
+            form.network.choices.append(
+                (network.id, f'{network.host}')
+            )
+        elif network.ssl:
+            form.network.choices.append((
+                network.id,
+                f'★ {network.host}:{network.port} (Using SSL)'
+            ))
+        else:
+            form.network.choices.append((
+                network.id,
+                f'★ {network.host}:{network.port}'
+            ))
 
     if form.validate_on_submit():
         network = IRCNetwork.query.get(form.network.data)
