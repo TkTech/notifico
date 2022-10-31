@@ -263,13 +263,21 @@ def new_hook(u, p: Project, sid):
         p.hooks.append(h)
         db_session.add(h)
         db_session.commit()
-        return redirect(url_for('.details', p=p.name, u=u.username))
+        return render_template(
+            'projects/hook_ready.html',
+            project=p,
+            hook=h
+        )
     elif form is None and request.method == 'POST':
         h = Hook(service_id=sid)
         p.hooks.append(h)
         db_session.add(h)
         db_session.commit()
-        return redirect(url_for('.details', p=p.name, u=u.username))
+        return render_template(
+            'projects/hook_ready.html',
+            project=p,
+            hook=h
+        )
 
     return render_template(
         'projects/new_hook.html',

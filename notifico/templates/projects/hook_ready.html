@@ -1,0 +1,29 @@
+{% extends "projects/project_base.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block main_content %}
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('Ready to go!') }}
+    </div>
+    <div class="card-body">
+      <div class="card-text text-center">
+        {{ _('Your webhook is now ready! Copy it below.') }}
+        <small class="d-block text-muted">
+          {{ _('Tip: You can find this again later by editing your webhook.') }}
+        </small>
+        <div class="py-3">
+          <label class="visually-hidden" for="webhook">{{ _('Webhook URL') }}</label>
+          <input
+            id="webhook"
+            class="w-100 form-control-lg"
+            readonly
+            value="{{ hook.url(hook.Page.TRIGGER, _external=True) }}" />
+        </div>
+        <a class="btn btn-success" href="{{ project.url(project.Page.DETAILS) }}">
+          {{ _('Continue') }}
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
