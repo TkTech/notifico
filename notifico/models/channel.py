@@ -85,7 +85,7 @@ class IRCNetwork(Base, HasPermissions):
         match action:
             case Action.READ:
                 if g.user and obj:
-                    return g.user_id == obj.owner_id or obj.public > 0
+                    return g.user.id == obj.owner_id or obj.public > 0
                 elif obj:
                     return obj.public > 0
             case Action.UPDATE | Action.DELETE:
