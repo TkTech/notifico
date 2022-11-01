@@ -4,7 +4,7 @@ from flask import Blueprint, render_template
 from sqlalchemy import func, text
 
 from notifico import Permission, db_session
-from notifico.models import IRCNetwork, NetworkEvent
+from notifico.models import IRCNetwork, NetworkEvent, User
 from notifico.permissions import require_permission
 
 admin_view = Blueprint('admin', __name__)
@@ -18,12 +18,21 @@ def dashboard():
     ).order_by(
         NetworkEvent.created.desc()
     ).limit(
-        50
+        15
+    )
+
+    users = db_session.query(
+        User
+    ).order_by(
+        User.joined.desc()
+    ).limit(
+        15
     )
 
     return render_template(
         'admin/dashboard.html',
-        irc_events=irc_events
+        irc_events=irc_events,
+        users=users
     )
 
 

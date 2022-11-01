@@ -40,4 +40,39 @@
       </tbody>
     </table>
   </div>
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('Newest Users') }}
+    </div>
+    <table class="table table-borderless table-light table-striped mb-0">
+      <thead>
+        <tr class="table-dark text-dark">
+          <th scope="col">{{ _('Username') }}</th>
+          <th scope="col">{{ _('Joined') }}</th>
+          <th scope="col">{{ _('Joined') }}</th>
+          <th scope="col" class="text-center">{{ _('Projects') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td class="w-100">
+              <a href="{{ user.url(user.Page.DASHBOARD) }}" class="text-light">
+                {{ user.username }}
+              </a>
+            </td>
+            <td class="text-nowrap">
+              {{ user.email }}
+            </td>
+            <td class="text-nowrap">
+              {{ user.joined|pretty_date }}
+            </td>
+            <td class="text-nowrap text-center">
+              {{ user.projects.count() }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

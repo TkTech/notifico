@@ -1,9 +1,10 @@
+import enum
 import hashlib
 import datetime
 import secrets
 from typing import Optional
 
-from flask import g, current_app
+from flask import g, current_app, url_for
 import sqlalchemy as sa
 from sqlalchemy import orm
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -29,6 +30,9 @@ permission_association = sa.Table(
 
 
 class User(Base, HasPermissions):
+    class Page(enum.IntEnum):
+        DASHBOARD = 10
+
     __tablename__ = 'user'
 
     id = sa.Column(sa.Integer, primary_key=True)
@@ -133,6 +137,18 @@ class User(Base, HasPermissions):
                     return True
 
         return False
+
+    def url(self, of: Page = Page.DASHBOARD) -> str:
+        match of:
+            case self.Page.DASHBOARD:
+                return url_for(
+                    'projects.dashboard',
+                    u=self.username
+                )
+            case _:
+                raise ValueError(
+                    f'Don\'t know how to generate a URL for {of=}.'
+                )
 
 
 class Permission(Base):
