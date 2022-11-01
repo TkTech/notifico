@@ -2,6 +2,7 @@ import inspect
 import asyncio
 import dataclasses
 from collections import defaultdict
+from functools import wraps
 from typing import Optional, Dict, Set, Callable, Union, Iterable
 
 from notifico.botifico.errors import ReadExceededError
@@ -16,6 +17,17 @@ class Network:
     host: str
     port: int
     ssl: bool
+
+
+def exception_catcher(f: Callable):
+    @wraps(f)
+    async def _wrapped(self: 'Bot', *args, **kwargs):
+        try:
+            return await f(self, *args, **kwargs)
+        except Exception as exc:
+            self.task_exception(exc)
+            raise
+    return _wrapped
 
 
 class Bot:
@@ -46,6 +58,7 @@ class Bot:
     def __repr__(self):
         return f'<{self.__class__.__name__}({self.network!r})>'
 
+    @exception_catcher
     async def connect(self):
         """
         Attempts to connect the bot to its network and starts processing
@@ -122,6 +135,7 @@ class Bot:
                 get_queue = asyncio.create_task(self.message_queue.get())
 
     def task_exception(self, ex: Exception):
+        await self.emit_event(Event.on_exception, ex=ex)
         raise ex
 
     async def emit_event(self, event: Union[str, Event], **kwargs):

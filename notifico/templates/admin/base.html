@@ -8,6 +8,9 @@
 {% block sidebar %}
   <div class="list-group py-4">
     <a class="list-group-item list-group-item-action"
+       href="{{ url_for('.dashboard') }}">
+      {{ _('Dashboard') }}</a>
+    <a class="list-group-item list-group-item-action"
        href="{{ url_for('.irc_networks') }}">
       {{ _('IRC Networks') }}</a>
   </div>

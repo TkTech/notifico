@@ -8,6 +8,8 @@ class Event(enum.Enum):
     on_disconnect = 'on_disconnect'
     #: Triggered when a message is received.
     on_message = 'on_message'
+    #: Triggered when an unhandled exception occurs.
+    on_exception = 'on_exception'
 
     #: Called just before a message is written to a Bot' socket, useful for
     #: implementing rate limiting.

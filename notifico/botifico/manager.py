@@ -90,6 +90,8 @@ class ChannelBot(Bot):
             # our manager's tracking set.
             pass
 
+        super().task_exception(ex)
+
 
 class Manager(Plugin):
     """

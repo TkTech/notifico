@@ -4,7 +4,7 @@ from flask import Blueprint, render_template
 from sqlalchemy import func, text
 
 from notifico import Permission, db_session
-from notifico.models import IRCNetwork
+from notifico.models import IRCNetwork, NetworkEvent
 from notifico.permissions import require_permission
 
 admin_view = Blueprint('admin', __name__)
@@ -13,7 +13,18 @@ admin_view = Blueprint('admin', __name__)
 @admin_view.route('/')
 @require_permission(Permission.SUPERUSER)
 def dashboard():
-    return render_template('admin/base.html')
+    irc_events = db_session.query(
+        NetworkEvent
+    ).order_by(
+        NetworkEvent.created.desc()
+    ).limit(
+        50
+    )
+
+    return render_template(
+        'admin/dashboard.html',
+        irc_events=irc_events
+    )
 
 
 @admin_view.route(

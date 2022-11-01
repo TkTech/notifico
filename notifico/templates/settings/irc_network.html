@@ -60,6 +60,38 @@
       </ul>
     </div>
     <div class="card mt-4">
+      <div class="card-header">
+        {{ _('Event Log') }}
+      </div>
+      <table class="table table-borderless table-light mb-0">
+        <thead>
+          <tr class="table-dark text-dark">
+            <th scope="col">{{ _('When') }}</th>
+            <th scope="col">{{ _('Description') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in network.events.limit(10) %}
+            <tr class="table-{{ {
+              event.Event.CRITICAL: 'danger',
+              event.Event.ERROR: 'danger',
+              event.Event.WARNING: 'warning',
+              event.Event.INFO: 'info'
+            }.get(event.event) }}">
+              <td class="text-nowrap">{{ event.created|pretty_date }}</td>
+              <td class="w-100">{{ event.description }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="2">
+                <em>{{ _('No events yet on this IRC network.') }}</em>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card mt-4">
       <form method="POST">
         <div class="card-header">
           {{ _('Delete Network') }}

@@ -1,5 +1,5 @@
 from notifico.models.user import User, Role, Permission
-from notifico.models.channel import Channel, IRCNetwork
+from notifico.models.channel import Channel, IRCNetwork, NetworkEvent
 from notifico.models.hook import Hook
 from notifico.models.project import Project
 
@@ -10,5 +10,6 @@ ALL_MODELS = [
     Channel,
     IRCNetwork,
     Hook,
-    Project
+    Project,
+    NetworkEvent
 ]

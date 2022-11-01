@@ -5,11 +5,11 @@ from typing import Optional
 
 from flask import g, url_for
 import sqlalchemy as sa
-from sqlalchemy import func, text, orm, or_
+from sqlalchemy import orm, or_
 from sqlalchemy.orm import Query
 
 from notifico import Action, has_permission
-from notifico.database import Base, db_session
+from notifico.database import Base
 from notifico.permissions import HasPermissions, Permission
 
 
@@ -17,6 +17,13 @@ class IRCNetwork(Base, HasPermissions):
     class Page(enum.IntEnum):
         DETAILS = 10
         EDIT = 20
+
+    class Status(enum.IntEnum):
+        UNKNOWN = 0
+        HEALTHY = 10
+        DEGRADING = 20
+        TEMPORARY_BLOCK = 30
+        BLOCKED = 40
 
     __tablename__ = 'irc_network'
 
@@ -43,6 +50,11 @@ class IRCNetwork(Base, HasPermissions):
             lazy='dynamic',
             cascade='all, delete-orphan'
         )
+    )
+
+    status = sa.Column(
+        sa.Enum(Status),
+        default=Status.UNKNOWN
     )
 
     created = sa.Column(
@@ -95,6 +107,37 @@ class IRCNetwork(Base, HasPermissions):
                 raise ValueError(
                     f'Don\'t know how to generate a URL for {of=}.'
                 )
+
+
+class NetworkEvent(Base):
+    class Event(enum.IntEnum):
+        CRITICAL = 100
+        ERROR = 200
+        WARNING = 300
+        INFO = 400
+
+    __tablename__ = 'network_event'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+
+    event = sa.Column(sa.Enum(Event))
+    description = sa.Column(sa.Text(), nullable=True)
+
+    created = sa.Column(
+        sa.DateTime,
+        default=lambda: datetime.datetime.now(tz=timezone.utc)
+    )
+
+    network_id = sa.Column(sa.BigInteger, sa.ForeignKey('irc_network.id'))
+    network = orm.relationship(
+        'IRCNetwork',
+        backref=orm.backref(
+            'events',
+            order_by=created,
+            lazy='dynamic',
+            cascade='all, delete-orphan'
+        )
+    )
 
 
 class Channel(Base, HasPermissions):

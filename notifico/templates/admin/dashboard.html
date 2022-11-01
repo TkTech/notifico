@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block main_content %}
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('IRC Event Log') }}
+    </div>
+    <table class="table table-borderless table-light mb-0">
+      <thead>
+      <tr class="table-dark text-dark">
+        <th scope="col">{{ _('Network') }}</th>
+        <th scope="col">{{ _('When') }}</th>
+        <th scope="col">{{ _('Description') }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for event in irc_events %}
+        <tr class="table-{{ {
+              event.Event.CRITICAL: 'danger',
+              event.Event.ERROR: 'danger',
+              event.Event.WARNING: 'warning',
+              event.Event.INFO: 'info'
+            }.get(event.event) }}">
+          <td class="text-nowrap">
+            <a class="text-light" href="{{ event.network.url(event.network.Page.EDIT) }}">
+              {{ event.network.host }}
+            </a>
+          </td>
+          <td class="text-nowrap">{{ event.created|pretty_date }}</td>
+          <td class="w-100">{{ event.description }}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="2">
+            <em>{{ _('No events yet on this IRC network.') }}</em>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -11,20 +11,55 @@ import redis.asyncio as redis
 from redis.asyncio.retry import Retry
 from redis.backoff import NoBackoff
 
-from notifico import create_app
+from notifico import create_app, db_session
 from notifico.botifico.bot import Bot, Network
 from notifico.botifico.contrib.plugins.identity import identity_plugin
 from notifico.botifico.contrib.plugins.logging import log_plugin
 from notifico.botifico.contrib.plugins.rate_limit import rate_limit_plugin
+from notifico.botifico.events import Event
 from notifico.botifico.plugin import Plugin
 from notifico.botifico.manager import Manager, Channel
 from notifico.botifico.contrib.plugins.ping import ping_plugin
-
+from notifico.models import IRCNetwork, NetworkEvent
 
 from notifico.settings import Settings
 
 
-handshake = Plugin('handshake')
+tracker = Plugin('tracker')
+
+
+def _get_matching_networks(network: Network):
+    return db_session.query(
+        IRCNetwork
+    ).filter(
+        IRCNetwork.host == network.host,
+        IRCNetwork.port == network.port,
+        IRCNetwork.ssl == network.ssl
+    )
+
+
+@tracker.on(Event.on_connected)
+async def on_connect(bot: Bot):
+    for network in _get_matching_networks(bot.network):
+        db_session.add(NetworkEvent(
+            network=network,
+            event=NetworkEvent.Event.INFO,
+            description='Connected to IRC network.'
+        ))
+
+    db_session.commit()
+
+
+@tracker.on(Event.on_disconnect)
+async def on_disconnect(bot: Bot):
+    for network in _get_matching_networks(bot.network):
+        db_session.add(NetworkEvent(
+            network=network,
+            event=NetworkEvent.Event.INFO,
+            description='Disconnected from IRC network.'
+        ))
+
+    db_session.commit()
 
 
 def _get_channel(j):
@@ -99,6 +134,7 @@ async def wait_for_events():
         manager.register_plugin(identity_plugin)
         manager.register_plugin(log_plugin)
         manager.register_plugin(rate_limit_plugin)
+        manager.register_plugin(tracker)
 
         r = await redis.from_url(
             settings.REDIS,

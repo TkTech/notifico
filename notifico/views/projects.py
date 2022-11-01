@@ -405,7 +405,10 @@ def new_channel(u, p: Project):
     form.network.choices = []
 
     for network in networks:
-        if network.public > 0:
+        if network.public is not None and network.public > 0:
+            # We simplify the display of public networks - it really doesn't
+            # matter what port it's on or if it's using SSL, and these things
+            # may even change as networks are merged.
             form.network.choices.append(
                 (network.id, f'{network.host}')
             )
