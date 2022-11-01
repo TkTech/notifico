@@ -82,7 +82,7 @@ class ChannelBot(Bot):
             )
         )
 
-    def task_exception(self, ex: Exception):
+    async def task_exception(self, ex: Exception):
         try:
             self.manager.bots[self.network].remove(self)
         except KeyError:
@@ -90,7 +90,7 @@ class ChannelBot(Bot):
             # our manager's tracking set.
             pass
 
-        super().task_exception(ex)
+        await super().task_exception(ex)
 
 
 class Manager(Plugin):

@@ -25,7 +25,7 @@ def exception_catcher(f: Callable):
         try:
             return await f(self, *args, **kwargs)
         except Exception as exc:
-            self.task_exception(exc)
+            await self.task_exception(exc)
             raise
     return _wrapped
 
@@ -134,7 +134,7 @@ class Bot:
                 await writer.drain()
                 get_queue = asyncio.create_task(self.message_queue.get())
 
-    def task_exception(self, ex: Exception):
+    async def task_exception(self, ex: Exception):
         await self.emit_event(Event.on_exception, ex=ex)
         raise ex
 
