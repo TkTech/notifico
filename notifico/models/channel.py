@@ -173,6 +173,8 @@ class Channel(Base, HasPermissions):
 
     @classmethod
     def only_readable(cls, q: Query) -> Query:
+        from notifico.models.project import Project
+
         if has_permission(Permission.SUPERUSER):
             return q
 
@@ -182,7 +184,7 @@ class Channel(Base, HasPermissions):
             ).filter(
                 or_(
                     Channel.public.is_(True),
-                    Channel.project.owner_id == g.user.id
+                    Project.owner_id == g.user.id
                 )
             )
         else:
