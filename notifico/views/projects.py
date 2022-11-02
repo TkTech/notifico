@@ -7,7 +7,7 @@ from flask import (
     redirect,
     url_for,
     abort,
-    request
+    request, flash
 )
 import flask_wtf as wtf
 from flask_babel import lazy_gettext as _
@@ -401,6 +401,24 @@ def new_channel(u, p: Project):
         IRCNetwork.public.asc()
     ).all()
 
+    # Get the user's most recently used channels from other projects as
+    # shortcuts.
+    common_channels = Channel.only_readable(
+        db_session.query(Channel)
+    ).join(
+        Channel.project
+    ).filter(
+        Project.owner_id == g.user.id,
+        Channel.project_id != p.id
+    ).distinct(
+        Channel.network_id
+    ).order_by(
+        Channel.network_id,
+        Channel.created.desc()
+    ).limit(
+        3
+    ).all()
+
     form = ChannelDetailsForm()
     form.network.choices = []
 
@@ -423,41 +441,72 @@ def new_channel(u, p: Project):
                 f'★ {network.host}:{network.port}'
             ))
 
-    if form.validate_on_submit():
-        network = IRCNetwork.query.get(form.network.data)
-        if not IRCNetwork.can(Action.READ, obj=network):
-            abort(403)
+    if request.method == 'POST':
+        if request.form['action'] == 'quick-add':
+            channel = db_session.query(
+                Channel
+            ).filter(
+                Channel.id == request.form['channel-id']
+            ).first()
 
-        channel = form.channel.data
+            if not channel:
+                abort(404)
+            elif not channel.can(Action.READ, obj=channel):
+                abort(403)
 
-        # Make sure this isn't a duplicate channel before we create it.
-        c = Channel.query.filter_by(
-            channel=channel,
-            network=network,
-            project_id=p.id
-        ).first()
-        if not c:
-            c = Channel(
+            db_session.add(Channel(
+                channel=channel.channel,
+                network=channel.network,
+                public=channel.public,
+                project=p
+            ))
+            db_session.commit()
+            flash(
+                _('The channel has been added to your project.'),
+                category='success'
+            )
+            return redirect(p.url(p.Page.DETAILS))
+        elif form.validate_on_submit():
+            network = IRCNetwork.query.get(form.network.data)
+            if not IRCNetwork.can(Action.READ, obj=network):
+                abort(403)
+
+            channel = form.channel.data
+
+            # Make sure this isn't a duplicate channel before we create it.
+            c = Channel.query.filter_by(
                 channel=channel,
                 network=network,
-                public=form.public.data
-            )
-            p.channels.append(c)
-            db_session.add(c)
-            db_session.commit()
-            return redirect(url_for('.details', p=p.name, u=u.username))
-        else:
-            form.channel.errors = [
-                validators.ValidationError(
-                    'You cannot have a project in the same channel twice.'
+                project_id=p.id
+            ).first()
+            if not c:
+                c = Channel(
+                    channel=channel,
+                    network=network,
+                    public=form.public.data
                 )
-            ]
+                p.channels.append(c)
+                db_session.add(c)
+                db_session.commit()
+
+                flash(
+                    _('The channel has been added to your project.'),
+                    category='success'
+                )
+                return redirect(p.url(p.Page.DETAILS))
+            else:
+                form.channel.errors = [
+                    validators.ValidationError(
+                        'You cannot have a project in the same channel twice.'
+                    )
+                ]
 
     return render_template(
         'projects/new_channel.html',
         project=p,
         networks=networks,
-        form=form
+        form=form,
+        common_channels=common_channels
     )
 
 

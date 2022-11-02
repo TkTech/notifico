@@ -2,6 +2,28 @@
 {% import "ui/forms.html" as forms %}
 
 {% block main_content %}
+  {% if common_channels %}
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-2 g-3">
+      {% for channel in common_channels %}
+        <div class="col">
+          <div class="card p-2 text-center">
+            <strong>{{ channel.channel }}</strong>
+            <div class="text-muted pb-2">
+              {{ channel.network.host }}
+            </div>
+            <form method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <input type="hidden" name="channel-id" value="{{ channel.id }}" />
+              <button type="submit" name="action" value="quick-add"
+                      class="btn btn-secondary btn-sm w-100">
+                {{ _('Quick Add') }}
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
   <div class="card mt-4">
     <form method="POST">
       <div class="card-header">

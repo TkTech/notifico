@@ -1,5 +1,6 @@
 from functools import wraps, partial
 
+from flask_wtf import CSRFProtect
 from redis import Redis
 from celery import Celery
 from flask import (
@@ -24,6 +25,7 @@ cache = Cache()
 mail = Mail()
 celery = Celery()
 babel = Babel()
+csrf = CSRFProtect()
 
 
 def user_required(f):
@@ -76,6 +78,7 @@ def create_app():
     cache.init_app(app)
     mail.init_app(app)
     babel.init_app(app)
+    csrf.init_app(app)
 
     # Update celery's configuration with our application config.
     celery.config_from_object(app.config)
