@@ -13,7 +13,7 @@ import flask_wtf as wtf
 from flask_babel import lazy_gettext as _
 from wtforms import fields, validators
 
-from notifico import user_required
+from notifico import user_required, csrf
 from notifico.database import db_session
 from notifico.models import User, Project, Hook, Channel, IRCNetwork
 from notifico.permissions import Action
@@ -330,6 +330,7 @@ def edit_hook(u, p: Project, hid):
 
 
 @projects.route('/h/<int:pid>/<key>', methods=['GET', 'POST'])
+@csrf.exempt
 def hook_receive(pid, key):
     h = Hook.query.filter_by(key=key, project_id=pid).first()
     if not h or not h.project:
