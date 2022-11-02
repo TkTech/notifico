@@ -3,7 +3,8 @@ from urllib.parse import urlsplit
 import flask_wtf as wtf
 from wtforms import fields, validators
 
-from notifico.contrib.services import BundledService
+from notifico.contrib.services import EnvironmentMixin
+from notifico.services.hook import IncomingHookService
 
 
 def _simplify(j):
@@ -61,9 +62,9 @@ class JIRAConfigForm(wtf.FlaskForm):
     ))
 
 
-class JIRAHook(BundledService):
+class JIRAHook(EnvironmentMixin, IncomingHookService):
     """
-    BundledService hook for Atlassian's JIRA service.
+    EnvironmentMixin hook for Atlassian's JIRA service.
     """
     SERVICE_NAME = 'JIRA'
     SERVICE_ID = 40
@@ -104,7 +105,7 @@ class JIRAHook(BundledService):
         if simplified['project_key']:
             line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
                 name=simplified['project_key'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
         # Who made the change?
         attribute_to = None
@@ -116,14 +117,14 @@ class JIRAHook(BundledService):
         if attribute_to:
             line.append('{LIGHT_CYAN}{attribute_to}{RESET} created'.format(
                 attribute_to=attribute_to,
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         # What was changed?
         if simplified['issue_key']:
             line.append('{PINK}{key}{RESET}'.format(
                 key=simplified['issue_key'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
         if simplified['issue_title']:
             line.append(simplified['issue_title'])
@@ -136,7 +137,7 @@ class JIRAHook(BundledService):
             if simplified['project_key']:
                 line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
                     name=simplified['project_key'],
-                    **BundledService.colors
+                    **IncomingHookService.colors
                 ))
             line.append(simplified['link'])
             yield ' '.join(line)
@@ -153,7 +154,7 @@ class JIRAHook(BundledService):
         if simplified['project_key']:
             line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
                 name=simplified['project_key'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
         # Who made the change?
         attribute_to = None
@@ -165,14 +166,14 @@ class JIRAHook(BundledService):
         if attribute_to:
             line.append('{LIGHT_CYAN}{attribute_to}{RESET} updated'.format(
                 attribute_to=attribute_to,
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         # What was changed?
         if simplified['issue_key']:
             line.append('{PINK}{key}{RESET}'.format(
                 key=simplified['issue_key'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
         if simplified['changes']:
             changes = simplified['changes']
@@ -188,7 +189,7 @@ class JIRAHook(BundledService):
             if simplified['project_key']:
                 line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
                     name=simplified['project_key'],
-                    **BundledService.colors
+                    **IncomingHookService.colors
                 ))
             line.append(simplified['comment'])
             yield ' '.join(line)
@@ -199,7 +200,7 @@ class JIRAHook(BundledService):
             if simplified['project_key']:
                 line.append('{RESET}[{BLUE}{name}{RESET}]'.format(
                     name=simplified['project_key'],
-                    **BundledService.colors
+                    **IncomingHookService.colors
                 ))
             line.append(simplified['link'])
             yield ' '.join(line)

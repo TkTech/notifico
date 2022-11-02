@@ -24,13 +24,6 @@ class Settings(BaseSettings):
         default='redis://localhost:6379/0'
     )
 
-    BROKER_URL: str = 'redis://'
-    CELERY_RESULT_BACKEND: str = 'redis://localhost:6379/0'
-    CELERY_IMPORTS: t.List[str] = [
-        'notifico.services.background'
-    ]
-    CELERY_TASK_SERIALIZER: str = 'json'
-
     CACHE_TYPE: str = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT: int = 300
     CACHE_KEY_PREFIX: str = 'cache_'
@@ -56,6 +49,13 @@ class Settings(BaseSettings):
     #: Set to n-# of proxies in front of this server setting X-Forwarded-For
     #: headers.
     USE_PROXY_HEADERS: int = 0
+
+    #: The list of modules Celery should look into for background tasks.
+    celery_imports: t.List[str] = [
+        'notifico.tasks.mail'
+    ]
+    #: The serializer celery should use when storing tasks and results.
+    celery_task_serializer: str = 'json'
 
     class Config:
         case_sensitive = True

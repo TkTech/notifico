@@ -4,8 +4,9 @@ from hashlib import sha256
 import flask_wtf as wtf
 from wtforms import fields, validators
 
-from notifico.contrib.services import BundledService
+from notifico.contrib.services import EnvironmentMixin
 from notifico.contrib.services.github import GithubHook
+from notifico.services.hook import IncomingHookService
 
 
 class TravisConfigForm(wtf.FlaskForm):
@@ -33,9 +34,9 @@ class TravisConfigForm(wtf.FlaskForm):
     ))
 
 
-class TravisHook(BundledService):
+class TravisHook(EnvironmentMixin, IncomingHookService):
     """
-    BundledService hook for https://travis-ci.org.
+    EnvironmentMixin hook for https://travis-ci.org.
     """
     SERVICE_NAME = 'Travis CI'
     SERVICE_ID = 60
@@ -95,7 +96,7 @@ class TravisHook(BundledService):
         """
         status_colour = cls.colors['RED']
         if payload['result'] == 0:
-            status_colour = BundledService.colors['GREEN']
+            status_colour = IncomingHookService.colors['GREEN']
 
         lines = []
 
@@ -108,21 +109,21 @@ class TravisHook(BundledService):
         lines.append(u'{status}{message}{RESET}.'.format(
             status=status_colour,
             message=payload['result_message'].lower(),
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
         # branch & commit hash
         lines.append(u'({G}{branch}{R} @ {G}{commit}{R})'.format(
             branch=payload['branch'],
             commit=payload['commit'][:7],
-            G=BundledService.colors['GREEN'],
-            R=BundledService.colors['RESET']
+            G=IncomingHookService.colors['GREEN'],
+            R=IncomingHookService.colors['RESET']
         ))
 
         # Short URL to changes on GH
         lines.append(u'{PINK}{url}{RESET}'.format(
             url=GithubHook.shorten(payload['compare_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
         line = u' '.join(lines)

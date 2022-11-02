@@ -7,7 +7,7 @@ from flask import url_for
 from sqlalchemy import orm
 
 from notifico.database import Base
-from notifico.service import available_services
+from notifico.service import incoming_services
 
 
 class Hook(Base):
@@ -48,7 +48,7 @@ class Hook(Base):
 
     @property
     def hook(self):
-        return available_services()[self.service_id]
+        return incoming_services()[self.service_id]
 
     def url(self, of: Page = Page.TRIGGER, **kwargs) -> str:
         match of:

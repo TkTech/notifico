@@ -4,7 +4,8 @@ import urllib
 import flask_wtf as wtf
 from wtforms import fields, validators
 
-from notifico.contrib.services import BundledService
+from notifico.contrib.services import EnvironmentMixin
+from notifico.services.hook import IncomingHookService
 
 
 class JenkinsConfigForm(wtf.FlaskForm):
@@ -39,9 +40,9 @@ class JenkinsConfigForm(wtf.FlaskForm):
     ))
 
 
-class JenkinsHook(BundledService):
+class JenkinsHook(EnvironmentMixin, IncomingHookService):
     """
-    BundledService hook for
+    EnvironmentMixin hook for
     https://wiki.jenkins-ci.org/display/JENKINS/Notification+Plugin.
     """
     SERVICE_NAME = 'Jenkins CI'
@@ -89,7 +90,7 @@ class JenkinsHook(BundledService):
             # Project names may be encoded depending on the version of
             # jekins being used.
             name=urllib.unquote(payload['name']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
         return prefix + line
 
@@ -99,14 +100,14 @@ class JenkinsHook(BundledService):
         Create and return a one-line summary of the build
         """
         status_colour = {
-            'SUCCESS': BundledService.colors['GREEN'],
-            'UNSTABLE': BundledService.colors['ORANGE'],
+            'SUCCESS': IncomingHookService.colors['GREEN'],
+            'UNSTABLE': IncomingHookService.colors['ORANGE'],
             # documentation differs from implementation
-            'FAILURE': BundledService.colors['RED'],
-            'FAILED': BundledService.colors['RED']
+            'FAILURE': IncomingHookService.colors['RED'],
+            'FAILED': IncomingHookService.colors['RED']
         }.get(
             payload['build'].get('status', 'SUCCESS').upper(),
-            BundledService.colors['RED']
+            IncomingHookService.colors['RED']
         )
 
         number = payload['build']['number']
@@ -120,7 +121,7 @@ class JenkinsHook(BundledService):
             status = ': {status_colour}{status}{RESET}'.format(
                 status_colour=status_colour,
                 status=status,
-                **BundledService.colors
+                **IncomingHookService.colors
             )
 
         commit = ''
@@ -129,7 +130,7 @@ class JenkinsHook(BundledService):
             # space is important again
             commit = '({GREEN}{commit}{RESET}) '.format(
                 commit=scm.get('commit')[:7],
-                **BundledService.colors
+                **IncomingHookService.colors
             )
 
         fmt_string = (
@@ -144,7 +145,7 @@ class JenkinsHook(BundledService):
             phase=phase,
             status=status,
             url=url,
-            **BundledService.colors
+            **IncomingHookService.colors
         )
         return cls._prefix_line(line, payload)
 

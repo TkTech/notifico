@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
+from celery import shared_task
 from flask_mail import Message
 
-from notifico import create_app, celery, mail
+from notifico import create_app, mail
 
 
-@celery.task
+@shared_task
 def send_mail(*args, **kwargs):
     """
     Sends an email using Flask-Mail and Notifico's configuration

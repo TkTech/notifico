@@ -1,15 +1,14 @@
 import fnmatch
 import re
 import json
-import requests
 
 import flask_wtf as wtf
 from functools import wraps
 from wtforms.fields import SelectMultipleField
 from wtforms import fields, validators
 
-from notifico.contrib.services import BundledService
-
+from notifico.contrib.services import EnvironmentMixin
+from notifico.services.hook import IncomingHookService
 
 COMMIT_MESSAGE_LENGTH_LIMIT = 1000
 
@@ -217,27 +216,27 @@ def _create_push_summary(project_name, j, config):
 
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=project_name,
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     # The user doing the push, if available.
     if j['pusher']:
         line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
             pusher=j['pusher'],
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
     # The number of commits included in this push.
     line.append(u'{GREEN}{count}{RESET} {commits}'.format(
         count=len(original['commits']),
         commits='commit' if len(original['commits']) == 1 else 'commits',
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     if show_branch and j['branch']:
         line.append(u'to {GREEN}{branch}{RESET}'.format(
             branch=j['branch'],
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
     # File movement summary.
@@ -249,7 +248,7 @@ def _create_push_summary(project_name, j, config):
 
     line.append(u'{PINK}{compare_link}{RESET}'.format(
         compare_link=original['compare'],
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     return u' '.join(line)
@@ -278,7 +277,7 @@ def _create_commit_summary(project_name, j, config):
 
         line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
             name=project_name,
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
         # Show the committer.
@@ -296,12 +295,12 @@ def _create_commit_summary(project_name, j, config):
         if attribute_to:
             line.append(u'{ORANGE}{attribute_to}{RESET}'.format(
                 attribute_to=attribute_to,
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         line.append(u'{GREEN}{sha}{RESET}'.format(
             sha=commit['id'][:7],
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
         line.append(u'-')
@@ -328,7 +327,7 @@ def _create_push_final_summary(project_name, j, config):
 
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=project_name,
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     line.append(u'... and {count} more commits.'.format(
@@ -338,9 +337,9 @@ def _create_push_final_summary(project_name, j, config):
     return u' '.join(line)
 
 
-class GithubHook(BundledService):
+class GithubHook(EnvironmentMixin, IncomingHookService):
     """
-    BundledService hook for http://github.com.
+    EnvironmentMixin hook for https://github.com.
     """
     SERVICE_NAME = 'Github'
     SERVICE_ID = 10
@@ -395,7 +394,7 @@ class GithubHook(BundledService):
     def _handle_ping(cls, user, request, hook, json):
         yield u'{RESET}[{BLUE}GitHub{RESET}] {zen}'.format(
             zen=json['zen'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -413,7 +412,7 @@ class GithubHook(BundledService):
             num=json['issue']['number'],
             title=json['issue']['title'],
             url=json['issue']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -437,7 +436,7 @@ class GithubHook(BundledService):
             num=json['issue']['number'],
             title=json['issue']['title'],
             url=json['comment']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -459,7 +458,7 @@ class GithubHook(BundledService):
             action=action,
             commit=json['comment']['commit_id'],
             url=json['comment']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -480,7 +479,7 @@ class GithubHook(BundledService):
             ref_type=json['ref_type'],
             ref=json['ref'],
             url=json['repository']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -498,7 +497,7 @@ class GithubHook(BundledService):
             ref_type=json['ref_type'],
             ref=json['ref'],
             url=json['repository']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -516,7 +515,7 @@ class GithubHook(BundledService):
             num=json['number'],
             title=json['pull_request']['title'],
             url=json['pull_request']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -534,7 +533,7 @@ class GithubHook(BundledService):
             who=json['comment']['user']['login'],
             num=num,
             url=json['comment']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -552,7 +551,7 @@ class GithubHook(BundledService):
             yield fmt_string.format(
                 name=name,
                 who=json['sender']['login'],
-                **BundledService.colors
+                **IncomingHookService.colors
             )
 
             fmt_string_page = (
@@ -566,7 +565,7 @@ class GithubHook(BundledService):
                     pname=page['page_name'],
                     action=page['action'],
                     url=page['html_url'],
-                    **BundledService.colors
+                    **IncomingHookService.colors
                 )
         else:
             # Only one page
@@ -581,7 +580,7 @@ class GithubHook(BundledService):
                 pname=json['pages'][0]['page_name'],
                 action=json['pages'][0]['action'],
                 url=json['pages'][0]['html_url'],
-                **BundledService.colors
+                **IncomingHookService.colors
             )
 
     @classmethod
@@ -596,7 +595,7 @@ class GithubHook(BundledService):
             name=json['repository']['name'],
             who=json['sender']['login'],
             url=json['sender']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -614,7 +613,7 @@ class GithubHook(BundledService):
             tag_name=json['release']['tag_name'],
             title=json['release']['name'],
             url=json['release']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -630,7 +629,7 @@ class GithubHook(BundledService):
             name=json['repository']['name'],
             who=json['forkee']['owner']['login'],
             url=json['forkee']['owner']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -647,7 +646,7 @@ class GithubHook(BundledService):
             action=json['action'],
             whom=json['member']['login'],
             url=json['member']['html_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -661,7 +660,7 @@ class GithubHook(BundledService):
         yield fmt_string.format(
             name=json['repository']['name'],
             who=json['sender']['login'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -676,7 +675,7 @@ class GithubHook(BundledService):
             name=json['repository']['name'],
             who=json['sender']['login'],
             tname=json['team']['name'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -687,9 +686,9 @@ class GithubHook(BundledService):
             '{description} - {PINK}{url}{RESET}'
         )
 
-        status_color = BundledService.colors['GREEN']
+        status_color = IncomingHookService.colors['GREEN']
         if not json['state'].lower() == 'success':
-            status_color = BundledService.colors['RED']
+            status_color = IncomingHookService.colors['RED']
 
         yield fmt_string.format(
             name=json['repository']['name'],
@@ -697,17 +696,17 @@ class GithubHook(BundledService):
             status=json['state'].capitalize(),
             description=json['description'],
             url=json['target_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
     @action_filter('check_run')
     def _handle_check_run(cls, user, request, hook, json):
-        conclusion_color = BundledService.colors['GREEN']
+        conclusion_color = IncomingHookService.colors['GREEN']
         conclusion = json['check_run']['conclusion']
         if conclusion is not None:
             if not conclusion == 'success':
-                conclusion_color = BundledService.colors['RED']
+                conclusion_color = IncomingHookService.colors['RED']
             conclusion = conclusion.capitalize()
             fmt_string = (
                 u'{RESET}[{BLUE}{name}{RESET}] Check Run for '
@@ -729,7 +728,7 @@ class GithubHook(BundledService):
             conclusion_color=conclusion_color,
             description=json['check_run']['name'],
             url=json['check_run']['details_url'],
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -842,14 +841,14 @@ class GithubHook(BundledService):
 
         line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
             name=project_name,
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
         # The user doing the push, if available.
         if j['pusher']:
             line.append(u'{ORANGE}{pusher}{RESET}'.format(
                 pusher=j['pusher'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         if j['tag']:
@@ -867,13 +866,13 @@ class GithubHook(BundledService):
                 # The sha1 hash of the head (tagged) commit.
                 line.append(u'{GREEN}{sha}{RESET} as'.format(
                     sha=original['head_commit']['id'][:7],
-                    **BundledService.colors
+                    **IncomingHookService.colors
                 ))
 
             # The tag itself.
             line.append(u'{GREEN}{tag}{RESET}'.format(
                 tag=j['tag'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
         elif j['branch']:
             # Verb with proper capitalization
@@ -893,13 +892,13 @@ class GithubHook(BundledService):
             # The branch name
             line.append(u'{GREEN}{branch}{RESET}'.format(
                 branch=j['branch'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         if original['head_commit']:
             line.append(u'{PINK}{link}{RESET}'.format(
                 link=original['head_commit']['url'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         return u' '.join(line)

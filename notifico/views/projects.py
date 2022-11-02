@@ -17,7 +17,7 @@ from notifico import user_required
 from notifico.database import db_session
 from notifico.models import User, Project, Hook, Channel, IRCNetwork
 from notifico.permissions import Action
-from notifico.service import available_services
+from notifico.service import incoming_services
 
 projects = Blueprint('projects', __name__, template_folder='templates')
 
@@ -253,7 +253,7 @@ def new_hook(u, p: Project, sid):
     if not Project.can(Action.UPDATE, obj=p):
         return abort(403)
 
-    hook = available_services()[sid]
+    hook = incoming_services()[sid]
     form = hook.form()
     if form:
         form = form()
@@ -282,7 +282,7 @@ def new_hook(u, p: Project, sid):
     return render_template(
         'projects/new_hook.html',
         project=p,
-        services=available_services(),
+        services=incoming_services(),
         service=hook,
         form=form,
         action='new'
@@ -321,7 +321,7 @@ def edit_hook(u, p: Project, hid):
     return render_template(
         'projects/new_hook.html',
         project=p,
-        services=available_services(),
+        services=incoming_services(),
         service=hook_service,
         form=form,
         action='edit',
@@ -347,7 +347,7 @@ def hook_receive(pid, key):
         Project.message_count: Project.message_count + 1
     })
 
-    hook = available_services()[h.service_id]
+    hook = incoming_services()[h.service_id]
     if hook is None:
         # TODO: This should be logged somewhere.
         return ''

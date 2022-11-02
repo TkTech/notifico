@@ -3,7 +3,8 @@ import json
 import flask_wtf as wtf
 from wtforms import fields, validators
 
-from notifico.contrib.services import BundledService
+from notifico.contrib.services import EnvironmentMixin
+from notifico.services.hook import IncomingHookService
 
 
 class BitbucketConfigForm(wtf.FlaskForm):
@@ -80,26 +81,26 @@ def _make_summary_line(hook, j, config):
     # Project name
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=original['repository']['name'],
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     if j['pusher']:
         line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
             pusher=j['pusher'],
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
     # Commit count
     line.append(u'{GREEN}{count}{RESET} {commits}'.format(
         count=len(original['commits']),
         commits='commit' if len(original['commits']) == 1 else 'commits',
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     if show_branch and j['branch']:
         line.append(u'to {GREEN}{branch}{RESET}'.format(
             branch=j['branch'],
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
     # File movement summary.
@@ -120,7 +121,7 @@ def _make_summary_line(hook, j, config):
     )
     line.append(u'{PINK}{0}{RESET}'.format(
         BitbucketHook.shorten(link),
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     return u' '.join(line)
@@ -138,17 +139,17 @@ def _make_commit_line(hook, j, commit):
 
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=original['repository']['name'],
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     line.append(u'{ORANGE}{0}{RESET}'.format(
         commit['raw_author'] if show_raw_author else commit['author'],
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     line.append(u'{GREEN}{0}{RESET}'.format(
         commit['node'][:7],
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     line.append(u'-')
@@ -157,7 +158,7 @@ def _make_commit_line(hook, j, commit):
     return u' '.join(line)
 
 
-class BitbucketHook(BundledService):
+class BitbucketHook(EnvironmentMixin, IncomingHookService):
     SERVICE_NAME = 'Bitbucket'
     SERVICE_ID = 30
 

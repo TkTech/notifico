@@ -1,14 +1,31 @@
-import abc
+import dataclasses
 import re
+import abc
 from typing import Optional, Type
 
 import flask_wtf
 from flask import current_app
-from jinja2 import Environment, PackageLoader
-from wtforms import Form
+from jinja2 import Environment
+from wtforms import Form, fields, validators
+from flask_babel import lazy_gettext as lg
 
 from notifico.util import irc
 from notifico.services.messages import MessageService
+
+
+@dataclasses.dataclass
+class StructuredMessage:
+    """
+    A structured message enables sending messages to outgoing services that
+    contains more information than just a plain string. It's useful to enable
+    richer service on platforms that support it, like Discord and Slack.
+
+    .. note::
+
+        Our original supported platform was IRC, which supports nothing more
+        than simple string messages.
+    """
+    legacy_message: str
 
 
 class HookService(abc.ABC):
@@ -52,6 +69,47 @@ class HookService(abc.ABC):
         return irc.strip_mirc_colors(msg)
 
     @classmethod
+    def form(cls) -> Optional[Type[Form]]:
+        """
+        Returns a wtforms.Form subclass which is a form of Service options
+        to be shown to the user on setup.
+        """
+        return None
+
+    @classmethod
+    def validate(cls, form: flask_wtf.FlaskForm, request):
+        """
+        Returns `True` if the form passes validation, `False` otherwise.
+        Should be subclassed by complex service configurations.
+        """
+        return form.validate_on_submit()
+
+    @classmethod
+    def pack_form(cls, form: Form) -> dict:
+        """
+        Returns a dictionary of configuration options processed from `form`.
+        By default, simply iterates all fields, taking their ``.id`` as the
+        key and ``.data`` as value.
+        """
+        return dict((f.id, f.data) for f in form)
+
+    @classmethod
+    def load_form(cls, form: Form, config: dict) -> Optional[Form]:
+        """
+        Loads a Hook configuration into an existing Form object, returning it.
+        """
+        if config is None:
+            return
+
+        for f in form:
+            if f.id in config:
+                f.data = config[f.id]
+
+        return form
+
+
+class IncomingHookService(HookService, abc.ABC):
+    @classmethod
     def message(cls, message: str, strip: bool = True):
         # Optionally strip mIRC color codes.
         message = cls.strip_colors(message) if strip else message
@@ -94,41 +152,33 @@ class HookService(abc.ABC):
         """
         raise NotImplementedError()
 
+
+class OutgoingHookService(HookService, abc.ABC):
+    class WebhookForm(flask_wtf.FlaskForm):
+        """
+        Base form all webhook configuration forms should subclass.
+        """
+        webhook_url = fields.URLField(
+            lg('Webhook URL'),
+            validators=[
+                validators.InputRequired()
+            ]
+        )
+
     @classmethod
     def form(cls) -> Optional[Type[Form]]:
-        """
-        Returns a wtforms.Form subclass which is a form of Service options
-        to be shown to the user on setup.
-        """
-        return None
+        return cls.WebhookForm
 
     @classmethod
-    def validate(cls, form: flask_wtf.FlaskForm, request):
-        """
-        Returns `True` if the form passes validation, `False` otherwise.
-        Should be subclassed by complex service configurations.
-        """
-        return form.validate_on_submit()
+    def process_message(cls, message: str | StructuredMessage):
+        if isinstance(message, str):
+            return cls.handle_message(StructuredMessage(legacy_message=message))
+        return cls.handle_message(message)
 
     @classmethod
-    def pack_form(cls, form: Form) -> dict:
+    @abc.abstractmethod
+    def handle_message(cls, message: StructuredMessage):
         """
-        Returns a dictionary of configuration options processed from `form`.
-        By default, simply iterates all fields, taking their ``.id`` as the
-        key and ``.data`` as value.
+        Handle an outgoing message.
         """
-        return dict((f.id, f.data) for f in form)
-
-    @classmethod
-    def load_form(cls, form: Form, config: dict) -> Optional[Form]:
-        """
-        Loads a Hook configuration into an existing Form object, returning it.
-        """
-        if config is None:
-            return
-
-        for f in form:
-            if f.id in config:
-                f.data = config[f.id]
-
-        return form
+        raise NotImplementedError()

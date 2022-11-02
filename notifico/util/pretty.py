@@ -4,7 +4,7 @@ Utilities for pretty-printing data[types].
 import sys
 from datetime import datetime
 
-from notifico.service import available_services
+from notifico.service import incoming_services
 
 
 def pretty_date(time=False):
@@ -77,6 +77,6 @@ def trim(docstring):
 
 def service_name(service_id):
     try:
-        return available_services()[service_id].SERVICE_NAME
+        return incoming_services()[service_id].SERVICE_NAME
     except KeyError:
         return 'Unknown'

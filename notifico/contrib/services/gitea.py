@@ -5,8 +5,8 @@ from functools import wraps
 from wtforms.fields import SelectMultipleField
 from wtforms import fields, validators
 
-from notifico.contrib.services import BundledService
-
+from notifico.contrib.services import EnvironmentMixin
+from notifico.services.hook import IncomingHookService
 
 COMMIT_MESSAGE_LENGTH_LIMIT = 1000
 
@@ -171,26 +171,26 @@ def _create_push_summary(project_name, j, config):
 
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=project_name,
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     # The user doing the push.
     line.append(u'{ORANGE}{pusher}{RESET} pushed'.format(
         pusher=j['pusher'],
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     # The number of commits included in this push.
     line.append(u'{GREEN}{count}{RESET} {commits}'.format(
         count=len(original['commits']),
         commits='commit' if len(original['commits']) == 1 else 'commits',
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     if show_branch and j['branch']:
         line.append(u'to {GREEN}{branch}{RESET}'.format(
             branch=j['branch'],
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
     # File movement summary.
@@ -204,7 +204,7 @@ def _create_push_summary(project_name, j, config):
     if original['compare_url']:
         line.append(u'{PINK}{compare_link}{RESET}'.format(
             compare_link=GiteaHook.shorten(original['compare_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
     return u' '.join(line)
@@ -227,12 +227,12 @@ def _create_commit_summary(project_name, j, config):
 
         line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
             name=project_name,
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
         line.append(u'{GREEN}{sha}{RESET}'.format(
             sha=commit['id'][:7],
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
         line.append(u'-')
@@ -251,7 +251,7 @@ def _create_commit_summary(project_name, j, config):
         if attribute_to:
             line.append(u'{ORANGE}{attribute_to}{RESET}'.format(
                 attribute_to=attribute_to,
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
             line.append(u'-')
 
@@ -277,7 +277,7 @@ def _create_push_final_summary(project_name, j, config):
 
     line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
         name=project_name,
-        **BundledService.colors
+        **IncomingHookService.colors
     ))
 
     line.append(u'... and {count} more commits.'.format(
@@ -287,7 +287,7 @@ def _create_push_final_summary(project_name, j, config):
     return u' '.join(line)
 
 
-class GiteaHook(BundledService):
+class GiteaHook(EnvironmentMixin, IncomingHookService):
     SERVICE_NAME = 'Gitea'
     SERVICE_ID = 100
 
@@ -339,7 +339,7 @@ class GiteaHook(BundledService):
             ref_type=json['ref_type'],
             ref=json['ref'],
             url=GiteaHook.shorten(json['repository']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -357,7 +357,7 @@ class GiteaHook(BundledService):
             ref_type=json['ref_type'],
             ref=json['ref'],
             url=GiteaHook.shorten(json['repository']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -373,7 +373,7 @@ class GiteaHook(BundledService):
             name=json['forkee']['name'],
             who=json['repository']['owner']['login'],
             url=GiteaHook.shorten(json['repository']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -461,7 +461,7 @@ class GiteaHook(BundledService):
             num=json['issue']['number'],
             title=json['issue']['title'],
             url=GiteaHook.shorten(json['issue']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -502,7 +502,7 @@ class GiteaHook(BundledService):
             num=json['issue']['number'],
             title=json['issue']['title'],
             url=GiteaHook.shorten(json['comment']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -520,7 +520,7 @@ class GiteaHook(BundledService):
             num=json['pull_request']['number'],
             title=json['pull_request']['title'],
             url=GiteaHook.shorten(json['pull_request']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
 
@@ -539,7 +539,7 @@ class GiteaHook(BundledService):
             num=json['pull_request']['number'],
             title=json['pull_request']['title'],
             url=GiteaHook.shorten(json['pull_request']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -557,7 +557,7 @@ class GiteaHook(BundledService):
             num=json['pull_request']['number'],
             title=json['pull_request']['title'],
             url=GiteaHook.shorten(json['pull_request']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -575,7 +575,7 @@ class GiteaHook(BundledService):
             tag_name=json['release']['tag_name'],
             title=json['release']['name'],
             url=GiteaHook.shorten(json['release']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod
@@ -601,14 +601,14 @@ class GiteaHook(BundledService):
 
         line.append(u'{RESET}[{BLUE}{name}{RESET}]'.format(
             name=project_name,
-            **BundledService.colors
+            **IncomingHookService.colors
         ))
 
         # The user doing the push, if available.
         if j['pusher']:
             line.append(u'{ORANGE}{pusher}{RESET}'.format(
                 pusher=j['pusher'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         if j['tag']:
@@ -626,13 +626,13 @@ class GiteaHook(BundledService):
                 # The sha1 hash of the head (tagged) commit.
                 line.append(u'{GREEN}{sha}{RESET} as'.format(
                     sha=original['head_commit']['id'][:7],
-                    **BundledService.colors
+                    **IncomingHookService.colors
                 ))
 
             # The tag itself.
             line.append(u'{GREEN}{tag}{RESET}'.format(
                 tag=j['tag'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
         elif j['branch']:
             # Verb with proper capitalization
@@ -652,14 +652,14 @@ class GiteaHook(BundledService):
             # The branch name
             line.append(u'{GREEN}{branch}{RESET}'.format(
                 branch=j['branch'],
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         if original['head_commit']:
             # The shortened URL linking to the head commit.
             line.append(u'{PINK}{link}{RESET}'.format(
                 link=GiteaHook.shorten(original['head_commit']['url']),
-                **BundledService.colors
+                **IncomingHookService.colors
             ))
 
         return u' '.join(line)
@@ -678,7 +678,7 @@ class GiteaHook(BundledService):
             num=json['pull_request']['number'],
             title=json['pull_request']['title'],
             url=GiteaHook.shorten(json['pull_request']['html_url']),
-            **BundledService.colors
+            **IncomingHookService.colors
         )
 
     @classmethod

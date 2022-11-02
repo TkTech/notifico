@@ -45,7 +45,7 @@ pytest = "^7.1.2"
 [tool.poetry.scripts]
 notifico = "notifico.cli:cli"
 
-[tool.poetry.plugins."notifico.plugins.service"]
+[tool.poetry.plugins."notifico.plugins.incoming"]
 "appveyor" = "notifico.contrib.services.appveyor:AppVeyorHook"
 "github" = "notifico.contrib.services.github:GithubHook"
 "gitlab" = "notifico.contrib.services.gitlab:GitlabHook"
@@ -54,6 +54,9 @@ notifico = "notifico.cli:cli"
 "plain" = "notifico.contrib.services.plain:PlainTextHook"
 "travisci" = "notifico.contrib.services.travisci:TravisHook"
 "gitea" = "notifico.contrib.services.gitea:GiteaHook"
+
+[tool.poetry.plugins."notifico.plugins.outgoing"]
+"discord" = "notifico.contrib.services.discord:DiscordHook"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

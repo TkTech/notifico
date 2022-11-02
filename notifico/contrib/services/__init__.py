@@ -2,10 +2,8 @@ import abc
 
 from jinja2 import Environment, PackageLoader
 
-from notifico.services.hook import HookService
 
-
-class BundledService(HookService, abc.ABC):
+class EnvironmentMixin(abc.ABC):
     @staticmethod
     def env():
         """

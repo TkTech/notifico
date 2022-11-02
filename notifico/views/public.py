@@ -3,7 +3,7 @@ from flask import (
     render_template,
 )
 
-from notifico.service import available_services
+from notifico.service import incoming_services
 from notifico.services import stats
 
 public = Blueprint('public', __name__, template_folder='templates')
@@ -17,7 +17,7 @@ def landing():
     """
     return render_template(
         'public/landing.html',
-        services=available_services(),
+        services=incoming_services(),
         total_networks=stats.total_networks(),
         total_users=stats.total_users(),
         total_messages=stats.total_messages(),

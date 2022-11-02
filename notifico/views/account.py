@@ -15,7 +15,8 @@ from notifico import user_required
 from notifico.database import db_session
 from notifico.models import User
 from notifico.permissions import Action
-from notifico.services import reset, background
+from notifico.services import reset
+from notifico.tasks.mail import send_mail
 from notifico.views.account_forms import (
     UserLoginForm,
     UserRegisterForm,
@@ -105,7 +106,7 @@ def forgot_password():
         # Send the email as a background job so we don't block
         # up the browser (and to use celery's built-in rate
         # limiting).
-        background.send_mail.delay(
+        send_mail.delay(
             'Notifico - Password Reset for {username}'.format(
                 username=user.username
             ),

@@ -1,7 +1,8 @@
 import flask_wtf as wtf
 from wtforms import fields, validators
 
-from notifico.contrib.services import BundledService
+from notifico.contrib.services import EnvironmentMixin
+from notifico.services.hook import IncomingHookService
 
 
 class AppVeyorConfigForm(wtf.FlaskForm):
@@ -12,9 +13,9 @@ class AppVeyorConfigForm(wtf.FlaskForm):
     ))
 
 
-class AppVeyorHook(BundledService):
+class AppVeyorHook(EnvironmentMixin, IncomingHookService):
     """
-    HookService hook for https://ci.appveyor.com
+    IncomingHookService hook for https://ci.appveyor.com
     """
     SERVICE_NAME = 'AppVeyor'
     SERVICE_ID = 80
