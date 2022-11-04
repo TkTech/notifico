@@ -9,7 +9,8 @@ from sqlalchemy import update, delete
 
 from notifico import create_app
 from notifico.database import db_session
-from notifico.models import Project, Role, Permission, IRCNetwork, Channel
+from notifico.models import Project, Role, Permission, IRCNetwork, Channel, \
+    NetworkEvent
 from notifico.models.user import User
 
 
@@ -242,6 +243,16 @@ def irc_merge(network_id: int, other_network: List[int]):
             Channel.network_id.in_(other_network)
         ).values(
             network_id=network.id
+        )
+    )
+
+    db_session.execute(
+        delete(
+            NetworkEvent
+        ).where(
+            NetworkEvent.network_id == IRCNetwork.id
+        ).where(
+            IRCNetwork.id.in_(other_network)
         )
     )
 
