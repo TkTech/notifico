@@ -100,6 +100,19 @@ class ChannelDetailsForm(wtf.FlaskForm):
     )
 
 
+class ProjectDeleteForm(wtf.FlaskForm):
+    confirm_project = fields.StringField(
+        _('Project Name'),
+        validators=[
+            validators.InputRequired()
+        ]
+    )
+
+    def validate_confirm_project(self, field: fields.StringField):
+        if self.meta.project.name != field.data:
+            raise validators.ValidationError(_('Project name does not match.'))
+
+
 def project_action(f):
     """
     A decorator for views which act on a project. The function
@@ -183,37 +196,63 @@ def new():
 
             return redirect(url_for('.details', u=g.user.username, p=p.name))
 
-    return render_template('projects/new_project.html', form=form)
+    return render_template(
+        'projects/new_project.html',
+        form=form,
+        action='new'
+    )
 
 
 @projects.route('/<u>/<p>/edit', methods=['GET', 'POST'])
 @user_required
 @project_action
-def edit_project(u, p: Project):
+def edit_project(u: User, p: Project):
     """
     Edit an existing project.
     """
     if not Project.can(Action.UPDATE, obj=p):
         return abort(403)
 
-    form = ProjectDetailsForm(obj=p)
-    if form.validate_on_submit():
-        old_p = Project.by_name_and_owner(form.name.data, g.user)
-        if old_p and old_p.id != p.id:
-            form.name.errors = [
-                validators.ValidationError('Project name must be unique.')
-            ]
-        else:
-            p.name = form.name.data
-            p.website = form.website.data
-            p.public = form.public.data
-            db_session.commit()
-            return redirect(url_for('.dashboard', u=u.username))
+    delete_form = ProjectDeleteForm(prefix='delete', meta={'project': p})
+    edit_form = ProjectDetailsForm(prefix='edit', obj=p)
+
+    match request.form.get('action'):
+        case 'edit':
+            if edit_form.validate_on_submit():
+                old_p = Project.by_name_and_owner(edit_form.name.data, g.user)
+                if old_p and old_p.id != p.id:
+                    edit_form.name.errors = [
+                        validators.ValidationError(
+                            _('Project name must be unique.')
+                        )
+                    ]
+                else:
+                    p.name = edit_form.name.data
+                    p.website = edit_form.website.data
+                    p.public = edit_form.public.data
+                    db_session.commit()
+                    flash(
+                        _('Changes to your project have been saved.'),
+                        category='success'
+                    )
+                    return redirect(p.url(p.Page.DETAILS))
+        case 'delete':
+            if delete_form.validate_on_submit():
+                db_session.delete(p)
+                db_session.commit()
+
+                flash(
+                    _('Your project has been deleted.'),
+                    category='success'
+                )
+
+                return redirect(u.url(u.Page.DASHBOARD))
 
     return render_template(
         'projects/edit_project.html',
         project=p,
-        form=form
+        edit_form=edit_form,
+        delete_form=delete_form
     )
 
 

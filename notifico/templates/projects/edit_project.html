@@ -1,17 +1,48 @@
-{% extends "layouts/main.html" %}
+{% extends "projects/project_base.html" %}
 {% import "ui/forms.html" as forms %}
 
-{% block content_page %}
-  <h2>Edit Project</h2>
-  <div class="section-content">
-    <form class="form form-horizontal" method='POST' action="{{ request.url }}">
-      {{ form.hidden_tag() }}
-      {{ forms.render_field(form.name) }}
-      {{ forms.render_field(form.website ) }}
-      {{ forms.render_field(form.public) }}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-success">Save Changes</button>
-        <a href="{{ url_for('.details', u=g.user.username, p=project.name) }}" class="btn">Cancel</a>
+{% block main_content %}
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _("Edit Project") }}
+    </div>
+    <form method="POST">
+      <div class="card-body">
+        {{ edit_form.hidden_tag() }}
+        {{ forms.render_field(edit_form.name) }}
+        {{ forms.render_field(edit_form.website ) }}
+        {{ forms.render_field(edit_form.public) }}
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary" name="action" value="edit">
+          {{ _("Save") }}
+        </button>
+        <a href="{{ project.url(project.Page.DETAILS) }}" class="btn btn-warning">
+          {{ _("Cancel") }}
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _("Delete Project") }}
+    </div>
+    <form method="POST">
+      <div class="card-body">
+        <p>
+          {% trans %}
+            Deleting your project will remove all hooks, channels, logs, and settings.
+            This action cannot be undone, but you can recreate your project later.
+          {% endtrans %}
+        </p>
+        {{ delete_form.hidden_tag() }}
+        {{ forms.render_field(delete_form.confirm_project) }}
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-danger" name="action" value="delete">
+          {{ _("Delete") }}
+        </button>
       </div>
     </form>
   </div>

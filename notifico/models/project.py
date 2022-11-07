@@ -17,6 +17,7 @@ from notifico.permissions import HasPermissions, Action, Permission
 class Project(Base, HasPermissions):
     class Page(enum.IntEnum):
         DETAILS = 10
+        EDIT = 30
 
     __tablename__ = 'project'
 
@@ -107,6 +108,12 @@ class Project(Base, HasPermissions):
             case self.Page.DETAILS:
                 return url_for(
                     'projects.details',
+                    u=self.owner.username,
+                    p=self.name
+                )
+            case self.Page.EDIT:
+                return url_for(
+                    'projects.edit_project',
                     u=self.owner.username,
                     p=self.name
                 )

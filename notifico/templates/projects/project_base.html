@@ -15,5 +15,10 @@
     <a class="list-group-item list-group-item-action"
        href="{{ url_for('.details', u=g.user.username, p=project.name, _anchor="irc-channels") }}">
       {{ _('IRC Channels') }}</a>
+    {% if project.can(Action.UPDATE, obj=project) %}
+      <a class="list-group-item list-group-item-action"
+         href="{{ project.url(project.Page.EDIT) }}">
+        {{ _('Edit Project') }}</a>
+    {% endif %}
   </div>
 {% endblock %}
