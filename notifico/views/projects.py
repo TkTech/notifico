@@ -455,12 +455,14 @@ def new_channel(u, p: Project):
             elif not channel.can(Action.READ, obj=channel):
                 abort(403)
 
-            db_session.add(Channel(
-                channel=channel.channel,
-                network=channel.network,
-                public=channel.public,
-                project=p
-            ))
+            db_session.add(
+                Channel(
+                    channel=channel.channel,
+                    network=channel.network,
+                    public=channel.public,
+                    project=p
+                )
+            )
             db_session.commit()
             flash(
                 _('The channel has been added to your project.'),

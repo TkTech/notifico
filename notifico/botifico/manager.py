@@ -5,6 +5,7 @@ from typing import Dict, Set, Type, Optional, Iterable
 
 from notifico.botifico.bot import Network, Bot
 from notifico.botifico.contrib.plugins.ready import ready_plugin
+from notifico.botifico.events import Event
 from notifico.botifico.logger import logger
 from notifico.botifico.plugin import Plugin
 
@@ -94,19 +95,24 @@ class ChannelBot(Bot):
 
 
 class Manager(Plugin):
-    """
-    A Manager is a high-level coordinator of one or more bots connect to one or
-    more networks.
-
-    .. note::
-
-        The `Manager` will always enable the `ready_plugin`, as it's needed
-        to enable channel support.
-    """
     bots: Dict[Network, Set[ChannelBot]]
     bot_class: Type[Bot]
 
-    def __init__(self, name, *, bot_class=ChannelBot):
+    def __init__(self, name: str, *, bot_class: Type[ChannelBot] = ChannelBot):
+        """
+        A Manager is a high-level coordinator of one or more bots connect to one
+        or more networks.
+        
+        .. note::
+    
+            The `Manager` will always enable the `ready_plugin`, as it's needed
+            to enable channel support.
+
+        :param name: A unique name for the bot, shared across all its instances.
+                     Used for namespacing.
+        :param bot_class: An optional alternative class to use instead of
+                          :class:`ChannelBot`
+        """
         super().__init__(name)
         self.bot_class = bot_class
         self.bots = defaultdict(set)
@@ -128,27 +134,71 @@ class Manager(Plugin):
 
     async def bots_by_network(self, network: Network) -> Iterable[ChannelBot]:
         """
-        Return all bots on the given network.
+        Return all bots connected (or connecting) to the given network.
 
         If no bot is connected to the given network, one will be created and
         connected.
+
+        .. note::
+
+            Any newly created bot is connected _asynchronously_, and may not
+            be done by the time it's returned.
+
+        :param network: The Network to search for.
         """
         bots = self.bots[network]
+        
+        # If there's no bots at all, just assume we need to connect one.
         if not bots:
-            bot = self.bot_class(self, network)
-            bot.register_plugin(self)
-            bots.add(bot)
-            await bot.connect()
+            bot = await self.add_bot_to_network(network)
+            asyncio.create_task(bot.connect())
+            return [bot]
 
         return bots
 
-    async def channel(self, network: Network, channel: Channel):
+    async def add_bot_to_network(self, network: Network) -> ChannelBot:
         """
-        Return a :py:`Channel` for the given network.
+        Add a bot to the given :class:`Network`, but does not attempt to
+        connect it.
 
-        This will attempt to find a usable bot for the given channel,
-        connecting one if necessary.
+        :param network: The Network associated with the new bot.
         """
-        bots = await self.bots_by_network(network)
+        bot = self.bot_class(self, network)
+        bot.register_plugin(self)
+        bot.register_handler(Event.on_disconnect, self.on_disconnect)
+        self.bots[network].add(bot)
+        return bot
+
+    async def channel(self, network: Network, channel: Channel) -> ChannelProxy:
+        """
+        Return a :py:`ChannelProxy` for a bot connected to the given network.
+        If no bot is connected, one will be connected for you.
+
+        :param network: The Network to search for the channel.
+        :param channel: The Channel to return.
+        """
+        bots = list(await self.bots_by_network(network))
         for bot in bots:
-            return bot[channel]
+            if channel in bot.channels:
+                return bot[channel]
+
+        # TODO: Check to see if the bot is at the channel cap per connection
+        #       (which comes from capabilities listed in 005), and create a
+        #       new connection if it is.
+        return bots[-1][channel]
+
+    async def on_disconnect(self, bot: ChannelBot):
+        """
+        Event handler called whenever a bot is disconnected from the network.
+
+        :param bot: The bot disconnecting.
+        """
+        try:
+            self.bots[bot.network].remove(bot)
+        except KeyError:
+            # In the very rare chance something else has already removed us
+            # (such as an exception occurring while handling disconnect), we
+            # don't really care.
+            pass
+
+        logger.info(f'[manager] Bot disconnected cleanly {bot}')

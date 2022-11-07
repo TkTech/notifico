@@ -35,8 +35,6 @@ class Bot:
     event_receivers: Dict[str, Set[Callable]]
     event_emitters: Dict[str, asyncio.Event]
     plugin_metadata: Dict[str, dict]
-    _writer_task: Optional[asyncio.Task]
-    _reader_task: Optional[asyncio.Task]
 
     def __init__(self, network: Network, *, max_buffer_size=0x100000):
         """
@@ -51,9 +49,6 @@ class Bot:
         self.event_emitters = defaultdict(lambda: asyncio.Event())
         self.plugin_metadata = defaultdict(dict)
         self.max_buffer_size = max_buffer_size
-
-        self._writer_task = None
-        self._reader_task = None
 
     def __repr__(self):
         return f'<{self.__class__.__name__}({self.network!r})>'
@@ -90,7 +85,7 @@ class Bot:
                 chunk: Optional[bytes] = read_chunk.result()
 
                 # Remote server closed the connection.
-                if chunk is None:
+                if chunk == b'':
                     self.message_queue.empty()
                     await self.emit_event(Event.on_disconnect)
 
