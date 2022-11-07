@@ -253,6 +253,8 @@ def irc_merge(network_id: int, other_network: List[int]):
             NetworkEvent.network_id == IRCNetwork.id
         ).where(
             IRCNetwork.id.in_(other_network)
+        ).execution_options(
+            synchronize_session=False
         )
     )
 
