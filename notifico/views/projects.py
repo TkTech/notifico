@@ -443,7 +443,7 @@ def new_channel(u, p: Project):
             ))
 
     if request.method == 'POST':
-        if request.form['action'] == 'quick-add':
+        if request.form.get('action') == 'quick-add':
             channel = db_session.query(
                 Channel
             ).filter(

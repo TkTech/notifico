@@ -7,6 +7,7 @@
     <form class="form form-horizontal" method='POST' action="{{ request.url }}">
       <p>Are you sure you want to delete the project <strong>{{ project.name }}</strong>?</p>
       <div class="form-actions">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <button type="submit" class="btn btn-danger" value="d" name="do">Delete Project</button>
         <a href="{{ url_for('.dashboard', u=g.user.username) }}" class="btn btn-success">Cancel</a>
       </div>

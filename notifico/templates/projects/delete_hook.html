@@ -15,6 +15,7 @@
             have to reconfigure any services you have setup to use it.
           {% endtrans %}
           </p>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <button type="submit" class="btn btn-danger" value='d' name='do'>
             {{ _('Delete Hook') }}
           </button>

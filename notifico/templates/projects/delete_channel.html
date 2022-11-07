@@ -16,6 +16,7 @@
             {% endtrans %}
           </p>
           <div class="form-actions">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <button type="submit" class="btn btn-danger" value="d" name="do">
               {{ _('Remove Channel') }}
             </button>
