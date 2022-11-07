@@ -33,6 +33,7 @@
         <div class="card-text">
           {{ form.hidden_tag() }}
           {{ forms.render_field(form.channel) }}
+          {{ forms.render_field(form.password) }}
           {{ forms.render_field(form.public) }}
           {{ forms.render_field(form.network) }}
           {% trans new_network=url_for('settings.irc') %}

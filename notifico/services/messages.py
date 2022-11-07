@@ -49,7 +49,8 @@ class MessageService(object):
                 'channel': channel.channel,
                 'host': channel.network.host,
                 'port': channel.network.port,
-                'ssl': channel.network.ssl
+                'ssl': channel.network.ssl,
+                'channel_password': channel.password
             }
         }
         message_dump = json.dumps(final_message)

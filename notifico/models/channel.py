@@ -148,6 +148,7 @@ class Channel(Base, HasPermissions):
 
     channel = sa.Column(sa.String(80), nullable=False)
     public = sa.Column(sa.Boolean, default=False)
+    password = sa.Column(sa.String(256))
 
     network_id = sa.Column(sa.BigInteger, sa.ForeignKey('irc_network.id'))
     network = orm.relationship(

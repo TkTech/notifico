@@ -43,7 +43,15 @@ class ChannelProxy:
             timeout=timeout
         )
 
-        await self.bot.send('JOIN', self.channel.name)
+        if self.channel.password:
+            await self.bot.send(
+                'JOIN',
+                self.channel.name,
+                # We sanitize long, long before this point, but just in case...
+                self.channel.password.replace('\n', '')
+            )
+        else:
+            await self.bot.send('JOIN', self.channel.name)
         if wait:
             logger.info(
                 f'[manager] Waiting on joined status for {self.bot}'

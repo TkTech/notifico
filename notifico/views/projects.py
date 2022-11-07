@@ -77,6 +77,17 @@ class ChannelDetailsForm(wtf.FlaskForm):
             ' #commits or ##my-project.'
         )
     )
+    password = fields.PasswordField(
+        _('Password'),
+        validators=[
+            validators.Optional(),
+            validators.Length(min=1, max=80)
+        ],
+        description=_(
+            'The password needed to join the channel, if one is required. Most'
+            ' IRC channels do not require a password.'
+        )
+    )
     network = fields.SelectField(
         _('Network')
     )
@@ -460,6 +471,7 @@ def new_channel(u, p: Project):
                     channel=channel.channel,
                     network=channel.network,
                     public=channel.public,
+                    password=channel.password,
                     project=p
                 )
             )
@@ -486,6 +498,7 @@ def new_channel(u, p: Project):
                 c = Channel(
                     channel=channel,
                     network=network,
+                    password=form.password.data,
                     public=form.public.data
                 )
                 p.channels.append(c)
