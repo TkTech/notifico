@@ -635,18 +635,31 @@ def edit_channel(u, p: Project, cid):
             if edit_form.validate_on_submit():
                 edit_form.populate_obj(c)
                 db_session.commit()
+                flash(_('The channel has been updated.'), category='success')
                 return redirect(url_for('.details', p=p.name, u=u.username))
         case 'delete':
             if delete_form.validate_on_submit():
                 c.project.channels.remove(c)
                 db_session.delete(c)
                 db_session.commit()
+                flash(_('The channel has been deleted.'), category='success')
                 return redirect(url_for('.details', p=p.name, u=u.username))
         case 'logging':
             if logging_form.validate_on_submit():
                 c.logged = logging_form.enabled.data
                 db_session.add(c)
                 db_session.commit()
+                if c.logged:
+                    flash(
+                        _('Logging has been enabled for this channel.'),
+                        category='success'
+                    )
+                else:
+                    flash(
+                        _('Logging has been disabled for this channel.'),
+                        category='success'
+                    )
+
                 return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template(
