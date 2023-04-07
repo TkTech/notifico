@@ -26,6 +26,7 @@ from notifico.settings import Settings
 
 
 tracker = Plugin('tracker')
+chat_logger = Plugin('chat_logger')
 
 
 def _get_matching_networks(network: Network):
@@ -60,6 +61,11 @@ async def on_disconnect(bot: Bot):
         ))
 
     db_session.commit()
+
+
+@chat_logger.on(Event.on_message)
+async def on_message(bot: Bot, command: str, args, prefix: str):
+    print(bot, command, args, prefix)
 
 
 def _get_channel(j):

@@ -26,6 +26,7 @@ class ChannelProxy:
         self.network = network
         self.channel = channel
         self.bot.register_handler('JOIN', self.on_join)
+        self.bot.register_handler('PRIVMSG', self.on_privmsg)
 
         self.joined = asyncio.Event()
 
@@ -108,8 +109,8 @@ class Manager(Plugin):
 
     def __init__(self, name: str, *, bot_class: Type[ChannelBot] = ChannelBot):
         """
-        A Manager is a high-level coordinator of one or more bots connect to one
-        or more networks.
+        A Manager is a high-level coordinator of one or more bots connected to
+        one or more networks.
         
         .. note::
     

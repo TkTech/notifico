@@ -1,3 +1,4 @@
+from notifico.models.chat import ChatLog, ChatMessage
 from notifico.models.user import User, Role, Permission
 from notifico.models.channel import Channel, IRCNetwork, NetworkEvent
 from notifico.models.hook import Hook
@@ -11,5 +12,7 @@ ALL_MODELS = [
     IRCNetwork,
     Hook,
     Project,
-    NetworkEvent
+    NetworkEvent,
+    ChatLog,
+    ChatMessage
 ]

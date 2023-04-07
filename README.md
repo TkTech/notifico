@@ -19,7 +19,27 @@ cd notifico
 docker-compose up
 ```
 
-This will start redis, postgres, IRC bots, and the frontend on port 5000.
+This will start redis, postgres, IRC bots, and the frontend on port 5000. If
+you've never run Notifico before, also run:
+
+```shell
+docker-compose exec workers poetry run notifico tools bootstrap
+```
+
+This will populate the initial database. If you've run Notifico in the past,
+instead use:
+
+```shell
+docker-compose exec workers poetry run alembic upgrade head
+```
+
+And finally if you need a user to log in with, create your initial admin
+account with:
+
+```shell
+docker-compose exec workers poetry run notifico users create <username> <email>
+docker-compose exec workers poetry run notifico users grant-role <username> admin
+```
 
 ## FAQ
 

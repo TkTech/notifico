@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import datetime
+from pathlib import Path
 from typing import List
 
 import click
@@ -8,9 +9,15 @@ from flask.cli import FlaskGroup
 from sqlalchemy import update, delete
 
 from notifico import create_app
-from notifico.database import db_session
-from notifico.models import Project, Role, Permission, IRCNetwork, Channel, \
+from notifico.database import db_session, Base, engine
+from notifico.models import (
+    Project,
+    Role,
+    Permission,
+    IRCNetwork,
+    Channel,
     NetworkEvent
+)
 from notifico.models.user import User
 
 
@@ -44,16 +51,12 @@ def irc():
 @users.command()
 @click.argument('username')
 @click.argument('email')
-@click.option('--superuser', is_flag=True, default=False)
 @click.password_option()
-def create(username, email, password, superuser=False):
+def create(username, email, password):
     """
     Create a new user.
     """
     user = User.new(username, email, password)
-    if superuser:
-        user.add_group('admin')
-
     db_session.add(user)
     db_session.commit()
 
@@ -267,6 +270,20 @@ def irc_merge(network_id: int, other_network: List[int]):
     )
 
     db_session.commit()
+
+
+@tools.command('bootstrap')
+def bootstrap_command():
+    Base.metadata.create_all(engine)
+
+    # then, load the Alembic configuration and generate the
+    # version table, "stamping" it with the most recent rev:
+    from alembic.config import Config
+    from alembic import command
+    alembic_cfg = Config(str(Path(__file__).parent / '..' / 'alembic.ini'))
+    command.stamp(alembic_cfg, "head")
+
+    add_default_roles()
 
 
 if __name__ == '__main__':

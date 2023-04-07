@@ -172,6 +172,8 @@ class Channel(Base, HasPermissions):
         )
     )
 
+    log_id = sa.Column(sa.Integer, sa.ForeignKey('chat_log.id'))
+
     @classmethod
     def only_readable(cls, q: Query) -> Query:
         from notifico.models.project import Project
