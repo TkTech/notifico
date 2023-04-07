@@ -167,20 +167,6 @@ def add_permission(name: str):
     db_session.commit()
 
 
-@tools.command('add-default-roles')
-def add_default_roles():
-    """
-    Create the default user roles and permissions if they're missing.
-    """
-    admin: Role = db_session.merge(Role(name='admin'))
-    superuser: Permission = db_session.merge(Permission(name='superuser'))
-
-    admin.permissions.append(superuser)
-
-    db_session.add(admin)
-    db_session.commit()
-
-
 @bots.command('start')
 def bots_start():
     """
@@ -283,7 +269,14 @@ def bootstrap_command():
     alembic_cfg = Config(str(Path(__file__).parent / '..' / 'alembic.ini'))
     command.stamp(alembic_cfg, "head")
 
-    add_default_roles()
+    # Add the default user roles.
+    admin: Role = db_session.merge(Role(name='admin'))
+    superuser: Permission = db_session.merge(Permission(name='superuser'))
+
+    admin.permissions.append(superuser)
+
+    db_session.add(admin)
+    db_session.commit()
 
 
 if __name__ == '__main__':
