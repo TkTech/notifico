@@ -65,7 +65,7 @@ class HookDetailsForm(wtf.FlaskForm):
     ], coerce=int)
 
 
-class ChannelDetailsForm(wtf.FlaskForm):
+class ChannelEditForm(wtf.FlaskForm):
     channel = fields.StringField(
         _('Channel'),
         validators=[
@@ -88,9 +88,6 @@ class ChannelDetailsForm(wtf.FlaskForm):
             ' IRC channels do not require a password.'
         )
     )
-    network = fields.SelectField(
-        _('Network')
-    )
     public = fields.BooleanField(
         _('Public'),
         default=True,
@@ -98,6 +95,62 @@ class ChannelDetailsForm(wtf.FlaskForm):
             'Allow others to see that this channel exists.'
         )
     )
+
+    def validate_public(self, field: fields.StringField):
+        channel: Channel | None = getattr(self.meta, 'channel', None)
+        if channel and channel.logged and field.data is False:
+            raise validators.ValidationError(
+                _('Channel cannot be made private while logging is enabled.')
+            )
+
+    def validate_password(self, field: fields.StringField):
+        channel: Channel = self.meta.channel
+        if channel.logged and field.data:
+            raise validators.ValidationError(_(
+                'Channel cannot have a password set while logging is enabled.'
+            ))
+
+
+class ChannelCreateForm(ChannelEditForm):
+    network = fields.SelectField(
+        _('Network')
+    )
+
+
+class ChannelLoggingForm(wtf.FlaskForm):
+    enabled = fields.BooleanField(
+        _('Enable Logging'),
+        default=False,
+        description=_(
+            'Enable logging for this channel.'
+        )
+    )
+
+    def validate_enabled(self, field: fields.StringField):
+        channel: Channel = self.meta.channel
+        if not channel.public:
+            raise validators.ValidationError(_('Channel must be public.'))
+
+        if channel.password:
+            raise validators.ValidationError(
+                _('Channel must not have a password.')
+            )
+
+
+class ChannelDeleteForm(wtf.FlaskForm):
+    confirm_channel = fields.StringField(
+        _('Channel Name'),
+        validators=[
+            validators.InputRequired()
+        ],
+        description=_(
+            'Type the name of the channel to confirm deletion.'
+        )
+    )
+
+    def validate_confirm_channel(self, field: fields.StringField):
+        if self.meta.channel.channel != field.data:
+            raise validators.ValidationError(_('Channel name does not match.'))
 
 
 class ProjectDeleteForm(wtf.FlaskForm):
@@ -254,24 +307,6 @@ def edit_project(u: User, p: Project):
         edit_form=edit_form,
         delete_form=delete_form
     )
-
-
-@projects.route('/<u>/<p>/delete', methods=['GET', 'POST'])
-@user_required
-@project_action
-def delete_project(u, p: Project):
-    """
-    Delete an existing project.
-    """
-    if not Project.can(Action.DELETE, obj=p):
-        return abort(403)
-
-    if request.method == 'POST' and request.form.get('do') == 'd':
-        db_session.delete(p)
-        db_session.commit()
-        return redirect(url_for('.dashboard', u=u.username))
-
-    return render_template('projects/delete_project.html', project=p)
 
 
 @projects.route('/<u>/<p>')
@@ -470,7 +505,7 @@ def new_channel(u, p: Project):
         3
     ).all()
 
-    form = ChannelDetailsForm()
+    form = ChannelCreateForm()
     form.network.choices = []
 
     for network in networks:
@@ -565,33 +600,60 @@ def new_channel(u, p: Project):
     )
 
 
-@projects.route('/<u>/<p>/channel/delete/<int:cid>', methods=['GET', 'POST'])
+@projects.route('/<u>/<p>/channel/<int:cid>/edit', methods=['GET', 'POST'])
 @user_required
 @project_action
-def delete_channel(u, p: Project, cid):
+def edit_channel(u, p: Project, cid):
     """
-    Delete an existing service hook.
+    Edit an existing channel.
     """
     if not Project.can(Action.UPDATE, obj=p):
         return abort(403)
 
-    c = Channel.query.filter_by(
+    c: Channel = Channel.query.filter_by(
         id=cid,
         project_id=p.id
     ).first()
 
     if not c:
-        # Project or channel doesn't exist (404 Not Found)
         return abort(404)
 
-    if request.method == 'POST' and request.form.get('do') == 'd':
-        c.project.channels.remove(c)
-        db_session.delete(c)
-        db_session.commit()
-        return redirect(url_for('.details', p=p.name, u=u.username))
+    edit_form = ChannelEditForm(prefix='edit', obj=c, meta={'channel': c})
+    logging_form = ChannelLoggingForm(
+        prefix='logging',
+        data={
+            'enabled': c.logged
+        },
+        meta={
+            'channel': c
+        }
+    )
+    delete_form = ChannelDeleteForm(prefix='delete', meta={'channel': c})
+
+    match request.form.get('action'):
+        case 'edit':
+            if edit_form.validate_on_submit():
+                edit_form.populate_obj(c)
+                db_session.commit()
+                return redirect(url_for('.details', p=p.name, u=u.username))
+        case 'delete':
+            if delete_form.validate_on_submit():
+                c.project.channels.remove(c)
+                db_session.delete(c)
+                db_session.commit()
+                return redirect(url_for('.details', p=p.name, u=u.username))
+        case 'logging':
+            if logging_form.validate_on_submit():
+                c.logged = logging_form.enabled.data
+                db_session.add(c)
+                db_session.commit()
+                return redirect(url_for('.details', p=p.name, u=u.username))
 
     return render_template(
-        'projects/delete_channel.html',
+        'projects/edit_channel.html',
         project=c.project,
-        channel=c
+        channel=c,
+        edit_form=edit_form,
+        logging_form=logging_form,
+        delete_form=delete_form
     )

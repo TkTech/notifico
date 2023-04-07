@@ -1,0 +1,74 @@
+{% extends "projects/project_base.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block main_content %}
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _("Edit Channel") }}
+    </div>
+    <form method="POST">
+      <div class="card-body">
+        {{ edit_form.hidden_tag() }}
+        {{ forms.render_field(edit_form.channel) }}
+        {{ forms.render_field(edit_form.password) }}
+        {{ forms.render_field(edit_form.public) }}
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary" name="action" value="edit">
+          {{ _("Save") }}
+        </button>
+        <a href="{{ project.url(project.Page.DETAILS) }}" class="btn btn-warning">
+          {{ _("Cancel") }}
+        </a>
+      </div>
+    </form>
+  </div>
+
+
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _("Delete Channel") }}
+    </div>
+    <form method="POST">
+      <div class="card-body">
+        <p>
+          {% trans %}
+            Are you sure you want to delete this channel?
+          {% endtrans %}
+        </p>
+         {{ delete_form.hidden_tag() }}
+         {{ forms.render_field(delete_form.confirm_channel) }}
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-danger" name="action" value="delete">
+          {{ _("Delete") }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  {% if has_permission(Permission.SUPERUSER) %}
+    <div class="card mt-4">
+      <div class="card-header">
+        {{ _("Logging") }}
+      </div>
+      <form method="POST">
+        <div class="card-body">
+          <p>
+            {% trans %}
+              Enabling logging will store all IRC messages for this channel in a publicly accessible log viewer.
+              For privacy concerns, logging may only be enabled on channels that are public and have no password.
+            {% endtrans %}
+          </p>
+          {{ logging_form.hidden_tag() }}
+          {{ forms.render_field(logging_form.enabled) }}
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary" name="action" value="logging">
+            {{ _("Save") }}
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}

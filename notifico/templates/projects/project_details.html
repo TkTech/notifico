@@ -68,9 +68,9 @@
               {{ channel.network.port }}
             </span>
             <div>
-              <a class="btn btn-sm btn-danger"
-                 href="{{ url_for('.delete_channel', p=project.name, u=user.username, cid=channel.id) }}">
-                {{ _('Delete') }}</a>
+              <a class="btn btn-sm btn-secondary"
+                 href="{{ url_for('.edit_channel', p=project.name, u=user.username, cid=channel.id) }}">
+                {{ _('Edit') }}</a>
             </div>
           </div>
         </li>

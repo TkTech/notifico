@@ -9,6 +9,11 @@
             <span class="required text-danger">*</span>
           {% endif %}
         </label>
+        {% for error in field.errors %}
+          <div class="invalid-feedback">
+            {{ error }}
+          </div>
+        {% endfor %}
       </div>
     {% else %}
       <label for="{{ field.id }}" class="form-label">
@@ -18,12 +23,12 @@
         {% endif %}
       </label>
       {{ field(class_='form-control ' + ('is-invalid' if field.errors else ''), **kwargs)|safe }}
+      {% for error in field.errors %}
+        <div class="invalid-feedback">
+          {{ error }}
+        </div>
+      {% endfor %}
     {% endif %}
-    {% for error in field.errors %}
-      <div class="invalid-feedback">
-        {{ error }}
-      </div>
-    {% endfor %}
     <div class="text-muted small pt-2">
       {{ field.description|safe }}
     </div>
