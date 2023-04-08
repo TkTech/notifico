@@ -26,7 +26,6 @@ class ChannelProxy:
         self.network = network
         self.channel = channel
         self.bot.register_handler('JOIN', self.on_join)
-        self.bot.register_handler('PRIVMSG', self.on_privmsg)
 
         self.joined = asyncio.Event()
 
@@ -91,6 +90,11 @@ class ChannelBot(Bot):
                 channel=channel
             )
         )
+
+    def get_channel(self, channel: str) -> ChannelProxy | None:
+        for channel_proxy in self.channels.values():
+            if channel_proxy.channel.name == channel:
+                return channel_proxy
 
     async def task_exception(self, ex: Exception):
         try:

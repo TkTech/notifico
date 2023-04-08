@@ -31,10 +31,8 @@ class MessageService(object):
         """
         Sends `message` to `channel`.
         """
-        final_message = {
-            # What we're delivering.
+        message_dump = json.dumps({
             'type': 'message',
-            # Contents of the message.
             'payload': {
                 'msg': message.replace(
                     '\n', ''
@@ -44,16 +42,28 @@ class MessageService(object):
                     '\x01', ''
                 )
             },
-            # Destination.
-            'channel': {
-                'channel': channel.channel,
-                'host': channel.network.host,
-                'port': channel.network.port,
-                'ssl': channel.network.ssl,
-                'channel_password': channel.password
-            }
-        }
-        message_dump = json.dumps(final_message)
+            'channel': channel.id
+        })
+        self.r.rpush(self.key_queue_messages, message_dump)
+
+    def start_logging(self, channel):
+        """
+        Starts logging for `channel`.
+        """
+        message_dump = json.dumps({
+            'type': 'start-logging',
+            'channel': channel.id
+        })
+        self.r.rpush(self.key_queue_messages, message_dump)
+
+    def stop_logging(self, channel):
+        """
+        Stops logging for `channel`.
+        """
+        message_dump = json.dumps({
+            'type': 'stop-logging',
+            'channel': channel.id
+        })
         self.r.rpush(self.key_queue_messages, message_dump)
 
     def log_message(self, message, project, log_cap=200):

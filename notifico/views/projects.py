@@ -2,7 +2,7 @@ from functools import wraps
 
 from flask import (
     Blueprint,
-    render_template,
+    current_app, render_template,
     g,
     redirect,
     url_for,
@@ -18,6 +18,7 @@ from notifico.database import db_session
 from notifico.models import User, Project, Hook, Channel, IRCNetwork
 from notifico.permissions import Action
 from notifico.service import incoming_services
+from notifico.services.messages import MessageService
 
 projects = Blueprint('projects', __name__, template_folder='templates')
 
@@ -630,6 +631,8 @@ def edit_channel(u, p: Project, cid):
     )
     delete_form = ChannelDeleteForm(prefix='delete', meta={'channel': c})
 
+    ms = MessageService(redis=current_app.redis)  # noqa
+
     match request.form.get('action'):
         case 'edit':
             if edit_form.validate_on_submit():
@@ -654,11 +657,13 @@ def edit_channel(u, p: Project, cid):
                         _('Logging has been enabled for this channel.'),
                         category='success'
                     )
+                    ms.start_logging(c)
                 else:
                     flash(
                         _('Logging has been disabled for this channel.'),
                         category='success'
                     )
+                    ms.stop_logging(c)
 
                 return redirect(url_for('.details', p=p.name, u=u.username))
 
