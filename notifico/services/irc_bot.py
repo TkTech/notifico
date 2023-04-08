@@ -226,8 +226,30 @@ async def wait_for_events():
         # keyspace events.
         await r.config_set('notify-keyspace-events', 'Kl')
 
-        # TODO: Proactively retrieve all channels which have logging setup,
-        #       and ensure we join them ASAP.
+        # We normally only JOIN a channel the first time we get a message.
+        # Except if logging is enabled for a channel, we want to JOIN it as
+        # soon as we possibly can, or we'll miss things.
+        # TODO: Periodically try to re-
+        channels = db_session.query(
+            ChannelModel
+        ).with_entities(
+            ChannelModel.id
+        ).filter(
+            ChannelModel.logged.is_(True),
+            ChannelModel.public.is_(True),
+            sa.or_(
+                ChannelModel.password.is_(None),
+                ChannelModel.password == ""
+            )
+        )
+
+        for channel in channels:
+            asyncio.create_task(
+                _handle_single_message({
+                    'type': 'start-logging',
+                    'channel': channel.id
+                }, manager)
+            )
 
         # Before we start waiting for events, process anything already in the
         # queue.
