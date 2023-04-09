@@ -122,14 +122,40 @@ async def on_message(bot: ChannelBot, command: str, args, prefix: Prefix):
         chat_log.line_count = ChatLog.line_count + 1
 
     db_session.add(chat_log)
-    db_session.add(
-        ChatMessage(
-            chat_log=chat_log,  # noqa, PyCharm doesn't understand this.
-            message=args[1],
-            sender=prefix.nick,
-            timestamp=datetime.datetime.now(tz=datetime.timezone.utc)
-        )
-    )
+
+    ts = timestamp = datetime.datetime.now(tz=datetime.timezone.utc),
+
+    match command:
+        case 'PRIVMSG':
+            if args[1].startswith('\x01ACTION '):
+                # Special handling for /me
+                db_session.add(
+                    ChatMessage(
+                        chat_log=chat_log,  # noqa, PyCharm doesn't understand this.
+                        message={
+                            'type': 'action',
+                            'message': args[1][7:-1]
+                        },
+                        sender=prefix.nick,
+                        timestamp=ts
+                    )
+                )
+            elif args[1].startswith('\x01'):
+                # Ignore all other CTCP messages.
+                pass
+            else:
+                db_session.add(
+                    ChatMessage(
+                        chat_log=chat_log,  # noqa, PyCharm doesn't understand this.
+                        message={
+                            'type': 'message',
+                            'message': args[1]
+                        },
+                        sender=prefix.nick,
+                        timestamp=ts
+                    )
+                )
+
     db_session.commit()
 
 

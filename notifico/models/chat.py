@@ -4,6 +4,7 @@ import enum
 import sqlalchemy as sa
 from flask import url_for
 from sqlalchemy import orm
+from sqlalchemy.dialects.postgresql import JSONB
 
 from notifico.database import Base
 
@@ -70,10 +71,10 @@ class ChatMessage(Base):
 
     log_id = sa.Column(sa.Integer, sa.ForeignKey('chat_log.id'))
 
-    # The raw content of the message. How this is interpreted is up to the
-    # displayer and likely based off the type of the owning Channel. It may
-    # be text, JSON, XML, whatever.
-    message = sa.Column(sa.Text)
+    # The content of the message, as a JSON object. This is intended to be
+    # a "raw" representation of the message, and should be parsed by the
+    # client. This is to allow for the most flexibility in the future.
+    message = sa.Column(JSONB)
 
     # A string label for the message sender, if there is one. It may not be
     # present in the case of system or service messages. This is not intended

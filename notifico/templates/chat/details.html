@@ -30,8 +30,14 @@
              class="d-inline-block text-muted font-monospace">
             [{{ line.timestamp.strftime('%H:%M') }}]
           </a>
-          &lt;<span class="font-monospace text-accent1">{{ line.sender }}</span>&gt;
-          {{ line.message }}
+          {% if line.message["type"] == "message" %}
+            &lt;<span class="font-monospace text-accent1">{{ line.sender }}</span>&gt;
+            {{ line.message["message"] }}
+          {% elif line.message.type == "action" %}
+            <span class="text-muted font-monospace">
+              * {{ line.sender }} {{ line.message["message"] }}
+            </span>
+          {% endif %}
         </div>
       {% endfor %}
     </div>

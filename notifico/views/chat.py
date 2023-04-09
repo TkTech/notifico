@@ -1,9 +1,11 @@
 import datetime
-from calendar import Calendar, HTMLCalendar, TextCalendar
+from calendar import HTMLCalendar
 
 from flask import (
     Blueprint,
-    abort, render_template, url_for,
+    abort,
+    render_template,
+    url_for,
 )
 
 from notifico import db_session
