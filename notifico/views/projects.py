@@ -636,10 +636,19 @@ def edit_channel(u, p: Project, cid):
     match request.form.get('action'):
         case 'edit':
             if edit_form.validate_on_submit():
-                edit_form.populate_obj(c)
-                db_session.commit()
-                flash(_('The channel has been updated.'), category='success')
-                return redirect(url_for('.details', p=p.name, u=u.username))
+                if c.logged:
+                    flash(_(
+                        'This channel cannot be edited because it is being'
+                        ' logged. Please disable logging before editing the '
+                        ' channel.'
+                    ), category='warning')
+                else:
+                    edit_form.populate_obj(c)
+                    db_session.commit()
+                    flash(_(
+                        'The channel has been updated.'
+                    ), category='success')
+                    return redirect(url_for('.details', p=p.name, u=u.username))
         case 'delete':
             if delete_form.validate_on_submit():
                 c.project.channels.remove(c)
@@ -650,6 +659,9 @@ def edit_channel(u, p: Project, cid):
         case 'logging':
             if logging_form.validate_on_submit():
                 c.logged = logging_form.enabled.data
+                if not c.logged:
+                    c.chat_log = None
+
                 db_session.add(c)
                 db_session.commit()
                 if c.logged:

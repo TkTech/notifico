@@ -1,0 +1,39 @@
+{% extends "layouts/two_column.html" %}
+
+{% block header %}
+  {% if channel %}
+    {{ channel.network.host }}
+    <span class="text-accent1">/</span>
+    {{ channel.channel }}
+    <span class="text-accent1">/</span>
+  {% endif %}
+  {{ date.strftime('%B %Y') }}
+{% endblock %}
+
+{% block sidebar %}
+  <div class="list-group py-4">
+    <div class="list-group-item py-4">
+      {{ calendar.formatmonth(date.year, date.month)|safe }}
+    </div>
+  </div>
+{% endblock %}
+
+{%block main_content %}
+  <div class="card mt-4">
+    <div class="card-header">
+      {{ _('Chat Log') }}
+    </div>
+    <div class="list-group list-group-flush">
+      {% for line in lines %}
+        <div class="list-group-item">
+          <a href="#{{ line.timestamp.timestamp() }}"
+             class="d-inline-block text-muted font-monospace">
+            [{{ line.timestamp.strftime('%H:%M') }}]
+          </a>
+          &lt;<span class="font-monospace text-accent1">{{ line.sender }}</span>&gt;
+          {{ line.message }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

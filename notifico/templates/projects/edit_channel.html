@@ -6,6 +6,13 @@
     <div class="card-header">
       {{ _("Edit Channel") }}
     </div>
+    {% if channel.logged %}
+    <div class="card-body">
+      <p class="my-0">
+        This channel cannot be edited while chat logging is enabled.
+      </p>
+    </div>
+    {% else %}
     <form method="POST">
       <div class="card-body">
         {{ edit_form.hidden_tag() }}
@@ -22,6 +29,7 @@
         </a>
       </div>
     </form>
+    {% endif %}
   </div>
 
 

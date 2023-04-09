@@ -68,6 +68,23 @@
               {{ channel.network.port }}
             </span>
             <div>
+              {% if channel.logged %}
+                {% if channel.chat_log is none %}
+                  <button
+                    disabled
+                    class="btn btn-sm btn-secondary"
+                    title="{{ _("No messages logged yet.") }}"
+                  >
+                    {{ _('Chat Log') }}
+                  </button>
+                {% else %}
+                  <a class="btn btn-sm btn-secondary"
+                     href="{{ channel.chat_log.url(channel.chat_log.Page.DETAILS) }}">
+                    {{ _('Chat Log') }}
+                  </a>
+                {% endif %}
+              {% endif %}
+
               <a class="btn btn-sm btn-secondary"
                  href="{{ url_for('.edit_channel', p=project.name, u=user.username, cid=channel.id) }}">
                 {{ _('Edit') }}</a>

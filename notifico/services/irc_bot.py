@@ -116,10 +116,11 @@ async def on_message(bot: ChannelBot, command: str, args, prefix: Prefix):
         )
     ).first()
     if chat_log is None:
-        chat_log = ChatLog()
+        chat_log = ChatLog(line_count=1)
         chat_log.channels.extend(channels)
+    else:
+        chat_log.line_count = ChatLog.line_count + 1
 
-    chat_log.line_count = ChatLog.line_count + 1
     db_session.add(chat_log)
     db_session.add(
         ChatMessage(
@@ -229,7 +230,8 @@ async def wait_for_events():
         # We normally only JOIN a channel the first time we get a message.
         # Except if logging is enabled for a channel, we want to JOIN it as
         # soon as we possibly can, or we'll miss things.
-        # TODO: Periodically try to re-
+        # TODO: Periodically try to join channels that might have failed due
+        #       to a network error.
         channels = db_session.query(
             ChannelModel
         ).with_entities(

@@ -1,6 +1,8 @@
 import datetime
+import enum
 
 import sqlalchemy as sa
+from flask import url_for
 from sqlalchemy import orm
 
 from notifico.database import Base
@@ -21,6 +23,9 @@ class ChatLog(Base):
     Discord, Teams, etc..., so we do not need to consider them when making
     changes.
     """
+    class Page(enum.IntEnum):
+        DETAILS = 10
+
     __tablename__ = 'chat_log'
 
     id = sa.Column(sa.Integer, primary_key=True)
@@ -29,10 +34,8 @@ class ChatLog(Base):
     # #commits, which will all link to a single log.
     channels = orm.relationship(
         'Channel',
-        cascade='all, delete-orphan',
-        backref=orm.backref(
-            'chat_log',
-        )
+        lazy='dynamic',
+        backref=orm.backref('chat_log')
     )
 
     messages = orm.relationship(
@@ -49,6 +52,15 @@ class ChatLog(Base):
     line_count = sa.Column(sa.BigInteger, default=0)
 
     created = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
+
+    def url(self, of: Page = Page.DETAILS) -> str:
+        match of:
+            case self.Page.DETAILS:
+                return url_for('chat.details', log_id=self.id)
+            case _:
+                raise ValueError(
+                    f'Don\'t know how to generate a URL for {of=}.'
+                )
 
 
 class ChatMessage(Base):

@@ -89,10 +89,12 @@ def create_app():
     from notifico.views import projects
     from notifico.views import settings
     from notifico.views import admin
+    from notifico.views import chat
 
     app.register_blueprint(account.account, url_prefix='/u')
     app.register_blueprint(settings.settings_view, url_prefix='/u/settings')
     app.register_blueprint(admin.admin_view, url_prefix='/a')
+    app.register_blueprint(chat.chat_view, url_prefix='/c')
     app.register_blueprint(projects.projects)
     app.register_blueprint(public.public)
 

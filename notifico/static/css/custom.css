@@ -9,3 +9,30 @@
 .card-header {
     font-weight: bold;
 }
+
+table.month {
+    width: 100%;
+}
+
+table.month th.month {
+    text-align: center;
+}
+
+table.month .mon,
+table.month .tue,
+table.month .wed,
+table.month .thu,
+table.month .fri,
+table.month .sat,
+table.month .sun {
+    text-align: center;
+}
+
+table.month .day {
+    text-align: center;
+}
+
+table.month .selected-day {
+    text-decoration: underline;
+    font-weight: bolder;
+}
