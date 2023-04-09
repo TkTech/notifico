@@ -1,12 +1,13 @@
-# -*- coding: utf8 -*-
 """
 Generic IRC utilities.
 """
-__all__ = ('mirc_colors', 'strip_mirc_colors')
+__all__ = ('mirc_colors', 'strip_mirc_colors', 'to_html')
 import re
 
+from markupsafe import Markup, escape
+
 #: Precompiled regex for matching mIRC color codes.
-_STRIP_R = re.compile('\x03(?:\d{1,2}(?:,\d{1,2})?)?', re.UNICODE)
+_STRIP_R = re.compile(r'\x03(?:\d{1,2}(?:,\d{1,2})?)?', re.UNICODE)
 
 #: Common mIRC color codes.
 _colors = dict(
@@ -44,8 +45,6 @@ def strip_mirc_colors(msg):
 
 
 def to_html(message):
-    from jinja2 import Markup, escape
-
     c_to_c = {
         0: 'white',
         1: '#DADADA',
@@ -66,9 +65,10 @@ def to_html(message):
     def _mirc_to_span(m):
         return Markup(
             '<span style="color: {fore};">{text}</span>'.format(
-                text=m.group(3),
+                text=escape(m.group(3)),
                 fore=c_to_c.get(int(m.group(1)), 'black"')
-        ))
+            )
+        )
 
     m = []
     for line in message.split('\n'):
@@ -78,7 +78,7 @@ def to_html(message):
                 #r'\x03([0-9]{1,2}),?([0-9]{1,2})(.*?)\x03',
                 r'\x03(\d{1,2})(,[0-9]{1,2})?(.*?)\x03',
                 _mirc_to_span,
-                escape(line),
+                line,
             )
         )
 

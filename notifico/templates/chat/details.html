@@ -32,10 +32,10 @@
           </a>
           {% if line.message["type"] == "message" %}
             &lt;<span class="font-monospace text-accent1">{{ line.sender }}</span>&gt;
-            {{ line.message["message"] }}
+            {{ to_html(line.message["message"]) }}
           {% elif line.message.type == "action" %}
             <span class="text-muted font-monospace">
-              * {{ line.sender }} {{ line.message["message"] }}
+              * {{ line.sender }} {{ to_html(line.message["message"]) }}
             </span>
           {% endif %}
         </div>
