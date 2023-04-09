@@ -56,11 +56,6 @@ def irc_chat_page():
     """
     Administrative view for viewing IRC chat logs.
     """
-    chats: Iterable[ChatLog] = db_session.query(
-        ChatLog
-    ).all()
+    chats: Iterable[ChatLog] = db_session.query(ChatLog).all()
 
-    return render_template(
-        "admin/irc_chat.html",
-        chats=chats
-    )
+    return render_template("admin/irc_chat.html", chats=chats)

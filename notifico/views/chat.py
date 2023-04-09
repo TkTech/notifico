@@ -119,5 +119,5 @@ def details(log_id: int, date: str | None = None):
         channel=chat_log.channels.first(),
         calendar=LoggerCalendar(log=chat_log, date=date),
         to_html=to_html,
-        color_hash=ColorHash
+        color_hash=ColorHash,
     )

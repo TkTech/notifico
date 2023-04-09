@@ -7,7 +7,9 @@ import re
 from markupsafe import Markup, escape
 
 #: Precompiled regex for matching mIRC color codes.
-_STRIP_R = re.compile(r"\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
+_STRIP_R = re.compile(
+    r"\x02|\x1D\x1F\x1E\x11|(\x03(?:\d{1,2}(?:,\d{1,2})?)?)|\x0F", re.UNICODE
+)
 
 #: Common mIRC color codes.
 _colors = dict(
@@ -74,9 +76,7 @@ def to_html(message):
     for line in message.split("\n"):
         m.append(
             re.sub(
-                # r'\x03(\d{1,2}),?(\d{1,2})(.*?)\x03',
-                # r'\x03([0-9]{1,2}),?([0-9]{1,2})(.*?)\x03',
-                r"\x03(\d{1,2})(,[0-9]{1,2})?(.*?)\x03",
+                r"\x03(\d{1,2})(,[0-9]{1,2})?(.*?)[\x03\x0F]",
                 _mirc_to_span,
                 line,
             )
