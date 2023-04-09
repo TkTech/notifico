@@ -40,6 +40,7 @@ tests = ["pytest"]
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
+black = "^23.3.0"
 
 [tool.poetry.scripts]
 notifico = "notifico.cli:cli"

@@ -110,6 +110,9 @@ async def on_message(bot: ChannelBot, command: str, args, prefix: Prefix):
         .all()
     )
 
+    if not channels:
+        return
+
     # In theory every Channel that matches should have the same ChatLog.
     chat_log = (
         db_session.query(ChatLog)
@@ -126,7 +129,7 @@ async def on_message(bot: ChannelBot, command: str, args, prefix: Prefix):
 
     db_session.add(chat_log)
 
-    ts = timestamp = (datetime.datetime.now(tz=datetime.timezone.utc),)
+    ts = datetime.datetime.now(tz=datetime.timezone.utc)
 
     match command:
         case "PRIVMSG":
