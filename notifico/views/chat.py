@@ -10,6 +10,7 @@ from flask import (
 
 from notifico import db_session
 from notifico.models import ChatLog, ChatMessage
+from notifico.util.colorhash import ColorHash
 from notifico.util.irc import to_html
 
 chat_view = Blueprint("chat", __name__, template_folder="templates")
@@ -118,4 +119,5 @@ def details(log_id: int, date: str | None = None):
         channel=chat_log.channels.first(),
         calendar=LoggerCalendar(log=chat_log, date=date),
         to_html=to_html,
+        color_hash=ColorHash
     )

@@ -31,7 +31,11 @@
             [{{ line.timestamp.strftime('%H:%M') }}]
           </a>
           {% if line.message["type"] == "message" %}
-            &lt;<span class="font-monospace text-accent1">{{ line.sender }}</span>&gt;
+            &lt;<span
+              class="font-monospace d-inline-block"
+              style="color: {{ color_hash(line.sender).hex }}">
+              {{ line.sender }}
+            </span>&gt;
             {{ to_html(line.message["message"]) }}
           {% elif line.message.type == "action" %}
             <span class="text-muted font-monospace">
