@@ -43,6 +43,10 @@
             </span>
           {% endif %}
         </div>
+      {% else %}
+        <div class="list-group-item text-center bg-info">
+          {{ _('There were no messages recorded on this day.') }}
+        </div>
       {% endfor %}
     </div>
   </div>
