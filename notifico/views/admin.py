@@ -4,7 +4,7 @@ from flask import Blueprint, render_template
 from sqlalchemy import func, text
 
 from notifico import Permission, db_session
-from notifico.models import IRCNetwork, NetworkEvent, User
+from notifico.models import ChatLog, IRCNetwork, NetworkEvent, User
 from notifico.permissions import require_permission
 
 admin_view = Blueprint("admin", __name__)
@@ -45,3 +45,22 @@ def irc_networks_page():
     )
 
     return render_template("admin/irc_networks.html", networks=networks)
+
+
+@admin_view.route(
+    "/irc/chat",
+    endpoint="irc_chat",
+)
+@require_permission(Permission.SUPERUSER)
+def irc_chat_page():
+    """
+    Administrative view for viewing IRC chat logs.
+    """
+    chats: Iterable[ChatLog] = db_session.query(
+        ChatLog
+    ).all()
+
+    return render_template(
+        "admin/irc_chat.html",
+        chats=chats
+    )

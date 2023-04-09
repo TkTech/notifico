@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% import "ui/forms.html" as forms %}
+
+{% block main_content %}
+<div class="card mt-4">
+  <div class="card-header">
+    {{ _('IRC Logs') }}
+  </div>
+  <table class="table table-borderless table-light table-striped mb-0">
+    <thead>
+      <tr class="table-dark text-dark">
+        <th scope="col">{{ _('ID') }}</th>
+        <th scope="col">{{ _('Channel') }}</th>
+        <th scope="col">{{ _('Message Count') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for chat in chats %}
+      <tr>
+        <td>
+          <a href="{{ chat.url(chat.Page.DETAILS) }}">
+            {{ chat.id }}
+          </a>
+        </td>
+        {% set channel = chat.channels.first() %}
+        <td>
+          {% if channel %}
+            {% trans name=channel.channel, project=channel.project.name, url=channel.project.url() %}
+              <strong>{{ name }}</strong> (<a href="{{ url }}">{{ project }}</a>).
+            {% endtrans %}
+          {% else %}
+            <span class="text-muted">
+              {{ _('No Linked Channels') }}
+            </span>
+          {% endif %}
+        </td>
+        <td>{{ chat.line_count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
