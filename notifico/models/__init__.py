@@ -14,5 +14,5 @@ ALL_MODELS = [
     Project,
     NetworkEvent,
     ChatLog,
-    ChatMessage
+    ChatMessage,
 ]

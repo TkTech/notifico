@@ -13,7 +13,7 @@ def make_celery():
         backend=settings.REDIS,
         broker=settings.REDIS,
     )
-    celery_instance.config_from_object(settings, namespace='celery_')
+    celery_instance.config_from_object(settings, namespace="celery_")
 
     class ContextTask(celery_instance.Task):
         def __call__(self, *args, **kwargs):

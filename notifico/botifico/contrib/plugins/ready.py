@@ -30,10 +30,10 @@ from notifico.botifico.plugin import Plugin
 
 class ReadyPlugin(Plugin):
     def is_ready(self, bot: Bot):
-        is_ready = self.get(bot, 'is_ready')
+        is_ready = self.get(bot, "is_ready")
         if is_ready is None:
             is_ready = asyncio.Event()
-            self.set(bot, 'is_ready', is_ready)
+            self.set(bot, "is_ready", is_ready)
 
         return is_ready
 
@@ -45,4 +45,4 @@ ready_plugin = ReadyPlugin(__name__)
 @ready_plugin.on(Event.ERR_NOMOTD)
 async def on_motd(bot: Bot, plugin: ReadyPlugin):
     plugin.is_ready(bot).set()
-    logger.info(f'[ready_plugin] bot {bot} marked as ready.')
+    logger.info(f"[ready_plugin] bot {bot} marked as ready.")

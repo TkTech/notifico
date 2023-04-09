@@ -1,4 +1,4 @@
 import logging
 
 
-logger = logging.getLogger('botifico')
+logger = logging.getLogger("botifico")

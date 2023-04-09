@@ -19,7 +19,7 @@ def pretty_date(time=False):
     day_diff = diff.days
 
     if day_diff < 0:
-        return ''
+        return ""
 
     if day_diff == 0:
         if second_diff < 10:
@@ -51,7 +51,7 @@ def plural(v, singular, plural):
 
 def trim(docstring):
     if not docstring:
-        return ''
+        return ""
     # Convert tabs to spaces (following the normal Python rules)
     # and split into a list of lines:
     lines = docstring.expandtabs().splitlines()
@@ -72,11 +72,11 @@ def trim(docstring):
     while trimmed and not trimmed[0]:
         trimmed.pop(0)
     # Return a single string:
-    return '\n'.join(trimmed)
+    return "\n".join(trimmed)
 
 
 def service_name(service_id):
     try:
         return incoming_services()[service_id].SERVICE_NAME
     except KeyError:
-        return 'Unknown'
+        return "Unknown"

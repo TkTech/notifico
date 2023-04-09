@@ -15,17 +15,17 @@ from notifico.database import Base
 from notifico.permissions import HasPermissions, Action
 
 role_association = sa.Table(
-    'role_association',
+    "role_association",
     Base.metadata,
-    sa.Column('user_id', sa.ForeignKey('user.id')),
-    sa.Column('role_id', sa.ForeignKey('role.name'))
+    sa.Column("user_id", sa.ForeignKey("user.id")),
+    sa.Column("role_id", sa.ForeignKey("role.name")),
 )
 
 permission_association = sa.Table(
-    'permission_association',
+    "permission_association",
     Base.metadata,
-    sa.Column('role_id', sa.ForeignKey('role.name')),
-    sa.Column('permission_id', sa.ForeignKey('permission.name'))
+    sa.Column("role_id", sa.ForeignKey("role.name")),
+    sa.Column("permission_id", sa.ForeignKey("permission.name")),
 )
 
 
@@ -33,7 +33,7 @@ class User(Base, HasPermissions):
     class Page(enum.IntEnum):
         DASHBOARD = 10
 
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
     id = sa.Column(sa.Integer, primary_key=True)
 
@@ -43,18 +43,15 @@ class User(Base, HasPermissions):
     salt = sa.Column(sa.String(64), nullable=False)
     joined = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
 
-    roles = orm.relationship(
-        'Role',
-        secondary=role_association
-    )
+    roles = orm.relationship("Role", secondary=role_association)
     permissions = orm.relationship(
-        'Permission',
+        "Permission",
         secondary=(
-            'join(role_association, permission_association,'
-            'role_association.c.role_id == permission_association.c.role_id)'
+            "join(role_association, permission_association,"
+            "role_association.c.role_id == permission_association.c.role_id)"
         ),
         viewonly=True,
-        lazy='joined'
+        lazy="joined",
     )
 
     @classmethod
@@ -76,8 +73,8 @@ class User(Base, HasPermissions):
         Returns a hashed password from `password` and `salt`.
         """
         h = hashlib.sha256()
-        h.update(salt.encode('utf-8'))
-        h.update(password.strip().encode('utf-8'))
+        h.update(salt.encode("utf-8"))
+        h.update(password.strip().encode("utf-8"))
         return h.hexdigest()
 
     def set_password(self, new_password):
@@ -125,13 +122,13 @@ class User(Base, HasPermissions):
         return q
 
     @classmethod
-    def can(cls, action: Action, *, obj: Optional['User'] = None):
+    def can(cls, action: Action, *, obj: Optional["User"] = None):
         if super().can(action, obj=obj):
             return True
 
         match action:
             case Action.CREATE:
-                return current_app.config.get('NEW_USERS', True)
+                return current_app.config.get("NEW_USERS", True)
             case Action.READ | Action.DELETE | Action.UPDATE:
                 if obj and g.user and g.user.id == obj.id:
                     return True
@@ -141,27 +138,21 @@ class User(Base, HasPermissions):
     def url(self, of: Page = Page.DASHBOARD) -> str:
         match of:
             case self.Page.DASHBOARD:
-                return url_for(
-                    'projects.dashboard',
-                    u=self.username
-                )
+                return url_for("projects.dashboard", u=self.username)
             case _:
-                raise ValueError(
-                    f'Don\'t know how to generate a URL for {of=}.'
-                )
+                raise ValueError(f"Don't know how to generate a URL for {of=}.")
 
 
 class Permission(Base):
-    __tablename__ = 'permission'
+    __tablename__ = "permission"
 
     name = sa.Column(sa.String(255), primary_key=True)
 
 
 class Role(Base):
-    __tablename__ = 'role'
+    __tablename__ = "role"
 
     name = sa.Column(sa.String(255), primary_key=True)
     permissions = orm.relationship(
-        'Permission',
-        secondary=permission_association
+        "Permission", secondary=permission_association
     )

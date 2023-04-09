@@ -25,7 +25,7 @@ class IRCNetwork(Base, HasPermissions):
         TEMPORARY_BLOCK = 30
         BLOCKED = 40
 
-    __tablename__ = 'irc_network'
+    __tablename__ = "irc_network"
 
     id = sa.Column(sa.Integer, primary_key=True)
 
@@ -37,29 +37,21 @@ class IRCNetwork(Base, HasPermissions):
     #: used as the sort ordering when presenting a list of networks.
     public = sa.Column(sa.Integer, default=0)
 
-    owner_id = sa.Column(
-        sa.BigInteger,
-        sa.ForeignKey('user.id'),
-        nullable=True
-    )
+    owner_id = sa.Column(sa.BigInteger, sa.ForeignKey("user.id"), nullable=True)
     owner = orm.relationship(
-        'User',
+        "User",
         backref=orm.backref(
-            'networks',
+            "networks",
             order_by=id,
-            lazy='dynamic',
-            cascade='all, delete-orphan'
-        )
+            lazy="dynamic",
+            cascade="all, delete-orphan",
+        ),
     )
 
-    status = sa.Column(
-        sa.Enum(Status),
-        default=Status.UNKNOWN
-    )
+    status = sa.Column(sa.Enum(Status), default=Status.UNKNOWN)
 
     created = sa.Column(
-        sa.DateTime,
-        default=lambda: datetime.datetime.now(tz=timezone.utc)
+        sa.DateTime, default=lambda: datetime.datetime.now(tz=timezone.utc)
     )
 
     @classmethod
@@ -69,16 +61,13 @@ class IRCNetwork(Base, HasPermissions):
 
         if g.user:
             return q.filter(
-                or_(
-                    IRCNetwork.owner_id == g.user.id,
-                    IRCNetwork.public > 0
-                )
+                or_(IRCNetwork.owner_id == g.user.id, IRCNetwork.public > 0)
             )
         else:
             return q.filter(IRCNetwork.public > 0)
 
     @classmethod
-    def can(cls, action: Action, *, obj: Optional['IRCNetwork'] = None):
+    def can(cls, action: Action, *, obj: Optional["IRCNetwork"] = None):
         if super().can(action, obj=obj):
             return True
 
@@ -99,14 +88,9 @@ class IRCNetwork(Base, HasPermissions):
     def url(self, of: Page = Page.DETAILS) -> str:
         match of:
             case self.Page.EDIT:
-                return url_for(
-                    'settings.irc_network_edit',
-                    network_id=self.id
-                )
+                return url_for("settings.irc_network_edit", network_id=self.id)
             case _:
-                raise ValueError(
-                    f'Don\'t know how to generate a URL for {of=}.'
-                )
+                raise ValueError(f"Don't know how to generate a URL for {of=}.")
 
 
 class NetworkEvent(Base):
@@ -116,7 +100,7 @@ class NetworkEvent(Base):
         WARNING = 300
         INFO = 400
 
-    __tablename__ = 'network_event'
+    __tablename__ = "network_event"
 
     id = sa.Column(sa.Integer, primary_key=True)
 
@@ -124,24 +108,23 @@ class NetworkEvent(Base):
     description = sa.Column(sa.Text(), nullable=True)
 
     created = sa.Column(
-        sa.DateTime,
-        default=lambda: datetime.datetime.now(tz=timezone.utc)
+        sa.DateTime, default=lambda: datetime.datetime.now(tz=timezone.utc)
     )
 
-    network_id = sa.Column(sa.BigInteger, sa.ForeignKey('irc_network.id'))
+    network_id = sa.Column(sa.BigInteger, sa.ForeignKey("irc_network.id"))
     network = orm.relationship(
-        'IRCNetwork',
+        "IRCNetwork",
         backref=orm.backref(
-            'events',
+            "events",
             order_by=created,
-            lazy='dynamic',
-            cascade='all, delete-orphan'
-        )
+            lazy="dynamic",
+            cascade="all, delete-orphan",
+        ),
     )
 
 
 class Channel(Base, HasPermissions):
-    __tablename__ = 'channel'
+    __tablename__ = "channel"
 
     id = sa.Column(sa.Integer, primary_key=True)
     created = sa.Column(sa.TIMESTAMP(), default=datetime.datetime.utcnow)
@@ -150,29 +133,29 @@ class Channel(Base, HasPermissions):
     public = sa.Column(sa.Boolean, default=False)
     password = sa.Column(sa.String(256))
 
-    network_id = sa.Column(sa.BigInteger, sa.ForeignKey('irc_network.id'))
+    network_id = sa.Column(sa.BigInteger, sa.ForeignKey("irc_network.id"))
     network = orm.relationship(
-        'IRCNetwork',
+        "IRCNetwork",
         backref=orm.backref(
-            'channels',
+            "channels",
             order_by=id,
-            lazy='dynamic',
-            cascade='all, delete-orphan'
-        )
+            lazy="dynamic",
+            cascade="all, delete-orphan",
+        ),
     )
 
-    project_id = sa.Column(sa.Integer, sa.ForeignKey('project.id'))
+    project_id = sa.Column(sa.Integer, sa.ForeignKey("project.id"))
     project = orm.relationship(
-        'Project',
+        "Project",
         backref=orm.backref(
-            'channels',
+            "channels",
             order_by=id,
-            lazy='dynamic',
-            cascade='all, delete-orphan'
-        )
+            lazy="dynamic",
+            cascade="all, delete-orphan",
+        ),
     )
 
-    log_id = sa.Column(sa.Integer, sa.ForeignKey('chat_log.id'))
+    log_id = sa.Column(sa.Integer, sa.ForeignKey("chat_log.id"))
 
     # Set if this channel should be logged.
     logged = sa.Column(sa.Boolean, default=False)
@@ -185,19 +168,14 @@ class Channel(Base, HasPermissions):
             return q
 
         if g.user:
-            return q.join(
-                Channel.project
-            ).filter(
-                or_(
-                    Channel.public.is_(True),
-                    Project.owner_id == g.user.id
-                )
+            return q.join(Channel.project).filter(
+                or_(Channel.public.is_(True), Project.owner_id == g.user.id)
             )
         else:
             return q.filter(Channel.public.is_(True))
 
     @classmethod
-    def can(cls, action: Action, *, obj: 'Channel' = None):
+    def can(cls, action: Action, *, obj: "Channel" = None):
         if super().can(action, obj=obj):
             return True
 

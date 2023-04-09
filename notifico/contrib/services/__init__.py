@@ -10,8 +10,5 @@ class EnvironmentMixin(abc.ABC):
         Returns a Jinja2 `Environment` for template rendering.
         """
         return Environment(
-            loader=PackageLoader(
-                'notifico.contrib.services',
-                'templates'
-            )
+            loader=PackageLoader("notifico.contrib.services", "templates")
         )

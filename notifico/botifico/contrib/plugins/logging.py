@@ -13,4 +13,4 @@ log_plugin = Plugin(__name__)
 
 @log_plugin.on(Event.on_message)
 async def on_log(command, args, prefix):
-    logger.debug(f'[log_plugin][{command}][{prefix} {args}')
+    logger.debug(f"[log_plugin][{command}][{prefix} {args}")

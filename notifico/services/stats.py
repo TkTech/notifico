@@ -13,9 +13,7 @@ def total_messages(user=None):
     """
     Sum the total number of messages across all projects.
     """
-    q = db_session.query(
-        func.sum(Project.message_count)
-    )
+    q = db_session.query(func.sum(Project.message_count))
     if user:
         q = q.filter(Project.owner_id == user.id)
 
@@ -39,9 +37,8 @@ def total_networks():
 
 @cache.memoize(timeout=60 * 5)
 def total_channels():
-    return db_session.query(
-        Channel
-    ).distinct(
-        Channel.channel,
-        Channel.network_id
-    ).count()
+    return (
+        db_session.query(Channel)
+        .distinct(Channel.channel, Channel.network_id)
+        .count()
+    )

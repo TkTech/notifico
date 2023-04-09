@@ -6,8 +6,9 @@ class DiscordHook(EnvironmentMixin, OutgoingHookService):
     """
     Simple service hook that just accepts text.
     """
+
     SERVICE_ID = 5100
-    SERVICE_NAME = 'Discord'
+    SERVICE_NAME = "Discord"
 
     @classmethod
     def handle_message(cls, message: StructuredMessage):

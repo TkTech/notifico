@@ -31,31 +31,31 @@ from notifico.settings import Settings
 
 # The tracker plugin is used to track the bot's current state in the database,
 # such as connected and disconnected events.
-tracker = Plugin('tracker')
+tracker = Plugin("tracker")
 # The chat_logger plugin does exactly what it says, logging the chat and
 # general actions (JOIN, PART, etc.) to the database when a channel is set up.
 # for logging.
-chat_logger = Plugin('chat_logger')
+chat_logger = Plugin("chat_logger")
 
 
 def _get_matching_networks(network: Network) -> Iterable[IRCNetwork]:
-    return db_session.query(
-        IRCNetwork
-    ).filter(
+    return db_session.query(IRCNetwork).filter(
         IRCNetwork.host == network.host,
         IRCNetwork.port == network.port,
-        IRCNetwork.ssl == network.ssl
+        IRCNetwork.ssl == network.ssl,
     )
 
 
 @tracker.on(Event.on_connected)
 async def on_connect(bot: Bot):
     for network in _get_matching_networks(bot.network):
-        db_session.add(NetworkEvent(
-            network=network,
-            event=NetworkEvent.Event.INFO,
-            description='Connected to IRC network.'
-        ))
+        db_session.add(
+            NetworkEvent(
+                network=network,
+                event=NetworkEvent.Event.INFO,
+                description="Connected to IRC network.",
+            )
+        )
 
     db_session.commit()
 
@@ -63,11 +63,13 @@ async def on_connect(bot: Bot):
 @tracker.on(Event.on_disconnect)
 async def on_disconnect(bot: Bot):
     for network in _get_matching_networks(bot.network):
-        db_session.add(NetworkEvent(
-            network=network,
-            event=NetworkEvent.Event.INFO,
-            description='Disconnected from IRC network.'
-        ))
+        db_session.add(
+            NetworkEvent(
+                network=network,
+                event=NetworkEvent.Event.INFO,
+                description="Disconnected from IRC network.",
+            )
+        )
 
     db_session.commit()
 
@@ -77,7 +79,7 @@ async def on_message(bot: ChannelBot, command: str, args, prefix: Prefix):
     # TODO: We should be caching in here, and relying on the start-logging
     #       and stop-logging signals to invalidate it. However, for now volume
     #       is low enough that we can just query the database every time.
-    if command not in ('PRIVMSG',):
+    if command not in ("PRIVMSG",):
         return
 
     channel: ChannelProxy | None = bot.get_channel(args[0])
@@ -89,32 +91,33 @@ async def on_message(bot: ChannelBot, command: str, args, prefix: Prefix):
         return
 
     # Find all the database-backed Channels that match the current IRC channel.
-    channels = db_session.query(
-        ChannelModel
-    ).join(
-        ChannelModel.network
-    ).filter(
-        IRCNetwork.host == bot.network.host,
-        IRCNetwork.port == bot.network.port,
-        IRCNetwork.ssl == bot.network.ssl
-    ).filter(
-        ChannelModel.channel == channel.channel.name,
-        ChannelModel.logged.is_(True),
-        ChannelModel.public.is_(True),
-        sa.or_(
-            ChannelModel.password.is_(None),
-            ChannelModel.password == ""
-        ),
-    ).all()
+    channels = (
+        db_session.query(ChannelModel)
+        .join(ChannelModel.network)
+        .filter(
+            IRCNetwork.host == bot.network.host,
+            IRCNetwork.port == bot.network.port,
+            IRCNetwork.ssl == bot.network.ssl,
+        )
+        .filter(
+            ChannelModel.channel == channel.channel.name,
+            ChannelModel.logged.is_(True),
+            ChannelModel.public.is_(True),
+            sa.or_(
+                ChannelModel.password.is_(None), ChannelModel.password == ""
+            ),
+        )
+        .all()
+    )
 
     # In theory every Channel that matches should have the same ChatLog.
-    chat_log = db_session.query(
-        ChatLog
-    ).filter(
-        ChatLog.channels.any(
-            ChannelModel.id.in_([c.id for c in channels])
+    chat_log = (
+        db_session.query(ChatLog)
+        .filter(
+            ChatLog.channels.any(ChannelModel.id.in_([c.id for c in channels]))
         )
-    ).first()
+        .first()
+    )
     if chat_log is None:
         chat_log = ChatLog(line_count=1)
         chat_log.channels.extend(channels)
@@ -123,36 +126,30 @@ async def on_message(bot: ChannelBot, command: str, args, prefix: Prefix):
 
     db_session.add(chat_log)
 
-    ts = timestamp = datetime.datetime.now(tz=datetime.timezone.utc),
+    ts = timestamp = (datetime.datetime.now(tz=datetime.timezone.utc),)
 
     match command:
-        case 'PRIVMSG':
-            if args[1].startswith('\x01ACTION '):
+        case "PRIVMSG":
+            if args[1].startswith("\x01ACTION "):
                 # Special handling for /me
                 db_session.add(
                     ChatMessage(
                         chat_log=chat_log,  # noqa, PyCharm doesn't understand this.
-                        message={
-                            'type': 'action',
-                            'message': args[1][7:-1]
-                        },
+                        message={"type": "action", "message": args[1][7:-1]},
                         sender=prefix.nick,
-                        timestamp=ts
+                        timestamp=ts,
                     )
                 )
-            elif args[1].startswith('\x01'):
+            elif args[1].startswith("\x01"):
                 # Ignore all other CTCP messages.
                 pass
             else:
                 db_session.add(
                     ChatMessage(
                         chat_log=chat_log,  # noqa, PyCharm doesn't understand this.
-                        message={
-                            'type': 'message',
-                            'message': args[1]
-                        },
+                        message={"type": "message", "message": args[1]},
                         sender=prefix.nick,
-                        timestamp=ts
+                        timestamp=ts,
                     )
                 )
 
@@ -160,42 +157,42 @@ async def on_message(bot: ChannelBot, command: str, args, prefix: Prefix):
 
 
 async def _handle_single_message(j: Dict[str, Any], manager: Manager):
-    match j['type']:
-        case 'message':
+    match j["type"]:
+        case "message":
             # Incoming message destined for a specific IRC channel.
-            channel = db_session.query(ChannelModel).get(j['channel'])
+            channel = db_session.query(ChannelModel).get(j["channel"])
 
             try:
                 c = await manager.channel(
                     Network(
                         channel.network.host,
                         channel.network.port,
-                        channel.network.ssl
+                        channel.network.ssl,
                     ),
-                    Channel(channel.channel, password=channel.password)
+                    Channel(channel.channel, password=channel.password),
                 )
-                await c.private_message(j['payload']['msg'])
+                await c.private_message(j["payload"]["msg"])
             except Exception as exception:
                 sentry_sdk.capture_exception(exception)
                 traceback.print_exc()
-        case 'start-logging':
+        case "start-logging":
             # Enable logging on an already-connected channel.
-            channel = db_session.query(ChannelModel).get(j['channel'])
+            channel = db_session.query(ChannelModel).get(j["channel"])
 
             try:
                 c = await manager.channel(
                     Network(
                         channel.network.host,
                         channel.network.port,
-                        channel.network.ssl
+                        channel.network.ssl,
                     ),
-                    Channel(channel.channel, password=channel.password)
+                    Channel(channel.channel, password=channel.password),
                 )
                 await c.join()
             except Exception as exception:
                 sentry_sdk.capture_exception(exception)
                 traceback.print_exc()
-        case 'stop-logging':
+        case "stop-logging":
             # Disable logging on an already-connected channel.
             raise NotImplementedError()
 
@@ -205,11 +202,11 @@ async def process_messages(r, manager: Manager):
     Process as many messages on the message queue as possible.
     """
     while True:
-        v = await r.lpop('messages')
+        v = await r.lpop("messages")
         if v is None:
             return
 
-        j = json.loads(v.decode('utf-8'))
+        j = json.loads(v.decode("utf-8"))
         asyncio.create_task(_handle_single_message(j, manager))
 
 
@@ -232,7 +229,7 @@ async def wait_for_events():
         sentry_sdk.init(dsn=settings.SENTRY_DSN)
 
     with app.app_context():
-        manager = Manager('botifico')
+        manager = Manager("botifico")
         manager.register_plugin(ping_plugin)
         manager.register_plugin(identity_plugin)
         manager.register_plugin(log_plugin)
@@ -240,43 +237,35 @@ async def wait_for_events():
         manager.register_plugin(tracker)
         manager.register_plugin(chat_logger)
 
-        r = await redis.from_url(
-            settings.REDIS,
-            retry=Retry(
-                NoBackoff(),
-                50
-            )
-        )
+        r = await redis.from_url(settings.REDIS, retry=Retry(NoBackoff(), 50))
 
         # If someone is using redis for something else, we probably don't want
         # to clobber their config but for our purposes, we need to enable
         # keyspace events.
-        await r.config_set('notify-keyspace-events', 'Kl')
+        await r.config_set("notify-keyspace-events", "Kl")
 
         # We normally only JOIN a channel the first time we get a message.
         # Except if logging is enabled for a channel, we want to JOIN it as
         # soon as we possibly can, or we'll miss things.
         # TODO: Periodically try to join channels that might have failed due
         #       to a network error.
-        channels = db_session.query(
-            ChannelModel
-        ).with_entities(
-            ChannelModel.id
-        ).filter(
-            ChannelModel.logged.is_(True),
-            ChannelModel.public.is_(True),
-            sa.or_(
-                ChannelModel.password.is_(None),
-                ChannelModel.password == ""
+        channels = (
+            db_session.query(ChannelModel)
+            .with_entities(ChannelModel.id)
+            .filter(
+                ChannelModel.logged.is_(True),
+                ChannelModel.public.is_(True),
+                sa.or_(
+                    ChannelModel.password.is_(None), ChannelModel.password == ""
+                ),
             )
         )
 
         for channel in channels:
             asyncio.create_task(
-                _handle_single_message({
-                    'type': 'start-logging',
-                    'channel': channel.id
-                }, manager)
+                _handle_single_message(
+                    {"type": "start-logging", "channel": channel.id}, manager
+                )
             )
 
         # Before we start waiting for events, process anything already in the
@@ -286,15 +275,15 @@ async def wait_for_events():
         notifications: redis.client.PubSub = r.pubsub()
         # We listen to a special notifications PubSub channel which will trigger
         # whenever an operation occurs on our messages queue.
-        await notifications.subscribe('__keyspace@0__:messages')
+        await notifications.subscribe("__keyspace@0__:messages")
 
         async for message in notifications.listen():  # noqa
-            match message['type']:
-                case 'subscribe':
+            match message["type"]:
+                case "subscribe":
                     continue
-                case 'message':
-                    match message['data']:
-                        case b'rpush':
+                case "message":
+                    match message["data"]:
+                        case b"rpush":
                             # New data has been pushed to the messages queue,
                             # try to snag it.
                             await process_messages(r, manager)

@@ -25,6 +25,7 @@ class StructuredMessage:
         Our original supported platform was IRC, which supports nothing more
         than simple string messages.
     """
+
     legacy_message: str
 
 
@@ -32,6 +33,7 @@ class HookService(abc.ABC):
     """
     The base type for any `Service`.
     """
+
     #: Alias to `notifico.util.irc.colors`
     colors = irc.mirc_colors()
 
@@ -43,7 +45,7 @@ class HookService(abc.ABC):
         """
         A description of this service as an HTML string.
         """
-        return ''
+        return ""
 
     @staticmethod
     def env() -> Environment:
@@ -114,7 +116,7 @@ class IncomingHookService(HookService, abc.ABC):
         # Optionally strip mIRC color codes.
         message = cls.strip_colors(message) if strip else message
         # Strip newlines and other whitespace.
-        message = re.sub(r'\s+', ' ', message)
+        message = re.sub(r"\s+", " ", message)
         return message
 
     @classmethod
@@ -142,7 +144,7 @@ class IncomingHookService(HookService, abc.ABC):
                 ms.send_message(message, channel)
 
         if hook.project.public:
-            ms.log_message('\n'.join(combined), hook.project)
+            ms.log_message("\n".join(combined), hook.project)
 
     @classmethod
     @abc.abstractmethod
@@ -158,11 +160,9 @@ class OutgoingHookService(HookService, abc.ABC):
         """
         Base form all webhook configuration forms should subclass.
         """
+
         webhook_url = fields.URLField(
-            lg('Webhook URL'),
-            validators=[
-                validators.InputRequired()
-            ]
+            lg("Webhook URL"), validators=[validators.InputRequired()]
         )
 
     @classmethod

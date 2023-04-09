@@ -19,7 +19,7 @@ class Project(Base, HasPermissions):
         DETAILS = 10
         EDIT = 30
 
-    __tablename__ = 'project'
+    __tablename__ = "project"
 
     id = sa.Column(sa.Integer, primary_key=True)
 
@@ -28,15 +28,15 @@ class Project(Base, HasPermissions):
     public = sa.Column(sa.Boolean, default=True)
     website = sa.Column(sa.String(1024))
 
-    owner_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    owner_id = sa.Column(sa.Integer, sa.ForeignKey("user.id"))
     owner = orm.relationship(
-        'User',
+        "User",
         backref=orm.backref(
-            'projects',
+            "projects",
             order_by=id,
-            lazy='dynamic',
-            cascade='all, delete-orphan'
-        )
+            lazy="dynamic",
+            cascade="all, delete-orphan",
+        ),
     )
 
     #: The total number of messages received by all hooks under this project,
@@ -76,10 +76,7 @@ class Project(Base, HasPermissions):
 
         if g.user:
             q = q.filter(
-                or_(
-                    Project.public.is_(True),
-                    Project.owner_id == g.user.id
-                )
+                or_(Project.public.is_(True), Project.owner_id == g.user.id)
             )
         else:
             q = q.filter(Project.public.is_(True))
@@ -87,7 +84,7 @@ class Project(Base, HasPermissions):
         return q
 
     @classmethod
-    def can(cls, action: Action, *, obj: Optional['Project'] = None):
+    def can(cls, action: Action, *, obj: Optional["Project"] = None):
         if super().can(action, obj=obj):
             return True
 
@@ -107,17 +104,11 @@ class Project(Base, HasPermissions):
         match of:
             case self.Page.DETAILS:
                 return url_for(
-                    'projects.details',
-                    u=self.owner.username,
-                    p=self.name
+                    "projects.details", u=self.owner.username, p=self.name
                 )
             case self.Page.EDIT:
                 return url_for(
-                    'projects.edit_project',
-                    u=self.owner.username,
-                    p=self.name
+                    "projects.edit_project", u=self.owner.username, p=self.name
                 )
             case _:
-                raise ValueError(
-                    f'Don\'t know how to generate a URL for {of=}.'
-                )
+                raise ValueError(f"Don't know how to generate a URL for {of=}.")

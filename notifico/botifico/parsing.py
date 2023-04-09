@@ -16,11 +16,11 @@ def unpack_prefix(prefix):
     host = None
     user = None
 
-    if '@' in prefix:
-        prefix, host = prefix.split('@', 1)
+    if "@" in prefix:
+        prefix, host = prefix.split("@", 1)
 
-    if '!' in prefix:
-        prefix, user = prefix.split('!', 1)
+    if "!" in prefix:
+        prefix, user = prefix.split("!", 1)
 
     return Prefix(nick=prefix, user=user, host=host)
 
@@ -39,11 +39,11 @@ def unpack_message(line):
 
     line = line.rstrip()
 
-    if line[0] == ':':
-        prefix, line = line[1:].split(' ', 1)
+    if line[0] == ":":
+        prefix, line = line[1:].split(" ", 1)
         prefix = unpack_prefix(prefix)
-    if ' :' in line:
-        line, trailing = line.split(' :', 1)
+    if " :" in line:
+        line, trailing = line.split(" :", 1)
         args = line.split()
         args.append(trailing)
     else:
@@ -52,6 +52,6 @@ def unpack_message(line):
     try:
         command = args.pop(0)
     except IndexError:
-        command = ''
+        command = ""
 
     return prefix, command.upper(), args

@@ -24,28 +24,25 @@ class ChatLog(Base):
     Discord, Teams, etc..., so we do not need to consider them when making
     changes.
     """
+
     class Page(enum.IntEnum):
         DETAILS = 10
 
-    __tablename__ = 'chat_log'
+    __tablename__ = "chat_log"
 
     id = sa.Column(sa.Integer, primary_key=True)
 
     # Several users may all have different instances of a channel, say
     # #commits, which will all link to a single log.
     channels = orm.relationship(
-        'Channel',
-        lazy='dynamic',
-        backref=orm.backref('chat_log')
+        "Channel", lazy="dynamic", backref=orm.backref("chat_log")
     )
 
     messages = orm.relationship(
-        'ChatMessage',
-        lazy='dynamic',
-        cascade='all, delete-orphan',
-        backref=orm.backref(
-            'chat_log'
-        )
+        "ChatMessage",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        backref=orm.backref("chat_log"),
     )
 
     # A cached count of all the lines logged in this ChatLog. This should
@@ -57,19 +54,17 @@ class ChatLog(Base):
     def url(self, of: Page = Page.DETAILS) -> str:
         match of:
             case self.Page.DETAILS:
-                return url_for('chat.details', log_id=self.id)
+                return url_for("chat.details", log_id=self.id)
             case _:
-                raise ValueError(
-                    f'Don\'t know how to generate a URL for {of=}.'
-                )
+                raise ValueError(f"Don't know how to generate a URL for {of=}.")
 
 
 class ChatMessage(Base):
-    __tablename__ = 'chat_message'
+    __tablename__ = "chat_message"
 
     id = sa.Column(sa.BigInteger, primary_key=True)
 
-    log_id = sa.Column(sa.Integer, sa.ForeignKey('chat_log.id'))
+    log_id = sa.Column(sa.Integer, sa.ForeignKey("chat_log.id"))
 
     # The content of the message, as a JSON object. This is intended to be
     # a "raw" representation of the message, and should be parsed by the
@@ -89,9 +84,5 @@ class ChatMessage(Base):
     __table_args__ = (
         # Message lookup is almost always going to be in chronological order
         # within a single ChatLog.
-        sa.Index(
-            'idx_log_id_and_ts',
-            timestamp.desc(),  # noqa
-            log_id
-        ),
+        sa.Index("idx_log_id_and_ts", timestamp.desc(), log_id),  # noqa
     )

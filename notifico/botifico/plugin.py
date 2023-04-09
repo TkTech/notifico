@@ -34,6 +34,7 @@ class Plugin:
             f.plugin_should_block = block
             self.event_receivers[event].add(f)
             return f
+
         return _f
 
     @property

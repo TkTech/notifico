@@ -21,12 +21,13 @@ class Network:
 
 def exception_catcher(f: Callable):
     @wraps(f)
-    async def _wrapped(self: 'Bot', *args, **kwargs):
+    async def _wrapped(self: "Bot", *args, **kwargs):
         try:
             return await f(self, *args, **kwargs)
         except Exception as exc:
             await self.task_exception(exc)
             raise
+
     return _wrapped
 
 
@@ -51,7 +52,7 @@ class Bot:
         self.max_buffer_size = max_buffer_size
 
     def __repr__(self):
-        return f'<{self.__class__.__name__}({self.network!r})>'
+        return f"<{self.__class__.__name__}({self.network!r})>"
 
     @exception_catcher
     async def connect(self):
@@ -59,17 +60,17 @@ class Bot:
         Attempts to connect the bot to its network and starts processing
         events.
         """
-        logger.info(f'[Core] Attempting to connect to {self.network!r}')
+        logger.info(f"[Core] Attempting to connect to {self.network!r}")
 
         reader, writer = await asyncio.open_connection(
             host=self.network.host,
             port=self.network.port,
             ssl=self.network.ssl,
-            limit=self.max_buffer_size
+            limit=self.max_buffer_size,
         )
 
         await self.emit_event(Event.on_connected)
-        message_so_far = ''
+        message_so_far = ""
 
         read_chunk = asyncio.create_task(reader.read(512))
         get_queue = asyncio.create_task(self.message_queue.get())
@@ -77,15 +78,14 @@ class Bot:
             # Wait until either there's network traffic to read, or there's a
             # message waiting to be sent.
             done, pending = await asyncio.wait(
-                [read_chunk, get_queue],
-                return_when=asyncio.FIRST_COMPLETED
+                [read_chunk, get_queue], return_when=asyncio.FIRST_COMPLETED
             )
 
             if read_chunk in done:
                 chunk: Optional[bytes] = read_chunk.result()
 
                 # Remote server closed the connection.
-                if chunk == b'':
+                if chunk == b"":
                     self.message_queue.empty()
                     await self.emit_event(Event.on_disconnect)
 
@@ -95,26 +95,24 @@ class Bot:
 
                     return
 
-                message_so_far += chunk.decode('utf-8')
+                message_so_far += chunk.decode("utf-8")
                 if len(message_so_far) > self.max_buffer_size:
                     # Realistically, the only time this is actually going to
                     # happen is when connection to a malicious server, so lets
                     # just die.
                     raise ReadExceededError()
 
-                while '\r\n' in message_so_far:
-                    line, message_so_far = message_so_far.split('\r\n', 1)
+                while "\r\n" in message_so_far:
+                    line, message_so_far = message_so_far.split("\r\n", 1)
                     prefix, command, args = unpack_message(line)
                     await self.emit_event(
                         Event.on_message,
                         command=command.upper(),
                         args=args,
-                        prefix=prefix
+                        prefix=prefix,
                     )
                     await self.emit_event(
-                        command.upper(),
-                        args=args,
-                        prefix=prefix
+                        command.upper(), args=args, prefix=prefix
                     )
 
                 read_chunk = asyncio.create_task(reader.read(512))
@@ -140,7 +138,7 @@ class Bot:
         if isinstance(event, Event):
             event = event.value
 
-        kwargs['bot'] = self
+        kwargs["bot"] = self
 
         for handler in self.event_receivers[event]:
             # Only pass the arguments the handler has specified.
@@ -148,12 +146,11 @@ class Bot:
 
             # When event handlers are registered on a plugin, we store the
             # registering plugin on the function as `plugin`.
-            kwargs['plugin'] = getattr(handler, 'plugin', None)
+            kwargs["plugin"] = getattr(handler, "plugin", None)
 
-            await handler(**{
-                k: v for k, v in kwargs.items()
-                if k in sig.parameters
-            })
+            await handler(
+                **{k: v for k, v in kwargs.items() if k in sig.parameters}
+            )
 
         # Trigger and immediately clear anything waiting on events.
         ev = self.event_emitters[event]
@@ -171,14 +168,22 @@ class Bot:
             event = event.value
         return await self.event_emitters[event].wait()
 
-    async def wait_for_any(self, events: Iterable[Union[str, Event]], *,
-                           timeout: Optional[int] = None):
-        return asyncio.wait([
-            self.event_emitters[
-                event.value if isinstance(event, Event) else event
-            ].wait()
-            for event in events
-        ], return_when=asyncio.FIRST_COMPLETED, timeout=timeout)
+    async def wait_for_any(
+        self,
+        events: Iterable[Union[str, Event]],
+        *,
+        timeout: Optional[int] = None,
+    ):
+        return asyncio.wait(
+            [
+                self.event_emitters[
+                    event.value if isinstance(event, Event) else event
+                ].wait()
+                for event in events
+            ],
+            return_when=asyncio.FIRST_COMPLETED,
+            timeout=timeout,
+        )
 
     def register_plugin(self, plugin: Plugin):
         """

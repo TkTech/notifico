@@ -7,7 +7,7 @@ import uuid
 from flask import current_app
 
 
-_tokens_by_user = lambda u: 'pw_reset_tokens_{uid}'.format(uid=u.id)
+_tokens_by_user = lambda u: "pw_reset_tokens_{uid}".format(uid=u.id)
 
 
 def _generate_token():

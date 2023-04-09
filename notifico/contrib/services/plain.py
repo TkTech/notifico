@@ -6,31 +6,33 @@ from notifico.services.hook import IncomingHookService
 
 
 class PlainTextConfigForm(wtf.FlaskForm):
-    use_colours = fields.BooleanField('Use Colors', validators=[
-        validators.Optional()
-    ], default=False, description=(
-        'If checked, messages will include mIRC colouring.'
-    ))
+    use_colours = fields.BooleanField(
+        "Use Colors",
+        validators=[validators.Optional()],
+        default=False,
+        description=("If checked, messages will include mIRC colouring."),
+    )
 
 
 class PlainTextHook(EnvironmentMixin, IncomingHookService):
     """
     Simple service hook that just accepts text.
     """
+
     SERVICE_ID = 20
-    SERVICE_NAME = 'Plain Text'
+    SERVICE_NAME = "Plain Text"
 
     @classmethod
     def service_description(cls):
-        return cls.env().get_template('plain_desc.html').render()
+        return cls.env().get_template("plain_desc.html").render()
 
     @classmethod
     def handle_request(cls, user, request, hook):
         config = hook.config or {}
 
-        p = request.form.get('payload', None)
+        p = request.form.get("payload", None)
         if not p:
-            p = request.args.get('payload', None)
+            p = request.args.get("payload", None)
             if not p:
                 return
 
@@ -40,7 +42,7 @@ class PlainTextHook(EnvironmentMixin, IncomingHookService):
                 #        This needs to be done intelligently, likely
                 #        by the bot itself.
                 line[:512],
-                strip=not config.get('use_colours', False)
+                strip=not config.get("use_colours", False),
             )
 
     @classmethod

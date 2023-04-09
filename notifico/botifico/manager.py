@@ -25,7 +25,7 @@ class ChannelProxy:
         self.bot = bot
         self.network = network
         self.channel = channel
-        self.bot.register_handler('JOIN', self.on_join)
+        self.bot.register_handler("JOIN", self.on_join)
 
         self.joined = asyncio.Event()
 
@@ -36,35 +36,34 @@ class ChannelProxy:
         if self.joined.is_set():
             return
 
-        logger.info(f'[manager] Waiting on ready status for {self.bot}')
+        logger.info(f"[manager] Waiting on ready status for {self.bot}")
 
         await asyncio.wait_for(
-            ready_plugin.is_ready(self.bot).wait(),
-            timeout=timeout
+            ready_plugin.is_ready(self.bot).wait(), timeout=timeout
         )
 
         if self.channel.password:
             await self.bot.send(
-                'JOIN',
+                "JOIN",
                 self.channel.name,
                 # We sanitize long, long before this point, but just in case...
-                self.channel.password.replace('\n', '')
+                self.channel.password.replace("\n", ""),
             )
         else:
-            await self.bot.send('JOIN', self.channel.name)
+            await self.bot.send("JOIN", self.channel.name)
         if wait:
             logger.info(
-                f'[manager] Waiting on joined status for {self.bot}'
-                f' on channel {self.channel!r}.'
+                f"[manager] Waiting on joined status for {self.bot}"
+                f" on channel {self.channel!r}."
             )
             await asyncio.wait_for(self.joined.wait(), timeout=timeout)
 
     async def private_message(self, message: str):
         await self.join()
-        await self.bot.send('PRIVMSG', self.channel.name, f':{message}')
+        await self.bot.send("PRIVMSG", self.channel.name, f":{message}")
 
     async def notice(self, message: str):
-        await self.bot.send('NOTICE', self.channel.name, f':{message}')
+        await self.bot.send("NOTICE", self.channel.name, f":{message}")
 
     async def on_join(self, args):
         if args[0].lower() == self.channel.name.lower():
@@ -72,7 +71,7 @@ class ChannelProxy:
 
 
 class ChannelBot(Bot):
-    def __init__(self, manager: 'Manager', network: Network, **kwargs):
+    def __init__(self, manager: "Manager", network: Network, **kwargs):
         super().__init__(network=network, **kwargs)
         self.channels = {}
         self.manager = manager
@@ -84,11 +83,7 @@ class ChannelBot(Bot):
         #        irc.libera.chat.
         return self.channels.setdefault(
             channel,
-            ChannelProxy(
-                bot=self,
-                network=self.network,
-                channel=channel
-            )
+            ChannelProxy(bot=self, network=self.network, channel=channel),
         )
 
     def get_channel(self, channel: str) -> ChannelProxy | None:
@@ -115,9 +110,9 @@ class Manager(Plugin):
         """
         A Manager is a high-level coordinator of one or more bots connected to
         one or more networks.
-        
+
         .. note::
-    
+
             The `Manager` will always enable the `ready_plugin`, as it's needed
             to enable channel support.
 
@@ -160,7 +155,7 @@ class Manager(Plugin):
         :param network: The Network to search for.
         """
         bots = self.bots[network]
-        
+
         # If there's no bots at all, just assume we need to connect one.
         if not bots:
             bot = await self.add_bot_to_network(network)
@@ -214,4 +209,4 @@ class Manager(Plugin):
             # don't really care.
             pass
 
-        logger.info(f'[manager] Bot disconnected cleanly {bot}')
+        logger.info(f"[manager] Bot disconnected cleanly {bot}")

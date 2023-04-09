@@ -7,7 +7,7 @@ from flask import (
     url_for,
     session,
     request,
-    flash
+    flash,
 )
 from flask_babel import lazy_gettext as lg
 
@@ -21,61 +21,56 @@ from notifico.views.account_forms import (
     UserLoginForm,
     UserRegisterForm,
     UserForgotForm,
-    UserResetForm
+    UserResetForm,
 )
 
-account = Blueprint('account', __name__, template_folder='templates')
+account = Blueprint("account", __name__, template_folder="templates")
 # Usernames that cannot be registered because they clash with internal
 # routes.
-_reserved = (
-    'new',
-    'dashboard',
-    'settings'
-)
+_reserved = ("new", "dashboard", "settings")
 
 
 @account.before_app_request
 def set_user():
     g.user = None
-    if '_u' in session and '_uu' in session:
+    if "_u" in session and "_uu" in session:
         g.user = User.query.filter_by(
-            id=session['_u'],
-            username=session['_uu']
+            id=session["_u"], username=session["_uu"]
         ).first()
 
 
-@account.route('/login', methods=['GET', 'POST'])
+@account.route("/login", methods=["GET", "POST"])
 def login():
     """
     Standard login form.
     """
     if g.user:
-        return redirect(url_for('public.landing'))
+        return redirect(url_for("public.landing"))
 
     form = UserLoginForm()
     if form.validate_on_submit():
         u = User.by_username(form.username.data)
-        session['_u'] = u.id
-        session['_uu'] = u.username
-        return redirect(url_for('projects.dashboard', u=u.username))
+        session["_u"] = u.id
+        session["_uu"] = u.username
+        return redirect(url_for("projects.dashboard", u=u.username))
 
-    return render_template('account/login.html', form=form)
+    return render_template("account/login.html", form=form)
 
 
-@account.route('/logout')
+@account.route("/logout")
 @user_required
 def logout():
     """
     Logout the current user.
     """
-    if '_u' in session:
-        del session['_u']
-    if '_uu' in session:
-        del session['_uu']
-    return redirect(url_for('.login'))
+    if "_u" in session:
+        del session["_u"]
+    if "_uu" in session:
+        del session["_uu"]
+    return redirect(url_for(".login"))
 
 
-@account.route('/forgot', methods=['GET', 'POST'])
+@account.route("/forgot", methods=["GET", "POST"])
 def forgot_password():
     """
     If PASSWORD_RESET is enabled and Flask-Mail is configured,
@@ -84,19 +79,16 @@ def forgot_password():
     """
     # Because this functionality depends on Flask-Mail and
     # celery being properly configured, we default to disabled.
-    if not current_app.config.get('PASSWORD_RESET'):
+    if not current_app.config.get("PASSWORD_RESET"):
         flash(
-            'Password resets have been disabled by the administrator.',
-            category='warning'
+            "Password resets have been disabled by the administrator.",
+            category="warning",
         )
-        return redirect('.login')
+        return redirect(".login")
 
     # How long should reset tokens last? We default
     # to 24 hours.
-    token_expiry = current_app.config.get(
-        'PASSWORD_RESET_EXPIRY',
-        60 * 60 * 24
-    )
+    token_expiry = current_app.config.get("PASSWORD_RESET_EXPIRY", 60 * 60 * 24)
 
     form = UserForgotForm()
     if form.validate_on_submit():
@@ -107,66 +99,63 @@ def forgot_password():
         # up the browser (and to use celery's built-in rate
         # limiting).
         send_mail.delay(
-            'Notifico - Password Reset for {username}'.format(
+            "Notifico - Password Reset for {username}".format(
                 username=user.username
             ),
             # We're already using Jinja2, so we might as well use
             # it to render our email templates as well.
             html=render_template(
-                'account/email_reset.html',
+                "account/email_reset.html",
                 user=user,
                 reset_link=url_for(
-                    '.reset_password',
+                    ".reset_password",
                     token=new_token,
                     uid=user.id,
-                    _external=True
+                    _external=True,
                 ),
-                hours=token_expiry / 60 / 60
+                hours=token_expiry / 60 / 60,
             ),
             recipients=[user.email],
-            sender=current_app.config['MAIL_SENDER']
+            sender=current_app.config["MAIL_SENDER"],
         )
-        flash('A reset email has been sent.', category='success')
-        return redirect(url_for('.login'))
+        flash("A reset email has been sent.", category="success")
+        return redirect(url_for(".login"))
 
-    return render_template('account/forgot.html', form=form)
+    return render_template("account/forgot.html", form=form)
 
 
-@account.route('/reset')
+@account.route("/reset")
 def reset_password():
     """
     Endpoint for password reset emails, which validates the token
     and UID pair, then redirects to the password set form.
     """
-    token = request.args.get('token')
-    uid = request.args.get('uid')
+    token = request.args.get("token")
+    uid = request.args.get("uid")
 
     u = User.query.get(int(uid))
     if not u or not reset.valid_token(u, token):
-        flash('Your reset request is invalid or expired.', category='warning')
-        return redirect(url_for('.login'))
+        flash("Your reset request is invalid or expired.", category="warning")
+        return redirect(url_for(".login"))
 
-    session['reset_token'] = token
-    session['reset_user_id'] = uid
+    session["reset_token"] = token
+    session["reset_user_id"] = uid
 
-    return redirect(url_for('.reset_pick_password'))
+    return redirect(url_for(".reset_pick_password"))
 
 
-@account.route('/reset/password', methods=['GET', 'POST'])
+@account.route("/reset/password", methods=["GET", "POST"])
 def reset_pick_password():
-    token = session.get('reset_token')
-    user_id = session.get('reset_user_id')
+    token = session.get("reset_token")
+    user_id = session.get("reset_user_id")
 
     if not token or not user_id:
-        return redirect(url_for('.login'))
+        return redirect(url_for(".login"))
 
     u = User.query.get(int(user_id))
     if not u or not reset.valid_token(u, token):
-        flash(
-            'Your reset request is invalid or expired.',
-            category='warning'
-        )
-        return redirect(url_for('.login'))
+        flash("Your reset request is invalid or expired.", category="warning")
+        return redirect(url_for(".login"))
 
     form = UserResetForm()
     if form.validate_on_submit():
@@ -177,35 +166,34 @@ def reset_pick_password():
         # so we want to clean up any other reset tokens as
         # well as our stashed session token.
         reset.clear_tokens(u)
-        session.pop('reset_token', None)
-        session.pop('reset_user_id', None)
+        session.pop("reset_token", None)
+        session.pop("reset_user_id", None)
 
         flash(
-            'The password for {username} has been reset.'.format(
+            "The password for {username} has been reset.".format(
                 username=u.username
             ),
-            category='success'
+            category="success",
         )
-        return redirect(url_for('.login'))
+        return redirect(url_for(".login"))
 
-    return render_template('account/reset.html', form=form)
+    return render_template("account/reset.html", form=form)
 
 
-@account.route('/register', methods=['GET', 'POST'])
+@account.route("/register", methods=["GET", "POST"])
 def register():
     """
     If new user registrations are enabled, provides a registration form
     and validation.
     """
     if g.user:
-        return redirect(url_for('public.landing'))
+        return redirect(url_for("public.landing"))
 
     if not User.can(Action.CREATE):
         flash(
-            lg('Registration of new accounts is disabled.'),
-            category='warning'
+            lg("Registration of new accounts is disabled."), category="warning"
         )
-        return redirect(url_for('public.landing'))
+        return redirect(url_for("public.landing"))
 
     form = UserRegisterForm()
     if form.validate_on_submit():
@@ -214,6 +202,6 @@ def register():
         db_session.add(u)
         db_session.commit()
         # ... and send them back to the login screen.
-        return redirect(url_for('.login'))
+        return redirect(url_for(".login"))
 
-    return render_template('account/register.html', form=form, User=User)
+    return render_template("account/register.html", form=form, User=User)
